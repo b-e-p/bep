@@ -18,7 +18,7 @@ It allows installing packages when you don't have root privileges on a shared fi
 And since the packages installed with Bep are put into their own location (in user's home directory), Bep doesn't mess with anything installed at the system-level -- meaning, packages installed with Bep won't get mixed in with versions of packages installed system-wide.  This way the system-level packages are left alone (packages installed via package managers or the like) and the Bep packages are kept in their own isolated area.  (Note though, it is easy to switch back to a system-level installed version of a package by turning off or removing the package installed with Bep). 
 
 
-## The basic commands are straightforward:
+## The basic commands are as follows:
 
 ###To install packages: 
 
