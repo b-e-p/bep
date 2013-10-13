@@ -73,44 +73,44 @@ For example:
 ###To update packages: 
 
 ```
-# A single package
+# A single package:
 bep --language=python update pkg
     
-# Update all installed packages
+# Update all installed packages:
 bep update ALL
 
-# Update all packages for a specific language
+# Update all packages for a specific language:
 bep --language=python2.6 update ALL
 ```
 
 
 ###To remove packages: 
 ```
-# Remove a single package
+# Remove a single package:
 bep --language=python remove pkg
 
 # Remove "turned off" packages -- either for a 
-# specific language or all turned off packages
+# specific language or all turned off packages:
 bep [--language=python] remove turned_off
 
 ```
 
 ###To turn on or off packages: 
 ```
-# Turn off a single package
+# Turn off a single package:
 bep --language=python turn_off pkg 
 
-# Turn off all packages
+# Turn off all packages:
 bep [--language=python] turn_off ALL 
 
 
-# Turn on a single package
+# Turn on a single package:
 bep --language=python turn_on pkg
 ```
 
 ###To list installed packages and whether each is turned on or off:
 ```
-# List installed packages
+# List installed packages:
 bep [--language=python] list
 ```
 
