@@ -31,19 +31,22 @@ bep install
 
 
 
-
 # NOTE, for package installs, the "pkg" above 
 # should be specified like so:
 # `pkg_type=repo_type+pkg_name^branch_name`
 # 
 # "pkg_type":  either github, gitorious, bitbucket, local_repo
-# "repo_type":  either git, hg, bzr.
+# "repo_type":  either git, hg, bzr (only if it comes from an 
+                ambiguous pkg_type -- github would obviously only be git)
 # "pkg_name":  either "user/package_name" from the pkg_type code hosting
 #              site, or the path to the package on the local file system.
 # "branch_name":  is optional & specifies if a specific branch should be
                   installed; if not specified, then master branch is installed.
 # Eg. 
-bep -l python install github=git+ipython/ipython[^optional_branch]
+bep -l python install github=ipython/ipython[^optional_branch]
+
+# or
+bep -l python install bitbucket=hg+mchaput/whoosh[^optional_branch]
 
 ```
 
