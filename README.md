@@ -161,6 +161,13 @@ suggested as per [PEP370](http://www.python.org/dev/peps/pep-0370/) -- particula
 `%APPDATA%/Python/Scripts`
 
 
+### Bep can manage Bep
+Once bep is installed, it can re-install itself to handle updates to itself:
+`bep -l python install github=bep`
+
+Also, in the same vein, bep can uninstall itself like so:
+`bep -l python remove github=bep`
+
 
 ### An example of a sample `.bep_packages` file would look like:
 
@@ -207,13 +214,6 @@ following instead of the above listing:
             ]
 ```
 
-
-#### Bep can manage Bep
-Once bep is installed, it can re-install itself to handle updates to itself:
-`bep -l python install github=bep`
-
-Also, in the same vein, bep can uninstall itself like so:
-`bep -l python remove github=bep`
 
 #### Note, Bep currently does not handle dependency installations.  
 >As a result, if a package is specified
