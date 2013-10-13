@@ -52,7 +52,8 @@ bep -l python install bitbucket=hg+mchaput/whoosh[^optional_branch]
 
 For example:
 
-![](imgs/install.png)
+![](imgs/install_github.png)
+![](imgs/install_bitbucket.png)
 
 ####NOTE, for all other command operations, the "pkg" only needs to be specified like so:
 ```
@@ -123,7 +124,8 @@ bep [--language=python] list
 
 For example:
 
-![](imgs/cmd_list.png)
+![](imgs/how_to_update.png)
+![](imgs/how_to_remove.png)
 
 (for more details see `bep --help`.)
 
