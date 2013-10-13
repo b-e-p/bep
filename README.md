@@ -210,7 +210,7 @@ packages = dict(
 >Just specify the branch name 
 appended to the package name with a `^`.  For example, you'd specify something like the 
 following instead of the above listing: 
-```
+```python
     github = [
         'python-->scikit-learn/scikit-learn^some_branch',
             ]
