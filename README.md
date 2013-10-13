@@ -49,7 +49,7 @@ bep -l python install github=git+ipython/ipython[^optional_branch]
 
 For example:
 
-![](imgs/bep_install.png)
+![](imgs/install.png)
 
 ####NOTE, for all other command operations, the "pkg" only needs to be specified like so:
 ```
@@ -64,7 +64,7 @@ bep [a command from below] github=ipython
 
 For example:
 
-![](imgs/bep_update.png)
+![](imgs/update.png)
 
 ###To update packages: 
 
@@ -110,12 +110,16 @@ bep --language=python turn_on pkg
 bep [--language=python] list
 ```
 
-![](imgs/bep_list.png)
+![](imgs/list.png)
 
 
 ###And lastly, to see the exact command to update/remove/turn_on|off a specific installed package: 
 
     bep {update/remove/turn_on|off} pkg 
+
+For example:
+
+![](imgs/cmd_list.png)
 
 (for more details see `bep --help`.)
 
