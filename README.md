@@ -207,6 +207,14 @@ following instead of the above listing:
             ]
 ```
 
+
+#### Bep can manage Bep
+Once bep is installed, it can re-install itself to handle updates to itself:
+`bep -l python install github=bep`
+
+Also, in the same vein, bep can uninstall itself like so:
+`bep -l python remove github=bep`
+
 #### Note, Bep currently does not handle dependency installations.  
 >As a result, if a package is specified
 for installation and it turns out that it cannot be built & installed due to it requiring a dependency not being installed on the system (or perhaps needing a newer version of that dependency than what is currently installed on the system), then Bep will display the installation error that occurs, which will likely point out the (newer) dependency that is needed.  If this occurs, then the dependency could be installed with Bep as well, if it's something that Bep is capable of handling, or if not, it will have to be installed otherwise (with an OS package manager, etc).
