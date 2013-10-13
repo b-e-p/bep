@@ -65,6 +65,7 @@ bep [a command from below] github=ipython
 For example:
 
 ![](imgs/update.png)
+![](imgs/remove.png)
 
 ###To update packages: 
 
