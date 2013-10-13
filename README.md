@@ -43,7 +43,7 @@ bep install
 # "branch_name":  is optional & specifies if a specific branch should be
                   installed; if not specified, then master branch is installed.
 # Eg. 
-bep install github=git+ipython/ipython[^optional_branch]
+bep -l python install github=git+ipython/ipython[^optional_branch]
 
 ```
 
@@ -59,7 +59,7 @@ For example:
 # "package_name":  just the name of the package.
 #
 # Eg.
-bep [a command below] github=ipython
+bep [a command from below] github=ipython
 ```
 
 For example:
