@@ -128,7 +128,7 @@ For example:
 
 
 
-### To install bep:
+## To install bep:
 
 Bep relies only on the python standard library and supports python >= 2.7.
 
@@ -164,7 +164,7 @@ suggested as per [PEP370](http://www.python.org/dev/peps/pep-0370/) -- particula
 `%APPDATA%/Python/Scripts`
 
 
-### Bep can manage Bep:
+### Also...Bep can manage Bep!
 Once bep is installed, it can re-install itself to handle updates to itself:
 
 `bep -l python install github=bepy/bep`
