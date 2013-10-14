@@ -3,8 +3,8 @@
 
 packages = dict(
     github = [
+        # 'language-->username/packagename', 
         ### eg:
-        # 'username/projectname', 
         'python-->scikit-learn/scikit-learn',
         'python-->pydata/pandas',
         'python-->ipython/ipython',
@@ -13,13 +13,14 @@ packages = dict(
 
     gitorious = [
         ### eg:
-        # 'username/projectname', 
+        # 'language-->username/packagename', 
         #'python-->python-omega/python-omega'
                 ],
 
 
     bitbucket = [
-        ### need to say what type of repo it is,
+        ### need to say what type of repo it is (git or hg),
+        # 'language-->repo_type+username/packagename', 
         # eg:
         #'python-->hg+mchaput/whoosh',
         #'python-->git+torotoki/corenlp-python',
@@ -27,9 +28,9 @@ packages = dict(
 
 
     local_repo = [
-        ### again, need to say what type of repo it is,
+        ### again, need to say what type of repo it is (git, hg, bzr),
+        # 'language-->repo_type+/a_dir/on_local_machine/packagename', 
         # eg:
-        # 'repo_type+/a_dir/inside_a_dir/on_local_machine/projectname', 
         #'python-->hg+/home/your_username/some_dir/some_mercurial_repo',
         #'python-->git+/home/your_username/some_dir/some_git_repo',
         #'python-->bzr+/home/your_username/some_dir/some_bazaar_repo',
