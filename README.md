@@ -51,7 +51,10 @@ bep install
 For example:
 
 ![](imgs/install_github.png)
+For bitbucket, repo type needs to be specified:
 ![](imgs/install_bitbucket.png)
+To install a specific branch:
+![](imgs/install_branch.png)
 
 ####NOTE, for all other command operations, the "pkg" only needs to be specified like so:
 ```
