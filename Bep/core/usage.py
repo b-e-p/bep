@@ -66,11 +66,14 @@ installs packages specified in the {} file
 Installing a single package.  
 -----------------------------------------------------
 (note, specifying a branch is optional; if a branch 
-is not given, then the master branch is installed)
+is not given, then the master branch is installed; also,
+repo_type needs only to be specified if it is not obvious
+give the pkg_type -- github would only be git, but bitbucket
+would need to be specified as it could either be 'git' or 'hg')
     `bep --language=lang install pkg_type=repo_type+pkg_name[^optional_branch]`
 
-    eg.  bep --language=python install github=git+ipython/ipython
-    eg.  bep --language=python install github=git+ipython/ipython^branch_name
+    eg.  bep --language=python install github=ipython/ipython
+    eg.  bep --language=python install github=ipython/ipython^branch_name
 '''
 
 
