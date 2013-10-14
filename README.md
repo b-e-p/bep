@@ -170,6 +170,10 @@ Moreover, in the same vein, bep can uninstall itself like so:
 
 `bep -l python remove github=bep`
 
+Or to remove everything, including bep itself:
+
+`bep remove ALL`
+
 
 ### An example of a sample `.bep_packages` file would look like:
 
