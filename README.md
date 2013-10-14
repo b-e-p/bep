@@ -226,9 +226,9 @@ following instead of the above listing:
 ```
 
 
-#### Note, Bep currently does not handle dependency installations.  
+#### Note, Bep handles some dependency issues, but might not work for all dependency installations.  
 >As a result, if a package is specified
-for installation and it turns out that it cannot be built & installed due to it requiring a dependency not being installed on the system (or perhaps needing a newer version of that dependency than what is currently installed on the system), then Bep will display the installation error that occurs, which will likely point out the (newer) dependency that is needed.  If this occurs, then the dependency could be installed with Bep as well, if it's something that Bep is capable of handling, or if not, it will have to be installed otherwise (with an OS package manager, etc).
+for installation and it turns out that it cannot be built & installed due to it requiring a dependency not being installed on the system (or perhaps needing a newer version of the dependency than what is currently installed on the system), then Bep will display the installation error that occurs, which will likely point out the (newer) dependency that is needed.  If this occurs, then the dependency could be installed with Bep as well, if it's something that Bep is capable of handling, or if not, it will have to be installed otherwise (with an OS package manager, etc).
 
 
 #### TODO
