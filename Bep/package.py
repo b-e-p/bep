@@ -450,7 +450,7 @@ class Package(object):
         if download_pkg:    # this is for the initial installation
             pkg_to_install_name, branch_to_install = self.parse_pkg_to_install_name(pkg_to_install)
 
-            print('\n\n--> {0}  [branch: {1}]'.format(pkg_to_install_name, branch_to_install))
+            print('\n--> {0}  [branch: {1}]'.format(pkg_to_install_name, branch_to_install))
 
             should_it_be_installed = self._installation_check(self.pkg_type, pkg_to_install_name, branch_to_install, 
                                                                 everything_already_installed)
@@ -480,7 +480,7 @@ class Package(object):
         branch_update_dir = join(pkg_update_dir, branch_to_update)
         os.chdir(branch_update_dir)
 
-        print('\n\n--> {0} [branch: {1}]'.format(pkg_to_update_name, branch_to_update))
+        print('\n--> {0} [branch: {1}]'.format(pkg_to_update_name, branch_to_update))
         when_not_quiet_mode('Checking for updates...', quiet)
 
         return_val = self._cmd_output(self.update_cmd, verbose=False)
