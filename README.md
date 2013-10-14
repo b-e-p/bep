@@ -52,11 +52,11 @@ For example:
 
 ![](imgs/install_github.png)
 
-For bitbucket, repo type needs to be specified:
+For bitbucket, repo_type would need to be specified:
 
 ![](imgs/install_bitbucket.png)
 
-To install a specific branch:
+And to install a specific branch:
 
 ![](imgs/install_branch.png)
 
