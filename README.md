@@ -72,6 +72,9 @@ And to install a specific branch:
 For example:
 
 ![](imgs/update.png)
+
+![](imgs/turn_off.png)
+
 ![](imgs/remove.png)
 
 ###To update packages: 

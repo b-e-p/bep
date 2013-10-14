@@ -1588,13 +1588,13 @@ def main(): # needs to be done as a main func for setuptools to work correctly i
                                         if pkg_type_installed == pkg_type: 
                                             if not branch_installed.startswith('.__'): 
                                                 if branch_installed == 'master':
-                                                    print("\nUpdate {0} {1} with:".format(pkg_to_update, lang_installed))
-                                                    print("\t{0} -l {1} update {2}={3}".format(name, lang_installed, 
+                                                    print("\n\tUpdate {0} {1} with:".format(pkg_to_update, lang_installed))
+                                                    print("{0} -l {1} update {2}={3}".format(name, lang_installed, 
                                                                             pkg_type_installed, pkg_name_installed))
                                                 else:
-                                                    print("\nUpdate {0} [{1}] {2} with:".format(pkg_to_update, branch_installed, 
+                                                    print("\n\tUpdate {0} [{1}] {2} with:".format(pkg_to_update, branch_installed, 
                                                                                                     lang_installed))
-                                                    print("\t{0} -l {1} update {2}={3}^{4}".format(name, lang_installed,
+                                                    print("{0} -l {1} update {2}={3}^{4}".format(name, lang_installed,
                                                                             pkg_type_installed, pkg_name_installed, branch_installed))
 
                                             elif branch_installed.startswith('.__'): 
@@ -1737,13 +1737,13 @@ def main(): # needs to be done as a main func for setuptools to work correctly i
                                             if branch_installed.startswith('.__'): 
                                                 branch_installed = branch_installed.lstrip('.__')
                                             if branch_installed == 'master':
-                                                print("\nRemove {0} {1} with:".format(pkg_to_remove, lang_installed))
-                                                print("\t{0} -l {1} remove {2}={3}".format(name, lang_installed, 
+                                                print("\n\tRemove {0} {1} with:".format(pkg_to_remove, lang_installed))
+                                                print("{0} -l {1} remove {2}={3}".format(name, lang_installed, 
                                                                         pkg_type_installed, pkg_name_installed))
                                             else:
-                                                print("\nRemove {0} [{1}] {2} with:".format(pkg_to_remove, branch_installed, 
+                                                print("\n\tRemove {0} [{1}] {2} with:".format(pkg_to_remove, branch_installed, 
                                                                                                 lang_installed))
-                                                print("\t{0} -l {1} remove {2}={3}^{4}".format(name, lang_installed,
+                                                print("{0} -l {1} remove {2}={3}^{4}".format(name, lang_installed,
                                                                         pkg_type_installed, pkg_name_installed, branch_installed))
 
                                             how_to_count += 1
@@ -1850,13 +1850,13 @@ def main(): # needs to be done as a main func for setuptools to work correctly i
 
                                             if not branch_installed.startswith('.__'): 
                                                 if branch_installed == 'master':
-                                                    print("\nTurn off {0} {1} with:".format(pkg_to_turn_off, lang_installed))
-                                                    print("\t{0} -l {1} turn_off {2}={3}".format(name, lang_installed, 
+                                                    print("\n\tTurn off {0} {1} with:".format(pkg_to_turn_off, lang_installed))
+                                                    print("{0} -l {1} turn_off {2}={3}".format(name, lang_installed, 
                                                                             pkg_type_installed, pkg_name_installed))
                                                 else:
-                                                    print("\nTurn off {0} [{1}] {2} with:".format(pkg_to_turn_off, branch_installed, 
+                                                    print("\n\tTurn off {0} [{1}] {2} with:".format(pkg_to_turn_off, branch_installed, 
                                                                                                     lang_installed))
-                                                    print("\t{0} -l {1} turn_off {2}={3}^{4}".format(name, lang_installed,
+                                                    print("{0} -l {1} turn_off {2}={3}^{4}".format(name, lang_installed,
                                                                             pkg_type_installed, pkg_name_installed, branch_installed))
 
                                             elif branch_installed.startswith('.__'): 
@@ -1937,13 +1937,13 @@ def main(): # needs to be done as a main func for setuptools to work correctly i
                                             if branch_installed.startswith('.__'): 
                                                 branch_installed = branch_installed.lstrip('.__')
                                                 if branch_installed == 'master':
-                                                    print("\nTurn on {0} {1} with:".format(pkg_to_turn_on, lang_installed))
-                                                    print("\t{0} -l {1} turn_on {2}={3}".format(name, lang_installed, 
+                                                    print("\n\tTurn on {0} {1} with:".format(pkg_to_turn_on, lang_installed))
+                                                    print("{0} -l {1} turn_on {2}={3}".format(name, lang_installed, 
                                                                             pkg_type_installed, pkg_name_installed))
                                                 else:
-                                                    print("\nTurn on {0} [{1}] {2} with:".format(pkg_to_turn_on, branch_installed, 
+                                                    print("\n\tTurn on {0} [{1}] {2} with:".format(pkg_to_turn_on, branch_installed, 
                                                                                                     lang_installed))
-                                                    print("\t{0} -l {1} turn_on {2}={3}^{4}".format(name, lang_installed,
+                                                    print("{0} -l {1} turn_on {2}={3}^{4}".format(name, lang_installed,
                                                                             pkg_type_installed, pkg_name_installed, branch_installed))
 
                                             elif not branch_installed.startswith('.__'): 
