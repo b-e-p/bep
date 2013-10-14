@@ -164,13 +164,13 @@ suggested as per [PEP370](http://www.python.org/dev/peps/pep-0370/) -- particula
 ### Bep can manage Bep:
 Once bep is installed, it can re-install itself to handle updates to itself:
 
-`bep -l python install github=bep`
+`bep -l python install github=bepy/bep`
 
 Moreover, in the same vein, bep can uninstall itself like so:
 
 `bep -l python remove github=bep`
 
-Or to remove everything, including bep itself:
+Or to remove everything bep installed, including bep itself:
 
 `bep remove ALL`
 
