@@ -38,7 +38,7 @@ bep install
 
 # NOTE, for package installs, the "pkg" above 
 # should be specified like so:
-# `pkg_type=repo_type+pkg_name^branch_name`
+# `pkg_type=repo_type+pkg_name[^branch_name]`
 # 
 # "pkg_type":  either github, gitorious, bitbucket, local_repo
 # "repo_type":  either git, hg, bzr (specify only if it comes from an 
@@ -67,7 +67,7 @@ And to install a specific branch:
 # "pkg_type":  the same as for installs
 # "pkg_name":  only the name of the package.
 # "branch_name":  again, is optional & specifies if a specific branch should be
-                  used.
+                  processed.
 ```
 For example:
 
