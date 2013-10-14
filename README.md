@@ -55,10 +55,12 @@ For example:
 
 ####NOTE, for all other command operations, the "pkg" only needs to be specified like so:
 ```
-# `pkg_type=pkg_name`
+# `pkg_type=pkg_name[^branch_name]`
 #
 # "pkg_type":  the same as for installs
 # "pkg_name":  only the name of the package.
+# "branch_name":  again, is optional & specifies if a specific branch should be
+                  used.
 ```
 For example:
 
