@@ -5,7 +5,7 @@
 
 ## The gist of it...
 
-Bep provides a simple way to allow running the absolute newest versions (bleeding edge versions) of any particular set of packages, it does not interfere with packages installed at the system level and it does not require root access for use (Bep also allows installing and running other versions of packages as well, other than just the bleeding edge versions).  To use, just specify at the command line a package for either installation, updating or removal; alternatively, several packages can be installed at the same time by just specifying the packages wanted for installation in a file named `.bep_packages` in your home directory; once done, then issue the simple installation command.
+Bep provides a simple way to allow running the absolute newest versions (bleeding edge versions) of any particular set of packages, it does not interfere with packages installed at the system level and it does not require root access for use (Bep also allows installing and running other versions of packages as well, other than just the bleeding edge versions).  To use, just specify at the command line a package for either installation, updating or removal; alternatively, several packages can be installed at the same time by simply specifying the packages wanted for installation in a file named `.bep_packages` in your home directory; once done, then just issue the installation command.
 
 Additionally, several versions of the same package can be installed with Bep (bleeding edge versions and others), with all but one of those installed versions being the currently active version.  Meaning, there will only be one version seen by the path at any given time.  Therefore, Bep makes switching between different versions of the same package easy to do.  And if all versions of a package installed with Bep are hidden ("turned off"), then access to a version of that same package installed at the system level (from a package manager or the like) can be done without needing to remove the package installed with Bep.
 
@@ -18,9 +18,9 @@ It allows installing packages when you don't have root privileges on a shared fi
 And since the packages installed with Bep are put into their own location (in user's home directory), Bep doesn't mess with anything installed at the system-level -- meaning, packages installed with Bep won't get mixed in with versions of packages installed system-wide.  This way the system-level packages are left alone (packages installed via package managers or the like) and the Bep packages are kept in their own isolated area.  (Note though, it is easy to switch back to a system-level installed version of a package by turning off or removing the package installed with Bep). 
 
 
-### A little bit more info...
+### A tad bit more info...
 
-Basically what Bep does, is that it sets up an installation area in the user's home directory (under `.bep`) and downloads & installs all of the specified packages into this location.  And since this area is searched first on the user's path, the packages installed by Bep are called upon for use before the system-level packages.  Currently, all of these packages are simply version controlled repositories (git, mercurial & bazaar), which are cloned/downloaded, built and then installed behind the scenes by using the `bep` commands in the various ways outlined below.  All that really needs to be done is to specify where to get these repos from -- eg. github, gitorous, bitbucket, or repos located on the local filesystem.  By default, a package installed with Bep uses the master branch of its specified repository; however, if a specific branch (other than master) is wanted for installation, then this can easily be done instead.
+Basically what Bep does, is that it sets up an installation area in the user's home directory (under `.bep`) and downloads & installs all of the specified packages into this location.  And since this area is searched first on the user's path, the packages installed by Bep are called upon for use before the system-level packages.  Currently, all of these packages are simply version controlled repositories (git, mercurial &/or bazaar), which are cloned/downloaded, built and then installed behind the scenes by using the `bep` commands in the various ways outlined below.  All that really needs to be done is to specify where to get these repos from -- currently supported are, github, gitorous, bitbucket, or repos located on the local filesystem.  By default, a package installed with Bep uses the master branch of its specified repository; however, if a specific branch (other than master) is wanted for installation, then this can easily be done instead.
 
 
 ## The basic commands are as follows:
@@ -96,8 +96,8 @@ bep --language=python2.6 update ALL
 # Remove a single package:
 bep --language=python remove pkg
 
-# Remove all installed packages:
-bep remove ALL
+# Remove all installed packages (or all for a given language):
+bep [--language=python] remove ALL
 
 # Remove "turned off" packages -- either for a 
 # specific language or all turned off packages:
@@ -110,7 +110,7 @@ bep [--language=python] remove turned_off
 # Turn off a single package:
 bep --language=python turn_off pkg 
 
-# Turn off all packages:
+# Turn off all packages (or all for a given language):
 bep [--language=python] turn_off ALL 
 
 
