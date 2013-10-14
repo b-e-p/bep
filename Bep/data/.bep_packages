@@ -7,21 +7,22 @@ packages = dict(
         # 'username/projectname', 
         'python-->scikit-learn/scikit-learn',
         'python-->pydata/pandas',
+        'python-->ipython/ipython',
             ],
 
 
     gitorious = [
         ### eg:
         # 'username/projectname', 
-        'python-->python-omega/python-omega'
+        #'python-->python-omega/python-omega'
                 ],
 
 
     bitbucket = [
         ### need to say what type of repo it is,
         # eg:
-        'python-->hg+mchaput/whoosh',
-        'python-->git+torotoki/corenlp-python',
+        #'python-->hg+mchaput/whoosh',
+        #'python-->git+torotoki/corenlp-python',
                 ],
 
 
