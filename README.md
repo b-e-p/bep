@@ -181,11 +181,11 @@ Once Bep is installed, it can re-install itself to handle updates to itself:
 
 `bep -l python install github=bepy/bep`
 
-In the same vein, **Bep can uninstall itself**; if Bep was initially installed locally, then **To Uninstall Bep**:
+In the same vein, **Bep can uninstall itself**; if Bep was initially installed locally, then **to Uninstall Bep**:
 
 `bep -l python remove github=bep`
 
-or, **To remove everything Bep installed, including Bep itself**:
+Alternatively, **to remove everything Bep installed, including Bep itself**:
 
 `bep remove ALL`
 
