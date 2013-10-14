@@ -1599,7 +1599,7 @@ def main(): # needs to be done as a main func for setuptools to work correctly i
 
                                             elif branch_installed.startswith('.__'): 
                                                 branch_installed = branch_installed.lstrip('.__')
-                                                print("\n{0} [{1}] {2} turned off:  turn on to update.".format(
+                                                print("\n* {0} [{1}] {2} turned off:  turn on to update.".format(
                                                                                     pkg_name_installed, branch_installed, lang_installed))
                                             how_to_count += 1
 
@@ -1861,7 +1861,7 @@ def main(): # needs to be done as a main func for setuptools to work correctly i
 
                                             elif branch_installed.startswith('.__'): 
                                                 branch_installed = branch_installed.lstrip('.__')
-                                                print("\n{0} [{1}] {2} already turned off.".format(pkg_name_installed, branch_installed, lang_installed))
+                                                print("\n* {0} [{1}] {2} already turned off.".format(pkg_name_installed, branch_installed, lang_installed))
 
                                             how_to_count += 1
 
@@ -1947,7 +1947,7 @@ def main(): # needs to be done as a main func for setuptools to work correctly i
                                                                             pkg_type_installed, pkg_name_installed, branch_installed))
 
                                             elif not branch_installed.startswith('.__'): 
-                                                print("\n{0} [{1}] {2} already turned on.".format(pkg_name_installed, branch_installed, lang_installed))
+                                                print("\n* {0} [{1}] {2} already turned on.".format(pkg_name_installed, branch_installed, lang_installed))
                                             how_to_count += 1
 
                                 if how_to_count == 0:
