@@ -1436,7 +1436,7 @@ def main(): # needs to be done as a main func for setuptools to work correctly i
                             lang_arg, pkg_to_install = lang_and_pkg_to_install
                             pkg_inst = create_pkg_inst(lang_arg, pkg_type, packages_file)
                         elif len(lang_and_pkg_to_install) != 2:
-                            print("Error: need to specifiy a language in {0} for:".format(packages_file)) 
+                            print("\nError: need to specifiy a language in {0} for:".format(packages_file)) 
                             print("\t{}".format(pkg_to_install))
                             raise SystemExit
 
