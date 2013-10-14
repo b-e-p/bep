@@ -185,7 +185,7 @@ In the same vein, Bep can uninstall itself; if Bep was initially installed local
 
 `bep -l python remove github=bep`
 
-Or **To remove everything Bep installed, including Bep itself**:
+or, **To remove everything Bep installed, including Bep itself**:
 
 `bep remove ALL`
 
