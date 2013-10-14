@@ -79,6 +79,9 @@ bep --language=python2.6 update ALL
 # Remove a single package:
 bep --language=python remove pkg
 
+# Remove all installed packages:
+bep remove ALL
+
 # Remove "turned off" packages -- either for a 
 # specific language or all turned off packages:
 bep [--language=python] remove turned_off
