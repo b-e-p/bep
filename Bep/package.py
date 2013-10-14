@@ -397,11 +397,11 @@ class Package(object):
                         try:
                             print('{0} {1}'.format(self.out.rstrip(), self.err.rstrip()))
                             print("\n\tCOULD NOT INSTALL {0} [{1}].".format(pkg_to_install_name, branch_to_install))
-                            print("\tA likely cause is a dependancy issue.")
+                            print("\tA likely cause is a dependency issue.")
                             print("\t...see Traceback for information.")
                         except UnicodeEncodeError:
                             print("\n\tCOULD NOT INSTALL {0} [{1}].".format(pkg_to_install_name, branch_to_install))
-                            print("\tA likely cause is a dependancy issue.")
+                            print("\tA likely cause is a dependency issue.")
 
                     if not download_pkg:
                         # remove the stuff for both download_pkg or not, but only print this stuff when trying to turn a package   
@@ -556,11 +556,11 @@ class Package(object):
                     try:
                         print('{0} {1}'.format(self.out.rstrip(), self.err.rstrip()))
                         print(status("\tUPDATE FAILED for {0} [{1}].".format(pkg_to_update_name, branch_to_update)))
-                        print("\tA likely cause is a dependancy issue, eg. needing a (newer) dependancy.")
+                        print("\tA likely cause is a dependency issue, eg. needing a (newer) dependency.")
                         print("\t...see Traceback for information.")
                     except UnicodeEncodeError:
                         print(status("\tUPDATE FAILED for {0} [{1}].".format(pkg_to_update_name, branch_to_update)))
-                        print("\tA likely cause is a dependancy issue, eg. needing a (newer) dependancy.")
+                        print("\tA likely cause is a dependency issue, eg. needing a (newer) dependency.")
                 # TODO FIXME maybe something else needs to be done here -- like removing the update since it failed to install?
 
 
