@@ -29,7 +29,7 @@ show minimal output during the command processes.
 '''
 
 lang_use = '''
-to specify a language to use.
+to specify a language (or language version) to use.
 '''
 
 
