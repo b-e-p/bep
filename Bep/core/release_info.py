@@ -9,7 +9,7 @@ Purpose:  general info that gets put into setup.py and shared elsewhere.
 """
 
 name = 'bep'
-__version__ = '0.5'
+__version__ = '0.5.1dev'
 description = 'A tool to make Package installation easier.'
 author = 'jason gors'
 email = 'jasonDOTgorsATgmailDOTcom'
