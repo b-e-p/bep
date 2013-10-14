@@ -144,11 +144,11 @@ For example:
 
 Bep relies only on the python standard library and supports python >= 2.7.
 
-If you want to install Bep system-wide:
+If you want to install Bep system-wide (the not recommended way):
 
 `python setup.py install`
 
-Alternatively, if you don't have root access and just want to install Bep locally under your user:
+Alternatively, if you don't have root access and just want to install Bep locally under your user (the recommended way):
 
 `python setup.py install --user`
 
@@ -177,15 +177,15 @@ suggested as per [PEP370](http://www.python.org/dev/peps/pep-0370/) -- particula
 
 
 ### Also...Bep can manage Bep!
-Once bep is installed, it can re-install itself to handle updates to itself:
+Once Bep is installed, it can re-install itself to handle updates to itself:
 
 `bep -l python install github=bepy/bep`
 
-Moreover, in the same vein, bep can uninstall itself like so:
+In the same vein, Bep can uninstall itself; if Bep was initially installed locally, then to *Uninstall Bep*:
 
 `bep -l python remove github=bep`
 
-Or to remove everything bep installed, including bep itself:
+Or *to remove everything Bep installed, including Bep itself*:
 
 `bep remove ALL`
 
