@@ -1,0 +1,6 @@
+*.pyc
+
+# from building & installing
+*.egg
+build
+dist
