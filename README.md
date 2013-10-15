@@ -244,4 +244,4 @@ for installation and it turns out that it cannot be built & installed due to it 
 #### TODO
 - Unit tests.
 - Support for remote repos (in addition to the local repos) -- direct url downloads.
-- Possibly support for other languages besides just Python [eg. of great use would be support for building & installing with "make" (though this would introduce cross-platorm differences); something to think about...]
+- Possibly support for other languages besides just Python [eg. of great use would be support for building & installing with "make & make install" (note, this would then introduce cross-platorm differences); something to think about though...]
