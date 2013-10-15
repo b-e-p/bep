@@ -15,6 +15,6 @@ if pyversion < 2.7:
 
 
 def _run_bep():
-    from .package import main
+    from Bep.package import main
     main()
 
