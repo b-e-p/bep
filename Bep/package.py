@@ -431,7 +431,7 @@ class Package(object):
 
 
             else: 
-                print(status("\tCANNOT INSTALL {0} [{1}].".format(pkg_to_install_name, branch_to_install)))
+                print("\n\tCANNOT INSTALL {0} [{1}].".format(pkg_to_install_name, branch_to_install))
                 print("\tThere is no {0} in this repo.".format(self.lang_using.setup_file))
                 if not download_pkg:
                     print('Removing {0} [{1}].'.format(pkg_to_install_name, branch_to_install))
