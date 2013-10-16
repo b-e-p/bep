@@ -4,8 +4,7 @@
 #----------------------------------------------------------------
 Author: Jason Gors <jasonDOTgorsATgmail>
 Creation Date: 07-30-2013
-Purpose: this manages installation of packages -- currently: git repos from github &
-        gitorious; git & hg repos from bitbucket; git, hg & bzr local repos.  
+Purpose: this does the actual managing of the packages. 
 #----------------------------------------------------------------
 """
 
@@ -16,15 +15,12 @@ import sys
 import imp
 import Bep.core.usage as usage 
 from Bep.core.release_info import __version__, name
-#from core.utils_db import (handle_db_after_an_install, handle_db_for_removal,
-                        #handle_db_for_branch_renaming,
-                        #get_lang_cmd_branch_was_installed_with)
 import package
 import utils
 
 
 def create_pkg_inst(lang_arg, pkg_type, install_dirs, packages_file=None):
-    ''' install_dirs is a dict '''
+    ''' install_dirs is a dict with the installed_pkgs_dir and the install_logs_dir '''
 
     if pkg_type == 'github':
         return package.Github(lang_arg, pkg_type, install_dirs)
@@ -178,10 +174,8 @@ def main(): # needs to be done as a main func for setuptools to work correctly i
         quiet = args.quiet
 
 
-    lang_arg = args.language
-
-
     all_error = "\nError: Did you mean to specifiy ALL instead?"
+    lang_arg = args.language
 
     if 'install_arg' in args:
         install_arg = args.install_arg 

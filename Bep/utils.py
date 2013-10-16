@@ -4,8 +4,8 @@
 #----------------------------------------------------------------
 Author: Jason Gors <jasonDOTgorsATgmail>
 Creation Date: 07-30-2013
-Purpose: this manages installation of packages -- currently: git repos from github &
-        gitorious; git & hg repos from bitbucket; git, hg & bzr local repos.  
+Purpose: this manages provides utility functions for managing 
+            the packages.  
 #----------------------------------------------------------------
 """
 
@@ -13,9 +13,7 @@ from Bep.core.release_info import name
 import os
 from os.path import join
 import glob
-#from core.utils_db import (handle_db_after_an_install, handle_db_for_removal,
-                        #handle_db_for_branch_renaming,
-                        #get_lang_cmd_branch_was_installed_with)
+
 
 
 def all_pkgs_and_branches_for_all_pkg_types_already_installed(installed_pkgs_dir):

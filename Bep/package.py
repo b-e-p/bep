@@ -4,26 +4,28 @@
 #----------------------------------------------------------------
 Author: Jason Gors <jasonDOTgorsATgmail>
 Creation Date: 07-30-2013
-Purpose: this manages installation of packages -- currently: git repos from github &
+Purpose: this specifies what types of packages can be handles:
+        currently: git repos from github &
         gitorious; git & hg repos from bitbucket; git, hg & bzr local repos.  
 #----------------------------------------------------------------
 """
 
 import os
 from os.path import join
-import site
+from site import getuserbase
 import shutil
 import subprocess
 import sys 
 import glob
 import itertools
 import locale   # needed in py3 for decoding output from subprocess pipes 
+
 import Bep.languages as languages
 from Bep.core.release_info import name
+import utils
 #from core.utils_db import (handle_db_after_an_install, handle_db_for_removal,
                         #handle_db_for_branch_renaming,
                         #get_lang_cmd_branch_was_installed_with)
-import utils
 
 
 class Package(object):
@@ -660,7 +662,7 @@ class Package(object):
         self._remove_install_dirs(pkg_to_remove_name, branch_to_remove_name, pkg_dir, branch_dir, noise)
 
         # look recursively to see if the dirs in userbase are empty and remove those empty dirs.
-        self._remove_empty_dirs_recursively(site.getuserbase(), noise)
+        self._remove_empty_dirs_recursively(getuserbase(), noise)
 
         # remove the branch listing from the installation_db
         #if noise.verbose:
@@ -696,7 +698,7 @@ class Package(object):
         self._remove_log_dirs(pkg_to_turn_off_name, branch_to_turn_off_name, pkg_logs_dir, branch_logs_dir, noise)
 
         # look recursively to see if the dirs in userbase are empty and removes those empty dirs.
-        self._remove_empty_dirs_recursively(site.getuserbase(), noise)
+        self._remove_empty_dirs_recursively(getuserbase(), noise)
 
         # rename the branch dir name (in the pkg_dir)
         if noise.verbose:
