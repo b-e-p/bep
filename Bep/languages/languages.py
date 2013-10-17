@@ -26,7 +26,7 @@ class Language(object):
             #p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True) # for using cmd as a string
             p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stdin=subprocess.PIPE)  # for using cmd as a list (doesn't require shell=True)
         except OSError:
-            print("\nError: Cannot use {} to install packages".format(lang))
+            print("\nError: Cannot use {} to process packages.".format(lang))
             raise SystemExit
 
         out, err = p.communicate()
