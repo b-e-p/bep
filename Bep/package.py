@@ -930,16 +930,3 @@ class Local_Repo(RepoTypeCheck):
 
     #def install(self, pkg_to_install, noise):
         #self.allowed_repo_types = ['git', 'hg', 'bzr'] # maybe 'svn'?
-
-
-class Stable(Package):
-    def __init__(self, lang_arg, pkg_type, install_dirs):
-        #self.repo_type = 'git'
-        #self.application_check_cmd = 'git --version'
-        super(Stable, self).__init__(lang_arg, pkg_type, install_dirs)
-        self.lang_cmd
-
-
-
-
-

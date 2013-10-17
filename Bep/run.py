@@ -24,8 +24,7 @@ def create_pkg_inst(lang_arg, pkg_type, install_dirs, packages_file=None):
 
     # for future pkg_types, just add them to this dict
     supported_pkg_types = dict(github=package.Github, bitbucket=package.Bitbucket,
-                            gitorious=package.Gitorious, local_repo=package.Local_Repo,
-                            stable=package.Stable)
+                            gitorious=package.Gitorious, local_repo=package.Local_Repo)
 
     def make_inst(pkg_type_cls):
         return pkg_type_cls(lang_arg, pkg_type, install_dirs)
@@ -292,10 +291,9 @@ def main(): # needs to be done as a main func for setuptools to work correctly i
 
                 pkg_to_install_specified_with_user_and_repo = pkg_to_install.split('/')
                 if len(pkg_to_install_specified_with_user_and_repo) == 1:
-                    if pkg_type != 'stable': 
-                        print("\nError: need to specifiy a user and branch for {}, like:".format(pkg_to_install))
-                        print("\t{} install github=git+username/pkg_name[^optional_branch]".format(name))   
-                        raise SystemExit
+                    print("\nError: need to specifiy a user and branch for {}, like:".format(pkg_to_install))
+                    print("\t{} install github=git+username/pkg_name[^optional_branch]".format(name))   
+                    raise SystemExit
 
                 utils.when_not_quiet_mode(utils.status('\t\tInstalling {0} package'.format(pkg_type)), noise.quiet)
                 pkg_inst = create_pkg_inst(lang_arg, pkg_type, install_dirs)
