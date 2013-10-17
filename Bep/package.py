@@ -86,7 +86,7 @@ class Package(object):
             else:
                 return str_to_strip                 # if nothing wrong, then just give back the string feed into this here.
 
-        # this bit looks to see if a branch is specified for installing; if not, then it gets master.
+        # this bit looks to see if a branch/version is specified for installing; if not, then it gets master.
         pkg_branch_test = pkg_to_install.split('^')
         assert len(pkg_branch_test) <= 2, "Only allowed to specify one branch/version per package listing for installation."
         if len(pkg_branch_test) == 2:
