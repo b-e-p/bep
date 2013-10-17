@@ -20,7 +20,7 @@ import glob
 import itertools
 import locale   # needed in py3 for decoding output from subprocess pipes 
 
-import Bep.languages as languages
+import Bep.languages.languages as languages
 from Bep.core.release_info import name
 import utils
 #from core.utils_db import (handle_db_after_an_install, handle_db_for_removal,
@@ -32,7 +32,7 @@ class Package(object):
     def __init__(self, lang_arg, pkg_type, install_dirs, **kwargs):
 
         if 'python' in lang_arg:
-            self.lang_using = languages.Python()
+            self.lang_using = languages.Python() # this is a class instance to have it's methods accessed throughout
         #elif 'otherlanguage' in lang_arg:  # for other languages
             #self.lang_using = languages.OtherLanguage()
         else:
@@ -933,4 +933,13 @@ class Local_Repo(RepoTypeCheck):
 
 
 class Stable(Package):
-    pass
+    def __init__(self, lang_arg, pkg_type, install_dirs):
+        #self.repo_type = 'git'
+        #self.application_check_cmd = 'git --version'
+        super(Stable, self).__init__(lang_arg, pkg_type, install_dirs)
+        self.lang_cmd
+
+
+
+
+

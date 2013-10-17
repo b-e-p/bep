@@ -22,32 +22,23 @@ import utils
 def create_pkg_inst(lang_arg, pkg_type, install_dirs, packages_file=None):
     ''' install_dirs is a dict with the installed_pkgs_dir and the install_logs_dir '''
 
-    if pkg_type == 'github':
-        return package.Github(lang_arg, pkg_type, install_dirs)
+    # for future pkg_types, just add them to this dict
+    supported_pkg_types = dict(github=package.Github, bitbucket=package.Bitbucket,
+                            gitorious=package.Gitorious, local_repo=package.Local_Repo,
+                            stable=package.Stable)
 
-    elif pkg_type == 'bitbucket':
-        return package.Bitbucket(lang_arg, pkg_type, install_dirs)
-
-    elif pkg_type == 'gitorious':
-        return package.Gitorious(lang_arg, pkg_type, install_dirs)
-
-    elif pkg_type == 'local_repo':
-        return package.Local_Repo(lang_arg, pkg_type, install_dirs)
-
-    elif pkg_type == 'stable':
-        return package.Stable(lang_arg, pkg_type, install_dirs)
-
-    # NOTE for future pkg_types
-    #elif pkg_type == <new/different_pkg_type>:
-        #pkg_inst = new/different_pkg_type(lang_arg, pkg_type)
-        #return pkg_inst
-
-    if packages_file:  # installs from the pkgs file are the only thing that get this argument 
-        not_pkg_type = utils.status('{0} in your {1} is an unrecognized package type.\n'.format(pkg_type, packages_file))
-        raise SystemExit(not_pkg_type)
-    else:
-        not_pkg_type = utils.status('{0} is an unrecognized package type.\n'.format(pkg_type))
-        raise SystemExit(not_pkg_type)
+    def make_inst(pkg_type_cls):
+        return pkg_type_cls(lang_arg, pkg_type, install_dirs)
+    
+    try:
+        return make_inst(supported_pkg_types[pkg_type])
+    except KeyError:
+        if packages_file:  # installs from the pkgs file are the only thing that get this argument 
+            not_pkg_type = '\nError: {0} in your {1} is an unrecognized package type.\n'.format(pkg_type, packages_file)
+            raise SystemExit(not_pkg_type)
+        else:
+            not_pkg_type = '\nError: {0} is an unrecognized package type.\n'.format(pkg_type)
+            raise SystemExit(not_pkg_type)
 
 
 
@@ -65,6 +56,7 @@ install_dirs = dict(installed_pkgs_dir=installed_pkgs_dir, install_logs_dir=inst
 
 packages_file = '.{}_packages'.format(name)
 packages_file_path = join(usr_home_dir, packages_file)
+
 
 
 def main(): # needs to be done as a main func for setuptools to work correctly in creating an executable
