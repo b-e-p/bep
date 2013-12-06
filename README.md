@@ -150,7 +150,7 @@ If you want to install Bep system-wide (the not recommended way):
 
 `python setup.py install`
 
-Alternatively, if you don't have root access and just want to install Bep locally under your user (the recommended way):
+Alternatively, if you don't have root access and/or just want to install Bep locally under your user (the recommended way):
 
 `python setup.py install --user`
 
