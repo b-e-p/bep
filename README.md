@@ -144,7 +144,7 @@ For example:
 
 Bep relies only on the python standard library and supports python >= 2.7.  
 
-Just clone/download the bep to wherever you want and then... 
+#### Just clone/download the bep to wherever you want and then... 
 
 If you want to install Bep system-wide (the not recommended way):
 
