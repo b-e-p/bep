@@ -142,7 +142,7 @@ For example:
 
 ## To install bep:
 
-Bep relies only on the python standard library and supports python >= 2.7.
+Bep relies only on the python standard library and supports python >= 2.7.  Just clone/download the repo to wherever you want and then... 
 
 If you want to install Bep system-wide (the not recommended way):
 
