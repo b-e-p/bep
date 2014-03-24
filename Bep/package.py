@@ -57,7 +57,7 @@ class Package(object):
         encoding = locale.getdefaultlocale()[1]     # py3 stuff b/c this is encoded as b('...')
         if verbose:    # shows all the output when running cmd -- sometimes lots of stuff
             print(cmd)
-            cmd = cmd.split(' ') # to use w/o setting needing to set shell=True
+            cmd = cmd.split(' ') # to use w/o needing to set shell=True
             p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
             for line in p.stdout:
                 line = line.decode(encoding)
@@ -65,7 +65,7 @@ class Package(object):
             return_val = p.wait()
 
         else:   # for a quiet mode -- only shows the output when the cmd fails
-            cmd = cmd.split(' ') # to use w/o setting needing to set shell=True
+            cmd = cmd.split(' ') # to use w/o needing to set shell=True
             #print('cmd:'); print(cmd)
             p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stdin=subprocess.PIPE, stderr=subprocess.PIPE)
             out, err = p.communicate()
@@ -93,20 +93,22 @@ class Package(object):
             pkg_to_install, branch = pkg_branch_test
             pkg_to_install = strip_end_of_str(pkg_to_install) 
 
-            if len(pkg_to_install.split('/')) == 1:
+            #if len(pkg_to_install.split('/')) == 1:
+            if len(pkg_to_install.split('/')) != 2:
                 utils.how_to_specify_installation(pkg_to_install)
                 raise SystemExit
 
-            download_url = self.download_url.format(pkg_to_install)
-            download_info = self.download_url_cmd.format(branch, download_url)
+            download_url = self.download_url.format(pkg_to_install=pkg_to_install)
+            download_info = self.download_url_cmd.format(branch=branch, download_url=download_url)
         elif len(pkg_branch_test) == 1:
             branch = 'master' 
             pkg_to_install = pkg_branch_test[0]
             pkg_to_install = strip_end_of_str(pkg_to_install) 
-            download_info = self.download_url.format(pkg_to_install)
+            download_info = self.download_url.format(pkg_to_install=pkg_to_install)
 
-        # if repo branch name is specified with a nested path, then change its name (in order 
-        # to install all branches flattened in the pkg_dir)
+        # if a repo branch name is specified with a nested path, then change its name (in   
+        # order to make sure that all branches installed have flattened names in the pkg_dir).
+        # (Eg. numpy on github has branches like this, where they are listed as as nested paths)
         branch = branch.split('/')   
         if len(branch) == 1:
             branch = branch[0]
@@ -114,7 +116,7 @@ class Package(object):
             branch = '_'.join(branch)
                 
         pkg_to_install_name = os.path.basename(pkg_to_install)
-        self.install_download_cmd = self.install_download_cmd.format(download_info, branch)
+        self.install_download_cmd = self.install_download_cmd.format(download_info=download_info, branch=branch)
 
         return pkg_to_install_name, branch 
 
@@ -122,8 +124,8 @@ class Package(object):
     def _download_pkg(self, pkg_to_install_name, branch_to_install_name, noise):
         ''' downloads/clones the specified package branch for installation '''
 
-        # tests whether the vc application is installed ('git', 'hg', 'bzr', maybe others in the future )
-        app_check_cmd = self.application_check_cmd
+        # tests whether the vc application is installed ('git', 'hg', 'bzr', etc)
+        app_check_cmd = self.application_check_cmd  # not sure if this is platform neutral
         app_type = app_check_cmd.split(' ')[0]
         return_val = self._cmd_output(app_check_cmd, verbose=False)
         if return_val:  # it would be zero if the program is installed (if anything other than zero, then it's not installed)
@@ -144,9 +146,9 @@ class Package(object):
         if return_val != 0:
             print("Could not properly download {0} [{1}] with {2}\n".format(pkg_to_install_name, branch_to_install_name, self.repo_type)) 
 
-            # remove whatever may have been downloaded that didn't get successfully downloaded
-            something_downloaded_or_already_in_pkg_name_dir = glob.glob(pkg_name_dir)
-            if not something_downloaded_or_already_in_pkg_name_dir:  # if nothing was downloaded
+            ### remove whatever may have been downloaded that didn't get successfully downloaded
+            something_downloaded_or_already_in_pkg_name_dir = os.listdir(pkg_name_dir)
+            if not something_downloaded_or_already_in_pkg_name_dir:  # if nothing was downloaded or is already in the pkg_name_dir
                 shutil.rmtree(pkg_name_dir) # if the install didn't work, then remove the pkg_name_dir
                 if not os.listdir(self.pkg_type_install_dir): # if the pkg type install dir is empty, remove that
                     os.rmdir(self.pkg_type_install_dir)
@@ -157,9 +159,9 @@ class Package(object):
             # be downloaded, and leave everything else in there alone. 
             else:
                 try:
-                    shutil.rmtree(branch_to_install_name) # if the install didn't work, then remove the downloaded pkg dir
-                # might need this b/c maybe it didn't even create the branch_to_install_name dir (eg. b/c of a wrongly 
-                # specified command - git when hg should have been used)
+                    shutil.rmtree(branch_to_install_name)   #NOTE should probably use absolute dirs instead of this 
+                # need this b/c maybe it didn't even create the branch_to_install_name dir; or, git automatically
+                # cleans up after itself, so the branch_to_install_name might not even exist b/c git deleted it already  
                 except: pass    
             return None
 
@@ -169,7 +171,7 @@ class Package(object):
 
     def _installation_check(self, pkg_type, pkg_to_install_name, branch_to_install, everything_already_installed):
         '''
-        to make sure that only one version of any given package can be turned on (/active) at any given 
+        To make sure that only one version of any given package can be turned on (/active) at any given 
         time for a specific version of the lang.  If a package branch with the same name as an already 
         installed (turned off) pkg branch is attempting to be installed under the same pkg_type, then do 
         not allow this; however, do allow it for a pkg branch with the same name as an existing package 
@@ -192,142 +194,148 @@ class Package(object):
         #print('everything_already_installed:')
         #print(everything_already_installed)
 
-        for lang_installed, pkg_types_dict in everything_already_installed.items():
-            if lang_installed == self.lang_cmd:
-                for installed_pkg_type, pkgs_dict in pkg_types_dict.items():
-                    for installed_pkg_name, branches_list in pkgs_dict.items(): 
-
-                        # make a list of any branch that is currently turned on for this pkg name via this package type;
-                        # should only be one branch on at a time for the package name across all pkg types.
-                        pkg_branch_names_on_for_pkg_type = [branch for branch in branches_list if not branch.startswith('.__')]
-
-                        # make a list of any branch that is currently turned off for this pkg name via package type
-                        pkg_branch_names_off_for_pkg_type = [branch.lstrip('.__') for branch in branches_list if branch.startswith('.__')]
-
-                        pkg_branch_names_all_for_pkg_type = pkg_branch_names_on_for_pkg_type + pkg_branch_names_off_for_pkg_type 
-                        
-
-                        if any_package_branch_on:
-                                #(ipy)       (ipy)
-                            if pkg_name == installed_pkg_name:
-                                    #(Github)    (Github)
-                                if pkg_type == installed_pkg_type: 
-                                    #(ipy_master)  (ipy_master)
-                                    if branch_name in pkg_branch_names_on_for_pkg_type:
-                                        print("Already installed & turned on.") 
-                                        return False
-
-                                        #(ipy_master) (.__ipy_master renamed to ipy_master)
-                                    if branch_name in pkg_branch_names_off_for_pkg_type:
-                                        print("Already installed & turned off.") 
-                                        return False
-
-                                    # these two statements below mean the same thing (i think); b/c if the branch is not
-                                    # in the installed branches for this pkg & pkg_type, then the branch would have to 
-                                    # be (turned on) in a different pkg_type (under the same pkg name of course).
-                                        #(ipy_master)        (anything but ipy_master)
-                                    if branch_name not in pkg_branch_names_all_for_pkg_type:
-                                        print("A branch of {0} is already turned on for {1}.".format(pkg_name, lang_installed))
-                                        return False # b/c there is already a branch on somewhere 
-
-                                        #(ipy_master)   (in the list of any branch turned on for this pkg, regardless of pkg_type)
-                                    if branch_name in any_package_branch_on:
-                                        print("A branch of {0} is already turned on for {1}.".format(pkg_name, lang_installed))
-                                        return False # b/c there is already a branch on somewhere 
-
-                                    #(Github)     (Local Repo)
-                                elif pkg_type != installed_pkg_type:
-
-                                        #(ipy_master)   (ipy_master)
-                                    if branch_name in pkg_branch_names_on_for_pkg_type:
-                                        #print("A branch of {} is already turned on under {} packages.".format(pkg_name, installed_pkg_type))
-                                        print("A branch of {0} is already turned on for {1}.".format(pkg_name, lang_installed))
-                                        return False # b/c there is already a pkg branch turned on somewhere
-
-                                        #(ipy_master)       (anything not ipy_master) 
-                                    if branch_name not in pkg_branch_names_all_for_pkg_type:
-                                        print("A branch of {0} is already turned on for {1}.".format(pkg_name, lang_installed))
-                                        return False # b/c there is already a pkg branch turned on somewhere
-
-                                    #if branch_name in any_package_branch_on:
-                                        #print("A branch of {} is already turned on.".format(pkg_name))
-                                        #return False # b/c there is already a branch on somewhere 
-
-                            ### don't care about these tests
-                                    ##(ipy)       (sklearn)
-                            #elif pkg_name != installed_pkg_name:
-                                    #(Github)    (Github)
-                                #if pkg_type == installed_pkg_type:
-                                        ##(master)       (master)
-                                    #if branch_name in installed_branch_names_raw:
-                                        #return False # b/c this doesn't matter 
-                                        ##(master)           (anything not master) 
-                                    #elif branch_name not in installed_branch_names_raw:
-                                        #return False # # b/c this doesn't matter 
-
-                                    ##(Github)     (Local Repo)
-                                #elif pkg_type != installed_pkg_type:
-                                        ##(master)       (master)
-                                    #if branch_name in installed_branch_names_raw:
-                                        #return False # b/c this doesn't matter
-                                        ##(master)           (anything but master) 
-                                    #elif branch_name not in installed_branch_names_raw:
-                                        #return False # b/c this doesn't matter 
-
-                        elif not any_package_branch_on: # if no branch is turned on for this package
-
-                                #(ipy)       (ipy)
-                            if pkg_name == installed_pkg_name:
-                                #(Github)      (Github)
-                                if pkg_type == installed_pkg_type:
-
-                                        #(ipy_master)   (ipy_master renamed from .__ipy_master)
-                                    if branch_name in pkg_branch_names_off_for_pkg_type:
-                                        print("Already installed & turned off.")
-                                        return False # b/c the branch is already installed for this pkg_name under this pkg_type but turned off.
-
-                                        #(ipy_master)         (anything but ipy_master)
-                                    elif branch_name not in pkg_branch_names_off_for_pkg_type:
-                                        return True # b/c there are not any pkg branches turned on and this branch isn't already installed for this pkg_type 
-
-                                    #(Github)     (Local Repo)
-                                #elif pkg_type != installed_pkg_type:
-
-                                        ##(ipy_master)  (ipy_master)
-                                    #if branch_name in pkg_branch_names_off_for_pkg_type:
-                                        # b/c it doesn't matter what branches are installed under a different pkg_type (so long as no branches are on)
-                                        #return True  
-
-                                        ##(ipy_master)        (anything but ipy_master)
-                                    #elif branch_name not in pkg_branch_names_off_for_pkg_type:
-                                        # b/c it doesn't matter what branches are installed under a different pkg_type (so long as no branches are on)
-                                        #return True  
 
 
-                            ### don't care about these tests
-                                ##(ipy)        (sklearn)
-                            #elif pkg_name != installed_pkg_name:
-                                ##(Github)      (Github)
-                                #if pkg_type == installed_pkg_type:
-                                        ##(master)      (master)
-                                    #if branch_name in installed_branch_names_renamed:
-                                        #return False # b/c this doesn't matter
-                                        ##(master)           (anything but master) 
-                                    #elif branch_name not in installed_branch_names_renamed:
-                                        #return False # b/c this doesn't matter 
+        if self.lang_cmd in everything_already_installed:
+            lang_installed = self.lang_cmd
+            pkg_types_dict = everything_already_installed[self.lang_cmd]
+        else:
+            # if there are no packages installed (like when using for the first time for a language)                   
+            return True
 
-                                    ##(Github)     (Local Repo)
-                                #elif pkg_type != installed_pkg_type:
-                                        ##(master)      (master)
-                                    #if branch_name in installed_branch_names_renamed:
-                                        #return False # b/c this doesn't matter 
-                                        ##(master)        (anything but master)
-                                    #elif branch_name not in installed_branch_names_renamed:
-                                        #return False # b/c this doesn't matter 
+        for installed_pkg_type, pkgs_dict in pkg_types_dict.items():
+            for installed_pkg_name, branches_list in pkgs_dict.items(): 
 
-        # True means that the branch can be installed b/c it wasn't caught in one of the false returns above.
-        # Also, this returns True if there are no packages installed (like when using for the first time).                   
-        return True 
+                # make a list of any branch that is currently turned on for this pkg name via this package type;
+                # should only be one branch on at a time for the package name across all pkg types.
+                pkg_branch_names_on_for_pkg_type = [branch for branch in branches_list if not branch.startswith('.__')]
+
+                # make a list of any branch that is currently turned off for this pkg name via package type
+                pkg_branch_names_off_for_pkg_type = [branch.lstrip('.__') for branch in branches_list if branch.startswith('.__')]
+
+                pkg_branch_names_all_for_pkg_type = pkg_branch_names_on_for_pkg_type + pkg_branch_names_off_for_pkg_type 
+                
+                # FIXME this part works, but refractor it so it isn't so nested
+                if any_package_branch_on:
+                        #(ipy)       (ipy)
+                    if pkg_name == installed_pkg_name:
+                            #(Github)    (Github)
+                        if pkg_type == installed_pkg_type: 
+                            #(ipy_master)  (ipy_master)
+                            if branch_name in pkg_branch_names_on_for_pkg_type:
+                                print("Already installed & turned on.") 
+                                return False
+
+                                #(ipy_master) (.__ipy_master renamed to ipy_master)
+                            if branch_name in pkg_branch_names_off_for_pkg_type:
+                                print("Already installed & turned off.") 
+                                return False
+
+                            # these two statements below mean the same thing (i think); b/c if the branch is not
+                            # in the installed branches for this pkg & pkg_type, then the branch would have to 
+                            # be (turned on) in a different pkg_type (under the same pkg name of course).
+                                #(ipy_master)        (anything but ipy_master)
+                            if branch_name not in pkg_branch_names_all_for_pkg_type:
+                                print("A branch of {0} is already turned on for {1}.".format(pkg_name, lang_installed))
+                                return False # b/c there is already a branch on somewhere 
+
+                                #(ipy_master)   (in the list of any branch turned on for this pkg, regardless of pkg_type)
+                            if branch_name in any_package_branch_on:
+                                print("A branch of {0} is already turned on for {1}.".format(pkg_name, lang_installed))
+                                return False # b/c there is already a branch on somewhere 
+
+                            #(Github)     (Local Repo)
+                        elif pkg_type != installed_pkg_type:
+
+                                #(ipy_master)   (ipy_master)
+                            if branch_name in pkg_branch_names_on_for_pkg_type:
+                                #print("A branch of {} is already turned on under {} packages.".format(pkg_name, installed_pkg_type))
+                                print("A branch of {0} is already turned on for {1}.".format(pkg_name, lang_installed))
+                                return False # b/c there is already a pkg branch turned on somewhere
+
+                                #(ipy_master)       (anything not ipy_master) 
+                            if branch_name not in pkg_branch_names_all_for_pkg_type:
+                                print("A branch of {0} is already turned on for {1}.".format(pkg_name, lang_installed))
+                                return False # b/c there is already a pkg branch turned on somewhere
+
+                            #if branch_name in any_package_branch_on:
+                                #print("A branch of {} is already turned on.".format(pkg_name))
+                                #return False # b/c there is already a branch on somewhere 
+
+                    ### don't care about these tests
+                            ##(ipy)       (sklearn)
+                    #elif pkg_name != installed_pkg_name:
+                            #(Github)    (Github)
+                        #if pkg_type == installed_pkg_type:
+                                ##(master)       (master)
+                            #if branch_name in installed_branch_names_raw:
+                                #return False # b/c this doesn't matter 
+                                ##(master)           (anything not master) 
+                            #elif branch_name not in installed_branch_names_raw:
+                                #return False # # b/c this doesn't matter 
+
+                            ##(Github)     (Local Repo)
+                        #elif pkg_type != installed_pkg_type:
+                                ##(master)       (master)
+                            #if branch_name in installed_branch_names_raw:
+                                #return False # b/c this doesn't matter
+                                ##(master)           (anything but master) 
+                            #elif branch_name not in installed_branch_names_raw:
+                                #return False # b/c this doesn't matter 
+
+                elif not any_package_branch_on: # if no branch is turned on for this package
+
+                        #(ipy)       (ipy)
+                    if pkg_name == installed_pkg_name:
+                        #(Github)      (Github)
+                        if pkg_type == installed_pkg_type:
+
+                                #(ipy_master)   (ipy_master renamed from .__ipy_master)
+                            if branch_name in pkg_branch_names_off_for_pkg_type:
+                                print("Already installed & turned off.")
+                                return False # b/c the branch is already installed for this pkg_name under this pkg_type but turned off.
+
+                                #(ipy_master)         (anything but ipy_master)
+                            elif branch_name not in pkg_branch_names_off_for_pkg_type:
+                                return True # b/c there are not any pkg branches turned on and this branch isn't already installed for this pkg_type 
+
+                            #(Github)     (Local Repo)
+                        #elif pkg_type != installed_pkg_type:
+
+                                ##(ipy_master)  (ipy_master)
+                            #if branch_name in pkg_branch_names_off_for_pkg_type:
+                                # b/c it doesn't matter what branches are installed under a different pkg_type (so long as no branches are on)
+                                #return True  
+
+                                ##(ipy_master)        (anything but ipy_master)
+                            #elif branch_name not in pkg_branch_names_off_for_pkg_type:
+                                # b/c it doesn't matter what branches are installed under a different pkg_type (so long as no branches are on)
+                                #return True  
+
+
+                    ### don't care about these tests
+                        ##(ipy)        (sklearn)
+                    #elif pkg_name != installed_pkg_name:
+                        ##(Github)      (Github)
+                        #if pkg_type == installed_pkg_type:
+                                ##(master)      (master)
+                            #if branch_name in installed_branch_names_renamed:
+                                #return False # b/c this doesn't matter
+                                ##(master)           (anything but master) 
+                            #elif branch_name not in installed_branch_names_renamed:
+                                #return False # b/c this doesn't matter 
+
+                            ##(Github)     (Local Repo)
+                        #elif pkg_type != installed_pkg_type:
+                                ##(master)      (master)
+                            #if branch_name in installed_branch_names_renamed:
+                                #return False # b/c this doesn't matter 
+                                ##(master)        (anything but master)
+                            #elif branch_name not in installed_branch_names_renamed:
+                                #return False # b/c this doesn't matter 
+        else:
+            # True means that the branch can be installed b/c it wasn't caught in one of the false returns above.
+            return True 
 
 
 
@@ -434,8 +442,9 @@ class Package(object):
                 download_success = self._download_pkg(pkg_to_install_name, branch_to_install, noise)
                 if download_success:
                     do_install(pkg_to_install_name, branch_to_install)
+                # if the download failed, it is taken care of inside self._download_pkg 
 
-        else:  # don't have to download pkg first -- this is for turning pkg back on (from being turned off)
+        else:  # if don't have to download pkg first -- this is for turning pkg back on (from being turned off)
             # pkg_to_install is passed to the install func from the turn_on method & self.branch_to_turn_on_renamed is from turn_on 
             pkg_to_install_name = pkg_to_install
             branch_to_install = self.branch_to_turn_on_renamed
@@ -782,9 +791,9 @@ class Git(Package):
         super(Git, self).__init__(lang_arg, pkg_type, install_dirs)
     
     def install(self, pkg_to_install, noise, **kwargs):
-        self.download_url_cmd = '-b {0} {1}'
+        self.download_url_cmd = '-b {branch} {download_url}'
         #self.install_download_cmd = 'git clone --single-branch {0}' # maybe want "git clone --recursive" instead?
-        self.install_download_cmd = 'git clone {0} {1}' 
+        self.install_download_cmd = 'git clone {download_info} {branch}' 
         Package.install(self, pkg_to_install, noise, **kwargs)
 
     def update(self, lang_to_update, pkg_to_update, branch_to_update, noise):
@@ -802,8 +811,8 @@ class Mercurial(Package):
 
     def install(self, pkg_to_install, noise, **kwargs):
         #self.download_url_cmd = '-r {0} {1}' # need to look more into these commands
-        self.download_url_cmd = '-b {0} {1}'
-        self.install_download_cmd = 'hg clone {0} {1}'
+        self.download_url_cmd = '-b {branch} {download_url}'
+        self.install_download_cmd = 'hg clone {download_info} {branch}'
         Package.install(self, pkg_to_install, noise, **kwargs)
 
     def update(self, lang_to_update, pkg_to_update, branch_to_update, noise):
@@ -819,8 +828,8 @@ class Bazaar(Package):
         super(Bazaar, self).__init__(lang_arg, pkg_type, install_dirs)
 
     def install(self, pkg_to_install, noise, **kwargs):
-        self.download_url_cmd =  '{0} {1}'  # i think this is how you install a specific branch (not sure though)
-        self.install_download_cmd = 'bzr branch {0} {1}'    # bzr uses branch instead of clone
+        self.download_url_cmd =  '{branch} {download_url}'  # i think this is how you install a specific branch (not sure though)
+        self.install_download_cmd = 'bzr branch {download_info} {branch}'    # bzr uses branch instead of clone
         Package.install(self, pkg_to_install, noise, **kwargs)
 
     def update(self, lang_to_update, pkg_to_update, branch_to_update, noise):
@@ -871,7 +880,7 @@ class Github(Git):
             #print("\nNote: do not have to specify repo type for Github repos.") 
             pkg_to_install = is_repo_type_specified[-1]
 
-        self.download_url = 'https://github.com/{0}.git'
+        self.download_url = 'https://github.com/{pkg_to_install}.git'
         Git.install(self, pkg_to_install, noise, **kwargs)
 
 
@@ -885,7 +894,7 @@ class Gitorious(Git):
             #print("\nNote: do not have to specify repo type for Gitorious repos.") 
             pkg_to_install = is_repo_type_specified[-1]
 
-        self.download_url = 'http://git.gitorious.org/{0}.git'
+        self.download_url = 'http://git.gitorious.org/{pkg_to_install}.git'
         Git.install(self, pkg_to_install, noise, **kwargs)
 
 
@@ -895,9 +904,9 @@ class Bitbucket(RepoTypeCheck):
         self.allowed_repo_types = ['git', 'hg']
         self.repo_type = pkg_to_install.split('+')[0]
         if self.repo_type == 'hg': 
-            self.download_url = 'https://bitbucket.org/{0}'
+            self.download_url = 'https://bitbucket.org/{pkg_to_install}'
         elif self.repo_type == 'git':
-            self.download_url = 'https://bitbucket.org/{0}.git'
+            self.download_url = 'https://bitbucket.org/{pkg_to_install}.git'
         else:
             print("\nError installing {0}:".format(pkg_to_install))   
             print("Command to install {0} packages needs to be specified as one of: {1}".format(self.pkg_type, self.allowed_repo_types))

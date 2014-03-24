@@ -21,23 +21,24 @@ def all_pkgs_and_branches_for_all_pkg_types_already_installed(installed_pkgs_dir
         specific version of the install lang. '''
 
     all_pkgs_and_branches_for_all_pkg_types_already_installed = {}
+    retrieve_paths = lambda dir_to_glob, how_to_glob='*': glob.glob(join(dir_to_glob, how_to_glob)) 
     
-    langs_paths = glob.glob(join(installed_pkgs_dir, '*'))
+    langs_paths = retrieve_paths(installed_pkgs_dir) 
 
     for lang_path in langs_paths: 
         lang_name = os.path.basename(lang_path)
         all_pkgs_and_branches_for_all_pkg_types_already_installed.update({ lang_name: {} })
-        pkg_types_paths = glob.glob(join(lang_path, '*'))
+        pkg_types_paths = retrieve_paths(lang_path) 
 
         for pkg_type_path in pkg_types_paths:
             pkg_type_name = os.path.basename(pkg_type_path)
             all_pkgs_and_branches_for_all_pkg_types_already_installed[lang_name].update({ pkg_type_name: {} })
-            pkg_names_paths = glob.glob(join(pkg_type_path, '*'))
+            pkg_names_paths = retrieve_paths(pkg_type_path)
 
             for pkg_name_path in pkg_names_paths: 
                 pkg_name = os.path.basename(pkg_name_path)
                 all_pkgs_and_branches_for_all_pkg_types_already_installed[lang_name][pkg_type_name].update({ pkg_name: [] })
-                branches_paths = glob.glob(join(pkg_name_path, '*')) + glob.glob(join(pkg_name_path, '.*')) # b/c glob ignores hidden stuff
+                branches_paths = retrieve_paths(pkg_name_path) + retrieve_paths(pkg_name_path, '.*') # b/c glob ignores hidden stuff 
             
                 for branch_path in branches_paths:
                     branch_name = os.path.basename(branch_path)
@@ -101,7 +102,7 @@ def branches_installed_for_given_pkgs_lang_ver(lang_cmd, pkg_to_process_name, ev
     ''' returns a list of all branches that are installed for a specific pkg, 
         for a specific version of the lang across all pkg types '''
     all_branches_installed_for_pkgs_lang_ver = [] 
-
+    '''
     for lang_installed, pkg_types_dict in everything_already_installed.items():
         if lang_installed == lang_cmd:
             for pkg_type, pkgs_dict in pkg_types_dict.items():
@@ -109,6 +110,17 @@ def branches_installed_for_given_pkgs_lang_ver(lang_cmd, pkg_to_process_name, ev
                     if pkg_to_process_name == installed_pkg_name: 
                         for branch in branches_list:
                             all_branches_installed_for_pkgs_lang_ver.append(branch)
+    '''
+    if lang_cmd in everything_already_installed:
+        pkg_types_dict = everything_already_installed[lang_cmd]
+    else:
+        return all_branches_installed_for_pkgs_lang_ver
+
+    for pkg_type, pkgs_dict in pkg_types_dict.items():
+        branches_list = pkgs_dict.get(pkg_to_process_name, [])
+    
+        for branch in branches_list:
+            all_branches_installed_for_pkgs_lang_ver.append(branch)
 
     return all_branches_installed_for_pkgs_lang_ver
 
@@ -117,7 +129,7 @@ def lang_and_pkg_type_and_pkg_and_branches_tuple(pkg_process, everything_already
     ''' gives back a tuple with all installed versions of a package, for different pkg_types and
         for different branches '''
     lang_pkg_type_pkg_and_branches_for_lang = [] 
-
+    """
     for lang_installed, pkg_types_dict in everything_already_installed.items():
         for installed_pkg_type, pkg_and_branches_dict in pkg_types_dict.items():
             for installed_pkg_name, branches_list in pkg_and_branches_dict.items(): 
@@ -125,6 +137,16 @@ def lang_and_pkg_type_and_pkg_and_branches_tuple(pkg_process, everything_already
                     for branch in branches_list:
                         lang_pkg_type_pkg_and_branches_for_lang.append(
                                 (lang_installed, installed_pkg_type, installed_pkg_name, branch))
+    """
+    for lang_installed, pkg_types_dict in everything_already_installed.items():
+        for installed_pkg_type, pkg_and_branches_dict in pkg_types_dict.items():
+
+            if pkg_process in pkg_and_branches_dict:
+                installed_pkg_name = pkg_process
+                branches_list = pkg_and_branches_dict[pkg_process]
+                for branch in branches_list:
+                    lang_pkg_type_pkg_and_branches_for_lang.append(
+                            (lang_installed, installed_pkg_type, installed_pkg_name, branch))
 
     #[(lang, pkg_type, pkg_1, branch), (lang, pkg_type, pkg_1, branch), ...]  
     return lang_pkg_type_pkg_and_branches_for_lang 

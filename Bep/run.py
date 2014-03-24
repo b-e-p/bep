@@ -24,7 +24,7 @@ def create_pkg_inst(lang_arg, pkg_type, install_dirs, packages_file=None):
 
     # for future pkg_types, just add them to this dict
     supported_pkg_types = dict(github=package.Github, bitbucket=package.Bitbucket,
-                            gitorious=package.Gitorious, local_repo=package.Local_Repo)
+                               gitorious=package.Gitorious, local_repo=package.Local_Repo)
 
     def make_inst(pkg_type_cls):
         return pkg_type_cls(lang_arg, pkg_type, install_dirs)
@@ -61,85 +61,80 @@ packages_file_path = join(usr_home_dir, packages_file)
 def main(): # needs to be done as a main func for setuptools to work correctly in creating an executable
     
     parser = argparse.ArgumentParser(description=name.upper(),
-                            formatter_class=argparse.RawDescriptionHelpFormatter,
+                            formatter_class=argparse.RawDescriptionHelpFormatter, 
+                            #formatter_class=argparse.RawTextHelpFormatter, 
                             epilog=usage.epilog_use)
 
     parser.add_argument('--version', action='version', version='%(prog)s {0}'.format(__version__))
-    parser.add_argument('--language', '-l', nargs='?', default=None, help=usage.lang_use)
+    parser.add_argument('-l', '--language', nargs='?', default='python', help=usage.lang_use)
+
 
     group = parser.add_mutually_exclusive_group()
     group.add_argument("-v", "--verbose", action="store_true", help=usage.verbose_use)
     group.add_argument("-q", "--quiet", action="store_true", help=usage.quiet_use)
 
 
-    subparsers = parser.add_subparsers(title='subcommands', description='(commands that %(prog)s uses)',
-                                            help=usage.subparser_use)
+    subparsers = parser.add_subparsers(title='Commands', 
+                                       description='[ These are the commands that can be passed to %(prog)s ]',
+                                       #help=usage.subparser_use)
+                                       help='[ Command specific help info ]')
 
 
     ### create parser for the "list" command
-    # TODO make is so that:
-    # can list all branches installed for a specific pkg,
+    # maybe make is so that it can list all branches installed for a specific pkg,
     parser_list = subparsers.add_parser('list', help=usage.list_use)
-    parser_list.add_argument('list_arg', #metavar="arg", 
-                                action="store_true", help=usage.list_sub_use)
+    parser_list.add_argument('list_arg', action="store_true", help=usage.list_sub_use) #metavar="arg") 
 
     # nargs options:
+    # (default): by not specifying nargs at all, you just get a string of 1 item
     # = N   where N is some specified number of args
     # = '?' makes a string of one item, and if no args are given, then default is used.
     # = '*' makes a list of all args passed after command and if no args given, then default is used.
     # = '+' makes list of all args passed after command, but requires at least one arg
 
+
+
     ### install command
     parser_install = subparsers.add_parser('install', help=usage.install_use.format(packages_file),
                                             formatter_class=argparse.RawTextHelpFormatter)
-    parser_install.add_argument('install_arg', nargs='*', default=packages_file_path, #metavar="arg",  
-                                help=usage.install_sub_use.format(packages_file))
+    parser_install.add_argument('install_arg', help=usage.install_sub_use.format(packages_file)) #metavar="arg")
+
+    
+    # NOTE this seems like a better way to go in the future:
     # parser_install.set_defaults(func=run_install)
-    # then above would define:
+    # then run_install would be defined to run the install process (rather than having the conditionals below)
     # def run_install(args):
     #   install_arg = args.install_arg  # would be a list of pkgs or a string of the packages file
     #   ...process the install_arg to decide what to install
     #   ...then do the install 
 
 
+
+
     ### remove command
     parser_remove = subparsers.add_parser('remove', help=usage.remove_use, 
                                             formatter_class=argparse.RawTextHelpFormatter)
-    parser_remove.add_argument('remove_arg', nargs=1, 
-                                help=usage.remove_sub_use)
+    parser_remove.add_argument('remove_arg', help=usage.remove_sub_use.format(name=name))
 
     ### update command
     parser_update = subparsers.add_parser('update', help=usage.update_use,
                                             formatter_class=argparse.RawTextHelpFormatter)
-    parser_update.add_argument('update_arg', nargs=1, 
-                                help=usage.update_sub_use)
-
+    parser_update.add_argument('update_arg', help=usage.update_sub_use.format(name=name))
+    
 
     ### turn_off command
     parser_turn_off = subparsers.add_parser('turn_off', help=usage.turn_off_use, 
                                             formatter_class=argparse.RawTextHelpFormatter)
-    parser_turn_off.add_argument('turn_off_arg', nargs=1, 
-                                help=usage.turn_off_sub_use)
+    parser_turn_off.add_argument('turn_off_arg', help=usage.turn_off_sub_use.format(name=name))
 
 
     ### turn_on command
     parser_turn_on = subparsers.add_parser('turn_on', help=usage.turn_on_use, 
                                             formatter_class=argparse.RawTextHelpFormatter)
-    parser_turn_on.add_argument('turn_on_arg', nargs=1, help=usage.turn_on_sub_use)#, metavar='arg')
+    parser_turn_on.add_argument('turn_on_arg', help=usage.turn_on_sub_use)#, metavar='arg')
 
 
     args = parser.parse_args()
-    #print(args)
-    #print(args.install_arg)
-    #if 'install_arg' in args:
-        #print(args.install_arg)
-
-    # this turns args into a dict
-    #args = vars(args)
-    #print(args)
-    #if 'install_arg' in args.keys():
-        #print("yup")
-    #parser.exit()
 
     ##########################################################
     ###########  this section handles cmds passed  ###########
@@ -165,52 +160,36 @@ def main(): # needs to be done as a main func for setuptools to work correctly i
         quiet = args.quiet
 
 
-    all_error = "\nError: Did you mean to specifiy ALL instead?"
+    def ALL_error(cmd_arg):
+        if cmd_arg in ['all', 'All']:
+            raise SystemExit("\nError: Did you mean to specifiy ALL instead?")
+
+
     lang_arg = args.language
 
     if 'install_arg' in args:
         install_arg = args.install_arg 
 
-        if install_arg == packages_file_path:
-            if lang_arg:
-                print("\nError: cannot use language arg when installing packages from {};".format(packages_file))
-                print("language needs to be specified for each package individually when installing")
-                print("with {}. For example, a listing in {} would look like:".format(packages_file)) 
-                print('\t"language-->[repo_type+]package_name[^optional_branch]"')
-                print('\t(eg. "python3.3-->git+ipython/ipython[^optional_branch]")')
-                raise SystemExit 
-
-        elif install_arg != packages_file_path:
-            if not lang_arg:
-                print("\nError: Need to specify a language for installation.".format(packages_file))
-                raise SystemExit 
-
 
     elif 'update_arg' in args:
-        update_arg = args.update_arg[0] # list of one item 
-
-        if update_arg in ['all', 'All']:
-            raise SystemExit(all_error)
+        update_arg = args.update_arg 
+        ALL_error(update_arg)
 
 
     elif 'remove_arg' in args:
-        remove_arg = args.remove_arg[0]
-       
-        if remove_arg in ['all', 'All']:
-            raise SystemExit(all_error)
+        remove_arg = args.remove_arg
+        ALL_error(remove_arg)
 
 
     elif 'turn_off_arg' in args:
-        turn_off_arg = args.turn_off_arg[0]
-
-        if turn_off_arg in ['all', 'All']:
-            raise SystemExit(all_error)
+        turn_off_arg = args.turn_off_arg
+        ALL_error(turn_off_arg)
 
 
     elif 'turn_on_arg' in args:
-        turn_on_arg = args.turn_on_arg[0]
+        turn_on_arg = args.turn_on_arg
+        ALL_error(turn_on_arg)
 
-        
     ##########################################################
     ##########################################################
 
@@ -225,14 +204,16 @@ def main(): # needs to be done as a main func for setuptools to work correctly i
     #print('\neverything_already_installed:') 
     #print(everything_already_installed) 
 
-    # install pkg(s) 
-    # maybe make it so that multiple versions of the same package can be listed in the pkg file;
-    #   though how to handle that all of them should be turned off except for one?
 
+    command_and_items_to_process_when_multiple_items = {}   # but not for install command 
+
+
+
+    # install pkg(s) 
     if 'install_arg' in args:
 
-        # install from packages file (the default)
-        if install_arg == packages_file_path:   
+        # install from packages file
+        if install_arg == "packages_file":
             try:  # bring in the packages file
                 sys.dont_write_bytecode = True  # to avoid writing a .pyc files (for the packages file)
                 pkgs_module = imp.load_source(packages_file, packages_file_path)    # used to import a hidden file (really hackey) 
@@ -251,7 +232,7 @@ def main(): # needs to be done as a main func for setuptools to work correctly i
             for pkg_type, pkgs_from_pkgs_file in pkgs_module.packages.items():
                 utils.when_not_quiet_mode(utils.status('\t\tInstalling {0} packages'.format(pkg_type)), noise.quiet)
 
-                if len(pkgs_from_pkgs_file) >= 1:
+                if pkgs_from_pkgs_file:
 
                     for pkg_to_install in pkgs_from_pkgs_file: 
 
@@ -264,44 +245,35 @@ def main(): # needs to be done as a main func for setuptools to work correctly i
                             print("\t{}".format(pkg_to_install))
                             raise SystemExit
 
-
                         # important to see what has previously been installed, so as to not turn on a 2nd version of a package.
                         everything_already_installed = utils.all_pkgs_and_branches_for_all_pkg_types_already_installed(installed_pkgs_dir) 
-                        pkg_inst.install(pkg_to_install, noise, 
-                                            everything_already_installed=everything_already_installed)
+                        pkg_inst.install(pkg_to_install, noise, everything_already_installed=everything_already_installed)
                 else:
                     utils.when_not_quiet_mode('\nNo {0} packages specified in {1} to install.'.format(pkg_type, packages_file), noise.quiet)
 
         # install w/ command line arg(s)
-        elif install_arg != packages_file_path:  
+        elif install_arg != "packages_file":
 
-            pkg_type_with_pkg_to_process = []   # this will be a list of tuples 
-            for pkg_type_and_pkg_to_process in install_arg:
-                pkg_type_andor_pkg_to_process = pkg_type_and_pkg_to_process.split('=') # need this check b/c pkg_type has to be specified when using cmdline 
-                if len(pkg_type_andor_pkg_to_process) != 2:
-                    utils.how_to_specify_installation(pkg_type_andor_pkg_to_process[0])
-                    #continue
-                    raise SystemExit
-                pkg_type, pkg_to_process = pkg_type_andor_pkg_to_process
-                pkg_type_with_pkg_to_process.append((pkg_type, pkg_to_process))
+            pkg_type_and_pkg_to_process = install_arg
+            pkg_type_andor_pkg_to_process = pkg_type_and_pkg_to_process.split('=') # need this check b/c pkg_type has to be specified when using cmdline 
+            if len(pkg_type_andor_pkg_to_process) != 2:
+                utils.how_to_specify_installation(pkg_type_andor_pkg_to_process[0])
+                raise SystemExit
 
+            pkg_type, pkg_to_install = pkg_type_andor_pkg_to_process
+            pkg_to_install_specified_with_user_and_repo = pkg_to_install.split('/')
+            if len(pkg_to_install_specified_with_user_and_repo) == 1:
+                print("\nError: need to specifiy a user and branch for {}, like:".format(pkg_to_install))
+                print("\t{} install github=username/pkg_name[^optional_branch]".format(name))   
+                print("\t{} install bitbucket=hg+username/pkg_name[^optional_branch]".format(name))   
+                raise SystemExit
 
-            for pkg_type, pkg_to_install in pkg_type_with_pkg_to_process:
+            utils.when_not_quiet_mode(utils.status('\t\tInstalling {0} package'.format(pkg_type)), noise.quiet)
+            pkg_inst = create_pkg_inst(lang_arg, pkg_type, install_dirs)
 
-
-                pkg_to_install_specified_with_user_and_repo = pkg_to_install.split('/')
-                if len(pkg_to_install_specified_with_user_and_repo) == 1:
-                    print("\nError: need to specifiy a user and branch for {}, like:".format(pkg_to_install))
-                    print("\t{} install github=git+username/pkg_name[^optional_branch]".format(name))   
-                    raise SystemExit
-
-                utils.when_not_quiet_mode(utils.status('\t\tInstalling {0} package'.format(pkg_type)), noise.quiet)
-                pkg_inst = create_pkg_inst(lang_arg, pkg_type, install_dirs)
-
-                # important to keep this here so it can be known what has previously been installed, so as to not turn on a 2nd version of a package.
-                everything_already_installed = utils.all_pkgs_and_branches_for_all_pkg_types_already_installed(installed_pkgs_dir) 
-                pkg_inst.install(pkg_to_install, noise, 
-                                    everything_already_installed=everything_already_installed)
+            # important to keep this here so it can be known what has previously been installed, so as to not turn on a 2nd version of a package.
+            everything_already_installed = utils.all_pkgs_and_branches_for_all_pkg_types_already_installed(installed_pkgs_dir) 
+            pkg_inst.install(pkg_to_install, noise, everything_already_installed=everything_already_installed)
 
     
 
@@ -416,6 +388,7 @@ def main(): # needs to be done as a main func for setuptools to work correctly i
                                                     print("\n* Update {0} {1} with:".format(pkg_to_update, lang_installed))
                                                     print("{0} -l {1} update {2}={3}".format(name, lang_installed, 
                                                                             pkg_type_installed, pkg_name_installed))
+
                                                 else:
                                                     print("\n* Update {0} [{1}] {2} with:".format(pkg_to_update, branch_installed, 
                                                                                                     lang_installed))

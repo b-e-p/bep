@@ -9,9 +9,9 @@ Purpose:  help commands.
 """
 
 
-subparser_use = '''
-[ Subcommand specific help info ]
-'''
+#subparser_use = '''
+#[ Command specific help info ]
+#'''
 
 
 epilog_use = '''
@@ -21,20 +21,22 @@ See command specific help by issuing a trailing `-h` after the command:
 
 
 verbose_use = '''
-show all output during the command processes.
+show all output during specified command processes.
 '''
 
 quiet_use = '''
-show minimal output during the command processes.
+show minimal output during specified command processes.
 '''
 
 lang_use = '''
-to specify a language (or language version) to use.
+specify a language (or language version) to use.
+(default is the system default:  %(default)s)
 '''
 
 
 list_use = '''
-Lists all installed packages and whether each package's branch is turned on or off.
+Lists all installed packages and whether each package's
+branch is turned on or off.
 '''
 
 list_sub_use = '''
@@ -46,22 +48,14 @@ optional language arg to show only packages installed for that language.
 
 install_use = '''
 Installs specified package(s). 
-Can either pass an argument to install a specific 
-package at the command line, or if no argument is
-given to the install command, then all packages  
-specified in the {} file will be installed.  
+Can pass an argument to the install command
+to either install one specific package or 
+to install several packages as specified 
+in the {} file.  
+
 '''
 
 install_sub_use = '''
-
-(default: %(default)s)
-
-Installing several packages. 
------------------------------------------------------
-installs packages specified in the {} file
-(don't pass any arguments to the install command)
-    eg. %(prog)s
-
 
 Installing a single package.  
 -----------------------------------------------------
@@ -70,10 +64,16 @@ is not given, then the master branch is installed; also,
 repo_type needs only to be specified if it is not obvious
 given the pkg_type -- github would only be git, but bitbucket
 would need to be specified, as it could be either 'git' or 'hg')
-    `bep --language=lang install pkg_type=repo_type+pkg_name[^optional_branch]`
+    `%(prog)s pkg_type=repo_type+pkg_name[^optional_branch]`
 
-    eg.  bep --language=python install github=ipython/ipython
-    eg.  bep --language=python install github=ipython/ipython^branch_name
+    eg.  %(prog)s github=ipython/ipython
+    eg.  %(prog)s github=ipython/ipython^branch_name
+
+
+Installing several packages. 
+-----------------------------------------------------
+installs packages specified in the {} file
+    eg. %(prog)s package_file
 '''
 
 
@@ -98,18 +98,18 @@ pass the installed package name to the update command.
 
 Updating a single package. 
 -----------------------------------------------------
-    `bep --language=lang update pkg_type=pkg_name[^optional_branch]`
+    `%(prog)s pkg_type=pkg_name[^optional_branch]`
 
-    eg.  bep --language=python update github=ipython
+    eg.  %(prog)s github=ipython
 
 
 Updating several packages.
 -----------------------------------------------------
 `ALL`: all packages specified will be updated,
-    `bep [--language=lang] update ALL`
+    `{name} [--language=lang] update ALL`
 
-    eg.  bep update ALL
-    eg.  bep --language=python2.6 update ALL
+    eg.  %(prog)s ALL
+    eg.  {name} --language=python2.6 update ALL
 '''
 
 
@@ -135,25 +135,25 @@ just pass the package name to the remove command.
 
 Removal of a single package.
 -----------------------------------------------------
-    `bep --language=lang remove pkg_type=pkg_name[^optional_branch]`
+    `%(prog)s pkg_type=pkg_name[^optional_branch]`
 
-    eg.  bep --language=python remove github=ipython
+    eg.  %(prog)s github=ipython
 
 
 Removal of several packages.
 -----------------------------------------------------
 `ALL`: all installed packages will be removed,
-    `bep [--language=lang] remove ALL`
+    `{name} [--language=lang] remove ALL`
 
-    eg.  bep remove ALL
-    eg.  bep --language=python2.6 remove ALL
+    eg.  %(prog)s ALL
+    eg.  {name} --language=python2.6 remove ALL
 
 
 `turned_off`: all turned off packages will be removed, 
-    `bep [--language=lang] remove turned_off`
+    `{name} [--language=lang] remove turned_off`
 
-    eg.  bep remove turned_off
-    eg.  bep --language=python2.6 remove turned_off
+    eg.  %(prog)s turned_off
+    eg.  {name} --language=python2.6 remove turned_off
 '''
 
 
@@ -197,18 +197,18 @@ just pass the package name to the turn_off command:
 
 Turning off a single package.
 -----------------------------------------------------
-    `bep --language=lang turn_off pkg_type=pkg_name[^optional_branch]`
+    `%(prog)s pkg_type=pkg_name[^optional_branch]`
 
-    eg.  bep --language=python turn_off github=ipython
+    eg.  %(prog)s github=ipython
 
 
 Turning off several packages.
 -----------------------------------------------------
 `ALL`: all installed packages will be turned off,
-    `bep [--language=lang] turn_off ALL`
+    `{name} [--language=lang] turn_off ALL`
 
-    eg.  bep turn_off ALL
-    eg.  bep --language=python2.6 turn_off ALL
+    eg.  %(prog)s ALL
+    eg.  {name} --language=python2.6 turn_off ALL
 '''
 
 
@@ -238,8 +238,8 @@ just pass the package name to the turn_on command.
 
 Turning on a single package.
 -----------------------------------------------------
-    `bep --language=lang turn_on pkg_type=pkg_name[^optional_branch]`
+    `%(prog)s pkg_type=pkg_name[^optional_branch]`
 
-    eg.  bep --language=python turn_on github=ipython
+    eg.  %(prog)s github=ipython
 
 '''
