@@ -81,7 +81,7 @@ def main(): # needs to be done as a main func for setuptools to work correctly i
 
 
     ### create parser for the "list" command
-    # maybe make is so that it can list all branches installed for a specific pkg,
+    # maybe make it so that it can list all branches installed for a specific pkg,
     parser_list = subparsers.add_parser('list', help=usage.list_use)
     parser_list.add_argument('list_arg', action="store_true", help=usage.list_sub_use) #metavar="arg") 
 
@@ -213,7 +213,7 @@ def main(): # needs to be done as a main func for setuptools to work correctly i
     if 'install_arg' in args:
 
         # install from packages file
-        if install_arg == "packages_file":
+        if install_arg == "packages":
             try:  # bring in the packages file
                 sys.dont_write_bytecode = True  # to avoid writing a .pyc files (for the packages file)
                 pkgs_module = imp.load_source(packages_file, packages_file_path)    # used to import a hidden file (really hackey) 
@@ -252,7 +252,7 @@ def main(): # needs to be done as a main func for setuptools to work correctly i
                     utils.when_not_quiet_mode('\nNo {0} packages specified in {1} to install.'.format(pkg_type, packages_file), noise.quiet)
 
         # install w/ command line arg(s)
-        elif install_arg != "packages_file":
+        elif install_arg != "packages":
 
             pkg_type_and_pkg_to_process = install_arg
             pkg_type_andor_pkg_to_process = pkg_type_and_pkg_to_process.split('=') # need this check b/c pkg_type has to be specified when using cmdline 
@@ -323,44 +323,25 @@ def main(): # needs to be done as a main func for setuptools to work correctly i
             for lang_dir_name, pkg_type_dict in everything_already_installed.items():
                 for pkg_type, pkgs_and_branches in pkg_type_dict.items():
 
-                    if len(pkgs_and_branches) >= 1:
+                    if pkgs_and_branches:
                         pkgs_status = utils.pkgs_and_branches_for_pkg_type_status(pkgs_and_branches)
                         pkgs_and_branches_on = pkgs_status['pkg_branches_on']
                         pkgs_and_branches_off = pkgs_status['pkg_branches_off']
 
                         if update_arg == 'ALL':
-                            if lang_arg:  # if a language arg is given, then update all pkgs for that lang's version
-                                pkg_inst = create_pkg_inst(lang_arg, pkg_type, install_dirs)
-                                lang_cmd = pkg_inst.lang_cmd  # makes it so that the system default of a lang maps back on to it's particular version
+                            utils.when_not_quiet_mode(utils.status('\t\tUpdating {0} {1} packages'.format(lang_dir_name, pkg_type)), noise.quiet)
+                            pkg_inst = create_pkg_inst(lang_dir_name, pkg_type, install_dirs)
 
-                                if lang_dir_name == lang_cmd:
-                                    utils.when_not_quiet_mode(utils.status('\t\tUpdating {0} {1} packages'.format(lang_dir_name, pkg_type)), noise.quiet)
-                                    count_of_pkgs_updated = 0
-                                    for pkg_to_update, branch_on in pkgs_and_branches_on.items():
-                                        for branch_to_update in branch_on:
-                                            pkg_inst.update(lang_dir_name, pkg_to_update, branch_to_update, noise)
-                                            count_of_pkgs_updated += 1
-                                            top_count_of_pkgs_updated += 1
+                            count_of_pkgs_updated = 0
+                            for pkg_to_update, branch_on in pkgs_and_branches_on.items():
+                                for branch_to_update in branch_on:
+                                    pkg_inst.update(lang_dir_name, pkg_to_update, branch_to_update, noise)
+                                    count_of_pkgs_updated += 1
+                                    top_count_of_pkgs_updated += 1
 
-                                    if count_of_pkgs_updated == 0:
-                                        utils.when_not_quiet_mode('\nNo {0} {1} packages turned on for updating.'.format(lang_dir_name, pkg_type), noise.quiet) 
-                                        top_count_of_pkgs_updated = -1
-
-                            else:  # if no language arg is given, then just update all installed pkgs
-                                utils.when_not_quiet_mode(utils.status('\t\tUpdating {0} {1} packages'.format(lang_dir_name, pkg_type)), noise.quiet)
-                                pkg_inst = create_pkg_inst(lang_dir_name, pkg_type, install_dirs)
-
-                                count_of_pkgs_updated = 0
-                                for pkg_to_update, branch_on in pkgs_and_branches_on.items():
-                                    for branch_to_update in branch_on:
-                                        pkg_inst.update(lang_dir_name, pkg_to_update, branch_to_update, noise)
-                                        count_of_pkgs_updated += 1
-                                        top_count_of_pkgs_updated += 1
-
-                                if count_of_pkgs_updated == 0:
-                                    utils.when_not_quiet_mode('\nNo {0} {1} packages turned on for updating.'.format(lang_dir_name, pkg_type), noise.quiet) 
-                                    top_count_of_pkgs_updated = -1
-
+                            if count_of_pkgs_updated == 0:
+                                utils.when_not_quiet_mode('\nNo {0} {1} packages turned on for updating.'.format(lang_dir_name, pkg_type), noise.quiet) 
+                                top_count_of_pkgs_updated = -1
 
 
                         else: # for a single command passed to update
@@ -374,12 +355,12 @@ def main(): # needs to be done as a main func for setuptools to work correctly i
                                         if pkg_type_installed == pkg_type: 
                                             if not branch_installed.startswith('.__'): 
                                                 if branch_installed == 'master':
-                                                    print("\n* Update {0} {1} with:".format(pkg_to_update, lang_installed))
+                                                    print("\n# Update {0} {1} with:".format(pkg_to_update, lang_installed))
                                                     print("{0} -l {1} update {2}={3}".format(name, lang_installed, 
                                                                             pkg_type_installed, pkg_name_installed))
 
                                                 else:
-                                                    print("\n* Update {0} [{1}] {2} with:".format(pkg_to_update, branch_installed, 
+                                                    print("\n# Update {0} [{1}] {2} with:".format(pkg_to_update, branch_installed, 
                                                                                                     lang_installed))
                                                     print("{0} -l {1} update {2}={3}^{4}".format(name, lang_installed,
                                                                             pkg_type_installed, pkg_name_installed, branch_installed))
@@ -446,7 +427,7 @@ def main(): # needs to be done as a main func for setuptools to work correctly i
             for lang_dir_name, pkg_type_dict in everything_already_installed.items():
                 for pkg_type, pkgs_and_branches in pkg_type_dict.items():
 
-                    if len(pkgs_and_branches) >= 1:
+                    if pkgs_and_branches:
                         pkgs_status = utils.pkgs_and_branches_for_pkg_type_status(pkgs_and_branches)
                         pkgs_and_branches_on = pkgs_status['pkg_branches_on']
                         pkgs_and_branches_off = pkgs_status['pkg_branches_off']
@@ -469,46 +450,21 @@ def main(): # needs to be done as a main func for setuptools to work correctly i
 
 
                         if remove_arg == 'ALL':
-                            if lang_arg:  # if a language arg is given, then remove all pkgs for that lang's version
-                                pkg_inst = create_pkg_inst(lang_arg, pkg_type, install_dirs)
-                                lang_cmd = pkg_inst.lang_cmd  # makes it so that the system default of a lang maps back on to it's particular version
-
-                                if lang_dir_name == lang_cmd:
-                                    utils.when_not_quiet_mode(utils.status('\t\tRemoving {0} {1} packages'.format(lang_dir_name, pkg_type)), noise.quiet)
-                                    count_of_turned_on_removed = remove_turned_on_branches(top_count_of_pkgs_removed)
-                                    count_of_turned_off_removed = remove_turned_off_branches(top_count_of_pkgs_removed)
-                                    if (count_of_turned_on_removed or count_of_turned_off_removed):
-                                        top_count_of_pkgs_removed = -1
-
-
-                            else:  # if no language arg is given, then remove all installed pkgs
-                                utils.when_not_quiet_mode(utils.status('\t\tRemoving {0} {1} packages'.format(lang_dir_name, pkg_type)), noise.quiet)
-                                pkg_inst = create_pkg_inst(lang_dir_name, pkg_type, install_dirs)
-                                count_of_turned_on_removed = remove_turned_on_branches(top_count_of_pkgs_removed)
-                                count_of_turned_off_removed = remove_turned_off_branches(top_count_of_pkgs_removed)
-                                if (count_of_turned_on_removed or count_of_turned_off_removed):
-                                    top_count_of_pkgs_removed = -1
+                            utils.when_not_quiet_mode(utils.status('\t\tRemoving {0} {1} packages'.format(lang_dir_name, pkg_type)), noise.quiet)
+                            pkg_inst = create_pkg_inst(lang_dir_name, pkg_type, install_dirs)
+                            count_of_turned_on_removed = remove_turned_on_branches(top_count_of_pkgs_removed)
+                            count_of_turned_off_removed = remove_turned_off_branches(top_count_of_pkgs_removed)
+                            if (count_of_turned_on_removed or count_of_turned_off_removed):
+                                top_count_of_pkgs_removed = -1
 
 
                         elif remove_arg == 'turned_off':
-                            if lang_arg:  # if a language arg is given, then remove all turned off pkgs for that lang's version
-                                pkg_inst = create_pkg_inst(lang_arg, pkg_type, install_dirs)
-                                lang_cmd = pkg_inst.lang_cmd  # makes it so that the system default of a lang maps back on to it's particular version
-
-                                if lang_dir_name == lang_cmd:
-                                    utils.when_not_quiet_mode(utils.status('\tRemoving turned off {0} {1} packages'.format(lang_dir_name, pkg_type)), noise.quiet)
-                                    count_of_pkgs_removed = remove_turned_off_branches(top_count_of_pkgs_removed)
-                                    if count_of_pkgs_removed == 0:
-                                        utils.when_not_quiet_mode('\nNo {0} {1} packages turned off for removal.'.format(lang_dir_name, pkg_type), noise.quiet) 
-                                        top_count_of_pkgs_removed = -1
-
-                            else:  # if no language arg is given, then remove all turned off pkgs
-                                utils.when_not_quiet_mode(utils.status('\tRemoving {0} {1} packages'.format(lang_dir_name, pkg_type)), noise.quiet)
-                                pkg_inst = create_pkg_inst(lang_dir_name, pkg_type, install_dirs)
-                                count_of_pkgs_removed = remove_turned_off_branches(top_count_of_pkgs_removed)
-                                if count_of_pkgs_removed == 0:
-                                    utils.when_not_quiet_mode('\nNo {0} {1} packages turned off for removal.'.format(lang_dir_name, pkg_type), noise.quiet) 
-                                    top_count_of_pkgs_removed = -1
+                            utils.when_not_quiet_mode(utils.status('\tRemoving {0} {1} packages'.format(lang_dir_name, pkg_type)), noise.quiet)
+                            pkg_inst = create_pkg_inst(lang_dir_name, pkg_type, install_dirs)
+                            count_of_pkgs_removed = remove_turned_off_branches(top_count_of_pkgs_removed)
+                            if count_of_pkgs_removed == 0:
+                                utils.when_not_quiet_mode('\nNo {0} {1} packages turned off for removal.'.format(lang_dir_name, pkg_type), noise.quiet) 
+                                top_count_of_pkgs_removed = -1
 
 
 
@@ -524,11 +480,11 @@ def main(): # needs to be done as a main func for setuptools to work correctly i
                                             if branch_installed.startswith('.__'): 
                                                 branch_installed = branch_installed.lstrip('.__')
                                             if branch_installed == 'master':
-                                                print("\n* Remove {0} {1} with:".format(pkg_to_remove, lang_installed))
+                                                print("\n# Remove {0} {1} with:".format(pkg_to_remove, lang_installed))
                                                 print("{0} -l {1} remove {2}={3}".format(name, lang_installed, 
                                                                         pkg_type_installed, pkg_name_installed))
                                             else:
-                                                print("\n* Remove {0} [{1}] {2} with:".format(pkg_to_remove, branch_installed, 
+                                                print("\n# Remove {0} [{1}] {2} with:".format(pkg_to_remove, branch_installed, 
                                                                                                 lang_installed))
                                                 print("{0} -l {1} remove {2}={3}^{4}".format(name, lang_installed,
                                                                         pkg_type_installed, pkg_name_installed, branch_installed))
@@ -593,7 +549,7 @@ def main(): # needs to be done as a main func for setuptools to work correctly i
             for lang_dir_name, pkg_type_dict in everything_already_installed.items():
                 for pkg_type, pkgs_and_branches in pkg_type_dict.items():
 
-                    if len(pkgs_and_branches) >= 1:
+                    if pkgs_and_branches:
                         pkgs_status = utils.pkgs_and_branches_for_pkg_type_status(pkgs_and_branches)
                         pkgs_and_branches_on = pkgs_status['pkg_branches_on']
                         pkgs_and_branches_off = pkgs_status['pkg_branches_off']
@@ -601,6 +557,10 @@ def main(): # needs to be done as a main func for setuptools to work correctly i
 
                         def turn_off_branches(top_count_of_pkgs_turned_off, count_of_pkgs_turned_off=0):
                             for pkg_to_turn_off, branch_on in pkgs_and_branches_on.items():
+                                if pkg_to_turn_off == 'bep':  # don't allow bep to turn itself off
+                                    print("\n** Cannot use {name} to turn off {name}".format(name=name))
+                                    continue
+                                
                                 for branch_to_turn_off in branch_on:
                                     pkg_inst.turn_off(pkg_to_turn_off, branch_to_turn_off, noise)
                                     count_of_pkgs_turned_off += 1; top_count_of_pkgs_turned_off += 1
@@ -608,22 +568,11 @@ def main(): # needs to be done as a main func for setuptools to work correctly i
 
 
                         if turn_off_arg == 'ALL':
-                            if lang_arg:  # if a language arg is given, then turn off all pkgs for that lang's version
-                                pkg_inst = create_pkg_inst(lang_arg, pkg_type, install_dirs)
-                                lang_cmd = pkg_inst.lang_cmd  # makes it so that the system default of a lang maps back on to it's particular version
-
-                                if lang_dir_name == lang_cmd:
-                                    utils.when_not_quiet_mode(utils.status('\t\tTurning off {0} {1} packages'.format(lang_dir_name, pkg_type)), noise.quiet)
-                                    count_of_turned_off = turn_off_branches(top_count_of_pkgs_turned_off)
-                                    if count_of_turned_off:
-                                        top_count_of_pkgs_turned_off = -1
-
-                            else:  # if no language arg is given, then turn off all installed pkgs
-                                utils.when_not_quiet_mode(utils.status('\t\tTurning off {0} {1} packages'.format(lang_dir_name, pkg_type)), noise.quiet)
-                                pkg_inst = create_pkg_inst(lang_dir_name, pkg_type, install_dirs)
-                                count_of_turned_off = turn_off_branches(top_count_of_pkgs_turned_off)
-                                if count_of_turned_off:
-                                    top_count_of_pkgs_turned_off = -1
+                            utils.when_not_quiet_mode(utils.status('\t\tTurning off {0} {1} packages'.format(lang_dir_name, pkg_type)), noise.quiet)
+                            pkg_inst = create_pkg_inst(lang_dir_name, pkg_type, install_dirs)
+                            count_of_turned_off = turn_off_branches(top_count_of_pkgs_turned_off)
+                            if count_of_turned_off:
+                                top_count_of_pkgs_turned_off = -1
 
                         else: # for a single command passed to turn off
                             # a specific branch of a specific pkg of a specific pkg_type for a specific lang is what's turned off
@@ -637,11 +586,11 @@ def main(): # needs to be done as a main func for setuptools to work correctly i
 
                                             if not branch_installed.startswith('.__'): 
                                                 if branch_installed == 'master':
-                                                    print("\n* Turn off {0} {1} with:".format(pkg_to_turn_off, lang_installed))
+                                                    print("\n# Turn off {0} {1} with:".format(pkg_to_turn_off, lang_installed))
                                                     print("{0} -l {1} turn_off {2}={3}".format(name, lang_installed, 
                                                                             pkg_type_installed, pkg_name_installed))
                                                 else:
-                                                    print("\n* Turn off {0} [{1}] {2} with:".format(pkg_to_turn_off, branch_installed, 
+                                                    print("\n# Turn off {0} [{1}] {2} with:".format(pkg_to_turn_off, branch_installed, 
                                                                                                     lang_installed))
                                                     print("{0} -l {1} turn_off {2}={3}^{4}".format(name, lang_installed,
                                                                             pkg_type_installed, pkg_name_installed, branch_installed))
@@ -665,6 +614,11 @@ def main(): # needs to be done as a main func for setuptools to work correctly i
                                 if lang_dir_name == lang_cmd:
                                     for pkg_name, branch_on in pkgs_and_branches_on.items():
                                         if pkg_name == pkg_to_turn_off: 
+
+                                            if pkg_to_turn_off == 'bep':  # don't allow bep to turn itself off
+                                                print("\n** Cannot use {name} to turn off {name}".format(name=name))
+                                                continue
+
                                             if branch_to_turn_off in branch_on: 
                                                 utils.when_not_quiet_mode(utils.status('\tTurning off {0} [{1}] {2} {3}'.format(
                                                         pkg_to_turn_off, branch_to_turn_off, lang_dir_name, pkg_type)), noise.quiet)
@@ -706,7 +660,7 @@ def main(): # needs to be done as a main func for setuptools to work correctly i
             for lang_dir_name, pkg_type_dict in everything_already_installed.items():
                 for pkg_type, pkgs_and_branches in pkg_type_dict.items():
 
-                    if len(pkgs_and_branches) >= 1:
+                    if pkgs_and_branches:
                         pkgs_status = utils.pkgs_and_branches_for_pkg_type_status(pkgs_and_branches)
                         pkgs_and_branches_on = pkgs_status['pkg_branches_on']
                         pkgs_and_branches_off = pkgs_status['pkg_branches_off']
@@ -724,11 +678,11 @@ def main(): # needs to be done as a main func for setuptools to work correctly i
                                             if branch_installed.startswith('.__'): 
                                                 branch_installed = branch_installed.lstrip('.__')
                                                 if branch_installed == 'master':
-                                                    print("\n* Turn on {0} {1} with:".format(pkg_to_turn_on, lang_installed))
+                                                    print("\n# Turn on {0} {1} with:".format(pkg_to_turn_on, lang_installed))
                                                     print("{0} -l {1} turn_on {2}={3}".format(name, lang_installed, 
                                                                             pkg_type_installed, pkg_name_installed))
                                                 else:
-                                                    print("\n* Turn on {0} [{1}] {2} with:".format(pkg_to_turn_on, branch_installed, 
+                                                    print("\n# Turn on {0} [{1}] {2} with:".format(pkg_to_turn_on, branch_installed, 
                                                                                                     lang_installed))
                                                     print("{0} -l {1} turn_on {2}={3}^{4}".format(name, lang_installed,
                                                                             pkg_type_installed, pkg_name_installed, branch_installed))

@@ -29,7 +29,7 @@ show minimal output during specified command processes.
 '''
 
 lang_use = '''
-specify a language (or language version) to use.
+specify a language version to use.
 (default is the system default:  %(default)s)
 '''
 
@@ -41,7 +41,7 @@ branch is turned on or off.
 
 list_sub_use = '''
 List does not take any arguments, and when called, it lists  
-all installed packages. 
+all installed packages and whether it is turned on or off. 
 '''
 
 
@@ -72,20 +72,19 @@ would need to be specified, as it could be either 'git' or 'hg')
 Installing several packages. 
 -----------------------------------------------------
 installs packages specified in the {} file
-    eg. %(prog)s package_file
+    eg. %(prog)s packages
 '''
 
 
 update_use = '''
 Updates specified package(s).  
 Can pass an argument to either update a specific 
-package, or to update `ALL` turned on packages (or 
-`ALL` turned on packages for a given language). 
+package, or to update `ALL` turned on packages. 
 '''
 
 update_sub_use = '''
 
-(update ignores turned off packages)
+(note, update ignores turned off packages)
 
 To see the exact syntax of how to update a package, just  
 pass the installed package name to the update command.
@@ -100,15 +99,15 @@ Updating a single package.
     `%(prog)s pkg_type=pkg_name[^optional_branch]`
 
     eg.  %(prog)s github=ipython
+    eg.  %(prog)s bitbucket=some_pkg_name
 
 
 Updating several packages.
 -----------------------------------------------------
 `ALL`: all packages specified will be updated,
-    `{name} [--language=lang] update ALL`
+    `{name} update ALL`
 
     eg.  %(prog)s ALL
-    eg.  {name} --language=python2.6 update ALL
 '''
 
 
@@ -116,10 +115,8 @@ Updating several packages.
 remove_use = '''
 Removes specified package(s).
 Can pass an argument to either remove a specific 
-package; to remove `ALL` installed packages (or 
-`ALL` installed packages for a given language); 
-or to remove all `turned_off` packages (or all 
-`turned_off` packages for a given language).
+package; to remove `ALL` installed packages;  
+or to remove all `turned_off` packages.
 '''
 
 remove_sub_use = '''
@@ -137,30 +134,29 @@ Removal of a single package.
     `%(prog)s pkg_type=pkg_name[^optional_branch]`
 
     eg.  %(prog)s github=ipython
+    eg.  {name} --language=python2.6 remove github=ipython
 
 
 Removal of several packages.
 -----------------------------------------------------
 `ALL`: all installed packages will be removed,
-    `{name} [--language=lang] remove ALL`
+    `%(prog)s ALL`
 
     eg.  %(prog)s ALL
-    eg.  {name} --language=python2.6 remove ALL
 
 
 `turned_off`: all turned off packages will be removed, 
-    `{name} [--language=lang] remove turned_off`
+    `%(prog)s turned_off turned_off`
 
     eg.  %(prog)s turned_off
-    eg.  {name} --language=python2.6 remove turned_off
 '''
 
 
 turn_off_use = '''
 Turns off specified package(s).  
 Can pass an argument to either turn off a specific package, 
-or to turn off `ALL` installed packages (or `ALL`  packages 
-for a given language). What this does is that it makes the 
+or to turn off `ALL` installed packages. 
+What this does is that it makes the given 
 package(s) inactive so that they are hidden from the 
 environment.  This is useful for a few reasons, see 
 `%(prog)s turn_off -h` for more information.
@@ -171,10 +167,11 @@ turn_off_sub_use = '''
 Turning off packages is useful because:
 1. It makes it so that several versions of the 
     same package can be installed (from the same 
-    or different pkg_type or version of a language), 
+    or different pkg_type or version of the language), 
     which can then be easily switched between -- with 
     only one version of a given package capable of 
-    being turned on at any given time for a language; 
+    being turned on at any given time for a language
+    version; 
 2. Thus, if all installed versions are turned off, 
     then that same package installed at the system 
     level (if there is one) can be accessed without 
@@ -182,8 +179,9 @@ Turning off packages is useful because:
 3. And by turning off a package, it means that it 
     will then not have to be re-downloaded and re-
     installed if wanting to use it again later (by 
-    later using `turn_on`), which could potentially 
-    save much time installing and building a package.
+    later using `turn_on` to reactivate the package), 
+    which could potentially save much time installing 
+    and building a package.
 
 
 To see the exact syntax of how to turn off a package, 
@@ -204,10 +202,9 @@ Turning off a single package.
 Turning off several packages.
 -----------------------------------------------------
 `ALL`: all installed packages will be turned off,
-    `{name} [--language=lang] turn_off ALL`
+    ` %(prog)s ALL`
 
     eg.  %(prog)s ALL
-    eg.  {name} --language=python2.6 turn_off ALL
 '''
 
 
