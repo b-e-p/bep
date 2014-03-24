@@ -40,9 +40,8 @@ branch is turned on or off.
 '''
 
 list_sub_use = '''
-List does not take any arguments, and when called by itself, it lists  
-all installed packages; however, list can be specified after the  
-optional language arg to show only packages installed for that language.
+List does not take any arguments, and when called, it lists  
+all installed packages. 
 '''
 
 
