@@ -467,7 +467,6 @@ def main(): # needs to be done as a main func for setuptools to work correctly i
                                 top_count_of_pkgs_removed = -1
 
 
-
                         else: # for a single command passed to remove
                             # a specific branch of a specific pkg of a specific pkg_type for a specific lang is what's removed
 

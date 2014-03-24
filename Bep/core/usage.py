@@ -50,7 +50,7 @@ Installs specified package(s).
 Can pass an argument to the install command
 to either install one specific package or 
 to install several packages as specified 
-in the {} file.  
+in the {} file.
 
 '''
 
@@ -63,15 +63,16 @@ is not given, then the master branch is installed; also,
 repo_type needs only to be specified if it is not obvious
 given the pkg_type -- github would only be git, but bitbucket
 would need to be specified, as it could be either 'git' or 'hg')
-    `%(prog)s pkg_type=repo_type+pkg_name[^optional_branch]`
+    `%(prog)s pkg_type=[repo_type+]pkg_name[^optional_branch]`
 
     eg.  %(prog)s github=ipython/ipython
-    eg.  %(prog)s github=ipython/ipython^branch_name
+    eg.  %(prog)s github=ipython/ipython^some_branch_name
+    eg.  %(prog)s bitbucket=hg+username/pkg_name^branch_name
 
 
 Installing several packages. 
 -----------------------------------------------------
-installs packages specified in the {} file
+installs all packages specified in the {} file.
     eg. %(prog)s packages
 '''
 
@@ -79,7 +80,7 @@ installs packages specified in the {} file
 update_use = '''
 Updates specified package(s).  
 Can pass an argument to either update a specific 
-package, or to update `ALL` turned on packages. 
+package, or to update `ALL` (turned on) packages. 
 '''
 
 update_sub_use = '''
@@ -99,13 +100,18 @@ Updating a single package.
     `%(prog)s pkg_type=pkg_name[^optional_branch]`
 
     eg.  %(prog)s github=ipython
+    eg.  %(prog)s github=ipython^some_branch
     eg.  %(prog)s bitbucket=some_pkg_name
+
+    And for a package not using the system default 
+    language version:
+    eg.  {name} --language=python2.6 update github=ipython
+
 
 
 Updating several packages.
 -----------------------------------------------------
-`ALL`: all packages specified will be updated,
-    `{name} update ALL`
+`ALL`: all turned on packages will be updated,
 
     eg.  %(prog)s ALL
 '''
@@ -116,7 +122,7 @@ remove_use = '''
 Removes specified package(s).
 Can pass an argument to either remove a specific 
 package; to remove `ALL` installed packages;  
-or to remove all `turned_off` packages.
+or to only remove all `turned_off` packages.
 '''
 
 remove_sub_use = '''
@@ -134,6 +140,11 @@ Removal of a single package.
     `%(prog)s pkg_type=pkg_name[^optional_branch]`
 
     eg.  %(prog)s github=ipython
+    eg.  %(prog)s github=ipython^some_branch
+    eg.  %(prog)s bitbucket=some_pkg_name
+
+    And for a package not using the system default 
+    language version:
     eg.  {name} --language=python2.6 remove github=ipython
 
 
@@ -154,8 +165,8 @@ Removal of several packages.
 
 turn_off_use = '''
 Turns off specified package(s).  
-Can pass an argument to either turn off a specific package, 
-or to turn off `ALL` installed packages. 
+Can pass an argument to either turn off a specific 
+package or to turn off `ALL` installed packages. 
 What this does is that it makes the given 
 package(s) inactive so that they are hidden from the 
 environment.  This is useful for a few reasons, see 
@@ -197,12 +208,17 @@ Turning off a single package.
     `%(prog)s pkg_type=pkg_name[^optional_branch]`
 
     eg.  %(prog)s github=ipython
+    eg.  %(prog)s github=ipython^some_branch
+    eg.  %(prog)s bitbucket=some_pkg_name
+
+    And for a package not using the system default 
+    language version:
+    eg.  {name} --language=python2.6 turn_off github=ipython
 
 
 Turning off several packages.
 -----------------------------------------------------
-`ALL`: all installed packages will be turned off,
-    ` %(prog)s ALL`
+`ALL`: all installed packages will be turned off.
 
     eg.  %(prog)s ALL
 '''
@@ -237,5 +253,12 @@ Turning on a single package.
     `%(prog)s pkg_type=pkg_name[^optional_branch]`
 
     eg.  %(prog)s github=ipython
+    eg.  %(prog)s github=ipython^some_branch
+    eg.  %(prog)s bitbucket=some_pkg_name
+
+    And for a package not using the system default 
+    language version:
+    eg.  {name} --language=python2.6 turn_on github=ipython
+
 
 '''
