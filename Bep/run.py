@@ -285,15 +285,11 @@ def main(): # needs to be done as a main func for setuptools to work correctly i
             count_of_listed = 0
             for lang_dir_name, pkg_type_dict in everything_already_installed.items():
 
-                if not lang_arg:  # if a language arg is not given, then list all installed packages
-                    utils.when_not_quiet_mode("\n{0} packages installed:".format(lang_dir_name), noise.quiet)
+                utils.when_not_quiet_mode("\n{0} packages installed:".format(lang_dir_name), noise.quiet)
 
                 for pkg_type, pkgs_and_branches in pkg_type_dict.items():
 
-                    #if not lang_arg:  # if a language arg is given, then remove all pkgs for that lang's version
-                        #when_not_quiet_mode("\t{0}:".format(pkg_type), noise.quiet)
-
-                    if len(pkgs_and_branches) >= 1:
+                    if pkgs_and_branches:
 
                         def list_packages(count_of_listed=count_of_listed):
                             for pkg_for_listing, branches in pkgs_and_branches.items(): 
@@ -310,14 +306,7 @@ def main(): # needs to be done as a main func for setuptools to work correctly i
                                     print(item_installed)
                             return count_of_listed
 
-                        if lang_arg:  # if a language arg is given, then list pkgs for only that lang
-                            pkg_inst = create_pkg_inst(lang_arg, pkg_type, install_dirs)
-                            lang_cmd = pkg_inst.lang_cmd  # makes it so that the system default of a lang maps back on to it's particular version
-
-                            if lang_dir_name == lang_cmd:
-                                count_of_listed = list_packages()
-                        else:
-                            count_of_listed = list_packages()
+                        count_of_listed = list_packages()
 
             if count_of_listed == 0: 
                 utils.when_not_quiet_mode('\n[ No packages for listing ]'.format(pkg_type), noise.quiet) 
