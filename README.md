@@ -28,11 +28,12 @@ Basically what Bep does, is that it sets up an installation area in the user's h
 
 ## The basic commands are as follows:
 
+(Note, for all commands, only specify the language arg if wanting to install a package under a version other than the system default version)
+
 ###To install packages: 
 
 ```
 # A single package:
-(note, only specify the language arg if wanting to install a package under a version other than the system default version)
 bep [--language=python_version] install pkg
 
 # All packages specified in the .bep_packages file:
