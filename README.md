@@ -64,9 +64,12 @@ For bitbucket, repo_type would need to be specified:
 
 And to install a specific branch:
 
-![](imgs/install_branch.png)
+![](imgs/install_branch_1.png)
 
-Oops...as you can see, in order to install another branch of ipython under the same version of python, the branch of ipython that was just installed previously needs to be turned off first.  After doing so, then we can proceed with installing the specified branch of ipython.
+Oops...as you can see, in order to install another branch of ipython under the same version of python, the branch of ipython that was just installed previously needs to be turned off first.  Then, after doing so, we can proceed with installing the specified branch of ipython.
+
+![](imgs/install_branch_2.png)
+
 
 Note though, we can install a version of ipython under a different version of python without needing to turn off anything because this will be the only branch of ipython installed under this version of python: 
 
