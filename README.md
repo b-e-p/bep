@@ -66,6 +66,13 @@ And to install a specific branch:
 
 ![](imgs/install_branch.png)
 
+Oops...as you can see, in order to install another branch of ipython under the same version of python, the branch of ipython that was just installed previously needs to be turned off first.  After doing so, then we can proceed with installing the specified branch of ipython.
+
+Note though, we can install a version of ipython under different version of python without needing to turn off anything because this will be the only version/branch of ipython installed under this version of python: 
+
+![](imgs/install_diff_lang_version_branch.png)
+
+
 ####NOTE, for all other command operations, the "pkg" is the only thing that needs to be specified, like so:
 ```
 # `pkg_type=pkg_name[^branch_name]`
@@ -79,9 +86,8 @@ For example:
 
 ![](imgs/update.png)
 
-![](imgs/turn_off.png)
-
 ![](imgs/remove.png)
+
 
 ###To update packages: 
 
