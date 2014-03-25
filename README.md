@@ -111,7 +111,7 @@ bep [--language=python_version] remove pkg
 # Remove all installed packages:
 bep remove ALL
 
-# Remove all "turned off" packages 
+# Remove all "turned off" packages: 
 bep remove turned_off
 
 ```
@@ -192,11 +192,11 @@ suggested as per [PEP370](http://www.python.org/dev/peps/pep-0370/) -- particula
 ### Also...Bep can manage Bep!
 Once Bep is installed, it can re-install itself to handle updates to itself:
 
-`bep [-l python_version] install github=bepy/bep`
+`bep install github=bepy/bep`
 
 In the same vein, if Bep was initially installed locally, then **Bep can uninstall itself**:
 
-`bep [-l python_version] remove github=bep`
+`bep remove github=bep`
 
 Likewise, again if Bep was installed locally, then **to remove everything Bep installed, including Bep itself**:
 
