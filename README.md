@@ -68,7 +68,7 @@ And to install a specific branch:
 
 Oops...as you can see, in order to install another branch of ipython under the same version of python, the branch of ipython that was just installed previously needs to be turned off first.  After doing so, then we can proceed with installing the specified branch of ipython.
 
-Note though, we can install a version of ipython under different version of python without needing to turn off anything because this will be the only version/branch of ipython installed under this version of python: 
+Note though, we can install a version of ipython under a different version of python without needing to turn off anything because this will be the only branch of ipython installed under this version of python: 
 
 ![](imgs/install_diff_lang_version_branch.png)
 
