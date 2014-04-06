@@ -4,7 +4,7 @@
 #----------------------------------------------------------------
 Author: Jason Gors <jasonDOTgorsATgmail>
 Creation Date: 07-30-2013
-Purpose: this does the actual managing of the packages. 
+Purpose: this is where the program is called into action. 
 #----------------------------------------------------------------
 """
 
@@ -12,32 +12,14 @@ import argparse
 import os
 from os.path import join
 import sys 
-import imp
-import Bep.core.usage as usage 
+import copy
+from collections import OrderedDict
+
+from Bep.core import usage 
 from Bep.core.release_info import __version__, name
-import package
-import utils
+from Bep.core import utils
+from Bep import actions 
 
-
-def create_pkg_inst(lang_arg, pkg_type, install_dirs, packages_file=None):
-    ''' install_dirs is a dict with the installed_pkgs_dir and the install_logs_dir '''
-
-    # for future pkg_types, just add them to this dict
-    supported_pkg_types = dict(github=package.Github, bitbucket=package.Bitbucket,
-                               gitorious=package.Gitorious, local_repo=package.Local_Repo)
-
-    def make_inst(pkg_type_cls):
-        return pkg_type_cls(lang_arg, pkg_type, install_dirs)
-    
-    try:
-        return make_inst(supported_pkg_types[pkg_type])
-    except KeyError:
-        if packages_file:  # installs from the pkgs file are the only thing that get this argument 
-            not_pkg_type = '\nError: {0} in your {1} is an unrecognized package type.\n'.format(pkg_type, packages_file)
-            raise SystemExit(not_pkg_type)
-        else:
-            not_pkg_type = '\nError: {0} is an unrecognized package type.\n'.format(pkg_type)
-            raise SystemExit(not_pkg_type)
 
 
 
@@ -56,34 +38,15 @@ install_dirs = dict(installed_pkgs_dir=installed_pkgs_dir, install_logs_dir=inst
 packages_file = '.{}_packages'.format(name)
 packages_file_path = join(usr_home_dir, packages_file)
 
+repo_choices = ['github', 'gitorious', 'bitbucket', 'local'] # 'remote'
+other_choices = ['packages'] # 'stable'
+possible_choices = repo_choices + other_choices
+
 
 
 def main(): # needs to be done as a main func for setuptools to work correctly in creating an executable
-    
-    parser = argparse.ArgumentParser(description=name.upper(),
-                            formatter_class=argparse.RawDescriptionHelpFormatter, 
-                            #formatter_class=argparse.RawTextHelpFormatter, 
-                            epilog=usage.epilog_use)
-
-    parser.add_argument('--version', action='version', version='%(prog)s {0}'.format(__version__))
-    parser.add_argument('-l', '--language', nargs='?', default='python', help=usage.lang_use)
-
-
-    group = parser.add_mutually_exclusive_group()
-    group.add_argument("-v", "--verbose", action="store_true", help=usage.verbose_use)
-    group.add_argument("-q", "--quiet", action="store_true", help=usage.quiet_use)
-
-
-    subparsers = parser.add_subparsers(title='Commands', 
-                                       description='[ These are the commands that can be passed to %(prog)s ]',
-                                       #help=usage.subparser_use)
-                                       help='[ Command specific help info ]')
-
-
-    ### create parser for the "list" command
-    # maybe make it so that it can list all branches installed for a specific pkg,
-    parser_list = subparsers.add_parser('list', help=usage.list_use)
-    parser_list.add_argument('list_arg', action="store_true", help=usage.list_sub_use) #metavar="arg") 
+    # for the approach i am taking here using nested subparsers:
+    # https://mail.python.org/pipermail/python-list/2010-August/585610.html
 
     # nargs options:
     # (default): by not specifying nargs at all, you just get a string of 1 item
@@ -91,68 +54,236 @@ def main(): # needs to be done as a main func for setuptools to work correctly i
     # = '?' makes a string of one item, and if no args are given, then default is used.
     # = '*' makes a list of all args passed after command and if no args given, then default is used.
     # = '+' makes list of all args passed after command, but requires at least one arg
-
-
-
-    ### install command
-    parser_install = subparsers.add_parser('install', help=usage.install_use.format(packages_file),
-                                            formatter_class=argparse.RawTextHelpFormatter)
-    parser_install.add_argument('install_arg', help=usage.install_sub_use.format(packages_file)) #metavar="arg")
-
     
-    # NOTE this seems like a better way to go in the future:
-    # parser_install.set_defaults(func=run_install)
-    # then run_install would be defined to run the install process (rather than having the conditionals below)
-    # def run_install(args):
-    #   install_arg = args.install_arg  # would be a list of pkgs or a string of the packages file
-    #   ...process the install_arg to decide what to install
-    #   ...then do the install 
+    top_parser = argparse.ArgumentParser(description=name.upper(),
+                            formatter_class=argparse.RawDescriptionHelpFormatter, 
+                            #formatter_class=argparse.RawTextHelpFormatter, 
+                            #add_help=False,
+                            epilog=usage.epilog_use)
+    
+    #################################
+    ### this go at the top level
+    top_parser.add_argument('--version', action='version', version='%(prog)s {0}'.format(__version__))
+    top_parser.add_argument('-l', '--language', nargs='?', default='python', help=usage.lang_use)
 
 
+    group = top_parser.add_mutually_exclusive_group()
+    group.add_argument("-v", "--verbose", action="store_true", help=usage.verbose_use)
+    group.add_argument("-q", "--quiet", action="store_true", help=usage.quiet_use)
+    #################################
 
 
-    ### remove command
-    parser_remove = subparsers.add_parser('remove', help=usage.remove_use, 
-                                            formatter_class=argparse.RawTextHelpFormatter)
-    parser_remove.add_argument('remove_arg', help=usage.remove_sub_use.format(name=name))
+    def check_for_all_error(cmd_arg):
+        if cmd_arg in ['all', 'All', 'ALL', '--All', '--ALL']:
+            raise SystemExit("\nError: Did you mean to specifiy --all instead?")
 
-    ### update command
-    parser_update = subparsers.add_parser('update', help=usage.update_use,
-                                            formatter_class=argparse.RawTextHelpFormatter)
-    parser_update.add_argument('update_arg', help=usage.update_sub_use.format(name=name))
+
+    # If --all is passed in:
+    # Skip stuff below if '--all' is specified w/ one of these accepted cmds
+    # (this is some seriously hacky brute force shit!)
+    build_up_subparsers = True
+    additional_args = []
+    cmds_that_accept_all_arg = ['update', 'remove', 'turn_off']
+    for cmd in cmds_that_accept_all_arg:
+        if cmd in sys.argv: 
+            for i in sys.argv:  # test for misspecified '--all' command
+                check_for_all_error(i)
+            if '--all' in sys.argv: 
+                #print(sys.argv)
+                build_up_subparsers = False
+                                                                            # TODO add help page for all
+                top_parser.add_argument('--all', action='store_true', help=usage.all_use) #metavar="arg") 
+                args = top_parser.parse_known_args()
+                args, additional_args = args
+                if len(additional_args) > 1:    # this makes it so that it could only be len(additional_args)==1
+                    error_all_arg = "--all can only be called with one of the following args:\n\t"
+                    error_all_arg = error_all_arg + '{update, remove, turn_off}'
+                    top_parser.error(error_all_arg)
+                #else:
+                    #additional_args = additional_args[0]
+
+
+    # To display how to run a command:
+    # look at all pkgs and check that passed in package name is one that's already installed
+    everything_already_installed = utils.all_pkgs_and_branches_for_all_pkg_types_already_installed(installed_pkgs_dir) 
+    any_of_this_pkg_already_installed = lambda pkg_to_process: utils.lang_and_pkg_type_and_pkg_and_branches_tuple(
+                                                                        pkg_to_process, everything_already_installed)
+    cmds_that_can_display_how_to = cmds_that_accept_all_arg + ['turn_on']
+    for cmd in cmds_that_can_display_how_to:    # everything except install i think
+        if (cmd in sys.argv) and ('--all' not in sys.argv): 
+            if ('-h' not in sys.argv) and ('--help' not in sys.argv): 
+                args = top_parser.parse_known_args()
+                args, additional_args = args
+                if len(additional_args) == 2:
+                    additional_args_copy = copy.copy(additional_args)
+                    additional_args_copy.remove(cmd) # 2 things in here, one equal to cmd, the other is what we want to see if it's alreay installed 
+                    potential_pkg_to_proc = additional_args_copy[0]
+
+                    #print any_of_this_pkg_already_installed(potential_pkg_to_proc)
+                    if any_of_this_pkg_already_installed(potential_pkg_to_proc):
+                        # should i make a function call out of this instead of relying on the command to be handled below?
+                        print(" **** This is how to {} {} ****".format(cmd, potential_pkg_to_proc))
+                        build_up_subparsers = False
+                    elif potential_pkg_to_proc not in possible_choices:   # else if the other arg/package name passed in is not a pkg_already_installed (& not one of the next possible cmd options)
+                        #print an error say that whatever is passed in cannot be updated/turned_on/etc
+                        #b/c it's not currently installed. 
+                        error_msg = "cannot {} {}: not a currently installed package.\n".format(cmd, potential_pkg_to_proc) 
+                        error_msg = error_msg + "[Execute `{} list` to see installed packages.]".format(name)
+                        top_parser.error(error_msg)
+                    #else:   # want this instead b/c otherwise the above hides the help pages
+                        #additional_args = []     # set back to empty to avoid the flag at the end of argparse stuff
+                #else:
+                    #error_msg = "An already installed package name must be passed in with {}".format(cmd)
+                    #top_parser.error(error_msg)
+                else:
+                    additional_args = []     # set back to empty to avoid the flag at the end of argparse stuff
     
 
-    ### turn_off command
-    parser_turn_off = subparsers.add_parser('turn_off', help=usage.turn_off_use, 
-                                            formatter_class=argparse.RawTextHelpFormatter)
-    parser_turn_off.add_argument('turn_off_arg', help=usage.turn_off_sub_use.format(name=name))
+    if build_up_subparsers:
+        top_subparser = top_parser.add_subparsers(title='Commands', 
+                                        description='[ These are the commands that can be passed to %(prog)s ]',
+                                        #help=usage.subparser_use)
+                                        help='[ Command specific help info ]')
+        ### create parser for the "list" command
+        # maybe make it so that it can list all branches installed for a specific pkg,
+        parser_list = top_subparser.add_parser('list', help=usage.list_use)
+        parser_list.add_argument('list_arg', action="store_true", help=usage.list_sub_use) #metavar="arg") 
 
 
-    ### turn_on command
-    parser_turn_on = subparsers.add_parser('turn_on', help=usage.turn_on_use, 
-                                            formatter_class=argparse.RawTextHelpFormatter)
-    parser_turn_on.add_argument('turn_on_arg', help=usage.turn_on_sub_use)#, metavar='arg')
+
+        class CheckIfCanBeInstalled(argparse.Action):
+            ''' makes sure a repo to install has both a user name and repo nane:
+                eg. ipython/ipython '''
+
+            def __call__(self, parser, namespace, arg_value, option_string=None):
+                if namespace.pkg_type in ['local']: 
+                    # check to see if the local path exists 
+                    if os.path.exists(arg_value):
+                        setattr(namespace, self.dest, arg_value)
+                    else:
+                        error_msg = "\n\tIs not a path that exists on local filesystem."
+                        raise parser.error(arg_value + error_msg)
+
+                # TODO check if repo exists (or for stable, if web-link 404's a response) (do that later)
+                elif namespace.pkg_type in ['remote']: # TODO not implement yet
+                    # do some kind of check on these as well to see if the url exists (probably do this later in the flow) 
+                    setattr(namespace, self.dest, arg_value)
+
+                else:
+                    if utils.check_if_valid_pkg_to_install(arg_value): # this also contains the appropriate stuff for 'local' check
+                        setattr(namespace, self.dest, arg_value)
+                    else:
+                        error_msg = '\nneed to make sure a user name and repo name are specified, like so:\n\tipython/ipython'
+                        raise parser.error(arg_value + error_msg)
 
 
-    args = parser.parse_args()
 
-    ##########################################################
-    ###########  this section handles cmds passed  ###########
+        ################################################## 
+        ### install command
+        install_parser = top_subparser.add_parser('install', help=usage.install_use.format(packages_file),
+                                                formatter_class=argparse.RawTextHelpFormatter)
+        install_parser.set_defaults(top_subparser='install') 
 
-    #def parse_command_args(cmd, cmdline_arg):
-        #pkg_type_with_pkg_to_process = []   # this will be a list of tuples 
-        #for pkg_type_and_pkg_to_process in cmdline_arg:
-            #pkg_type_andor_pkg_to_process = pkg_type_and_pkg_to_process.split('=') 
-            #if len(pkg_type_andor_pkg_to_process) != 2:
-                #print("\nError: with argument {}.".format(pkg_type_andor_pkg_to_process[0]))
-                #print("{} argument needs to be specified like so:".format(cmd))
-                #print("\t`pkg_type=repo_type+pkg_name[^branch_name]`")
-                #print("\t(eg. `{0} {1} github=git+ipython/ipython[^optional_branch]`)\n".format(name, cmd))
-                #continue
-                #raise SystemExit
-            #pkg_type, pkg_to_process = pkg_type_andor_pkg_to_process
-            #pkg_type_with_pkg_to_process.append((pkg_type, pkg_to_process))
-        #return pkg_type_with_pkg_to_process #[(pkg_type, pkg_to_process1), (pkg_type, pkg_to_process2), ...] 
+        install_subparser = install_parser.add_subparsers(dest='pkg_type', help=usage.install_sub_use.format(packages_file)) 
+        for c in repo_choices:
+            pkg_type_to_install = install_subparser.add_parser(c)
+            #pkg_type_to_install.set_defaults(pkg_type_to_install=c) # is the same as 'pkg_type' dest above 
+
+            pkg_type_to_install.add_argument('pkg_to_install',   # like ipython/ipython
+                                            action=CheckIfCanBeInstalled)   # actions here to make sure it's legit
+
+            # local repos don't get to have a branch specified; a branch would need to be checked out first, then installed.
+            #if c != 'local': 
+                #pkg_type_to_install.add_argument('-b', '--branch', dest='branch', default=None)#, action=CheckBranch)    # the branch bit is filled out below
+
+            if c in ['github', 'gitorious']: 
+                pkg_type_to_install.add_argument('repo_type', default='git', nargs='?')
+
+            elif c == 'bitbucket': 
+                pkg_type_to_install.add_argument('repo_type', choices=['git', 'hg'])
+
+            elif c == 'local': 
+                pkg_type_to_install.add_argument('repo_type', choices=['git', 'hg', 'bzr'])
+
+            #elif c == 'remote':    # TODO not implemented
+                #pkg_type_to_install.add_argument('repo_type', choices=['git', 'hg', 'bzr'])
+
+            pkg_type_to_install.add_argument('-b', '--branch', dest='branch', default=None)#, action=CheckBranch)    # the branch bit is filled out below
+
+        for c in other_choices:
+            if c == 'packages':
+                pkg_type_to_install = install_subparser.add_parser(c, help=usage.packages_file_use.format(packages_file))
+
+            #elif c == 'stable': # TODO not implemented
+                #pkg_type_to_install = install_subparser.add_parser(c)
+                #pkg_type_to_install.add_argument('pkg_to_install')  # like ipython
+                ##pkg_type_to_install.add_argument('--pversion')      # TODO like 1.2.1 (add this in later to install different version of a stable pkg) 
+
+        # NOTE this seems like a better way to go in the future:
+        # install_parser.set_defaults(func=run_install)
+        # then run_install would be defined to run the install process (rather than having the conditionals below)
+        # def run_install(args):
+        #   install_arg = args.install_arg  # would be a list of pkgs or a string of the packages file
+        #   ...process the install_arg to decide what to install
+        #   ...then do the install 
+        ################################################## 
+
+
+
+
+        ################################################## 
+        # commands other than install
+        cmd_help = vars(usage.cmd_help)
+        for cmd in ['update', 'remove', 'turn_off', 'turn_on']:
+            subparser_parser = top_subparser.add_parser(cmd, help=cmd_help['{}_use'.format(cmd)],
+                                                    formatter_class=argparse.RawTextHelpFormatter)
+            subparser_parser.set_defaults(top_subparser=cmd)
+
+            ### didn't work, not sure why, but this is getting kind of complex with 
+            ### the nested subparsers
+            #all_dest = '{}_ALL'.format(cmd)
+            #subparser_parser.add_argument('--all', 
+                                            ##help=usage.remove_sub_use.format(name=name),    # FIXME not sure why this wouldn't work
+                                            ##action=CheckIfALL, action='store_true')
+
+            #cur_args = vars(top_parser.parse_args())
+            #print(cur_args)
+            #if 'all' in cur_args:
+                #if cur_args['all']:
+                    #break
+            this_cmds_help = cmd_help['{}_sub_use'.format(cmd)].format(name=name)
+            subparsers_subparser = subparser_parser.add_subparsers(dest='pkg_type', help=this_cmds_help)
+
+            for c in repo_choices:
+                pkg_type_to_proc = subparsers_subparser.add_parser(c)
+                pkg_type_to_proc.add_argument('pkg_to_{}'.format(cmd))   # like ipython
+                pkg_type_to_proc.add_argument('-b', '--branch', dest='branch', default=None)  # needs to be specified in script (for installs though it use default name if not specified)
+
+            #for c in other_choices: #TODO
+                ##if c == 'packages':    # packages args only used for installs
+                    ##pkg_type_to_proc = subparsers_subparser.add_parser(c)
+                #if c == 'stable':
+                    #pkg_type_to_proc = subparsers_subparser.add_parser(c)
+                    #pkg_type_to_proc.add_argument('pkg_to_{}'.format(cmd))  # like ipython
+                    #pkg_type_to_proc.add_argument('--pversion', help='package version')      # like 1.2.1 (default should be the newest, but can specify older ones)
+        ################################################## 
+
+
+
+
+
+        args = top_parser.parse_args()
+
+
+        if ('top_subparser' in args) and (args.top_subparser == 'install'):
+            if ('branch' in args) and (args.branch == None):
+                if args.pkg_type == 'local':    # for local, grab the currently checked out branch from the repo and set that as the branch to install 
+                    branch = utils.get_checked_out_local_branch(args.pkg_to_install, args.repo_type)
+                else:
+                    branch = utils.get_default_branch(args.repo_type)
+                args.branch = branch
+        #print "args changed\n", args
+
 
 
     class noise(object):
@@ -160,577 +291,162 @@ def main(): # needs to be done as a main func for setuptools to work correctly i
         quiet = args.quiet
 
 
-    def ALL_error(cmd_arg):
-        if cmd_arg in ['all', 'All']:
-            raise SystemExit("\nError: Did you mean to specifiy ALL instead?")
-
-
-    lang_arg = args.language
-
-    if 'install_arg' in args:
-        install_arg = args.install_arg 
-
-
-    elif 'update_arg' in args:
-        update_arg = args.update_arg 
-        ALL_error(update_arg)
-
-
-    elif 'remove_arg' in args:
-        remove_arg = args.remove_arg
-        ALL_error(remove_arg)
-
-
-    elif 'turn_off_arg' in args:
-        turn_off_arg = args.turn_off_arg
-        ALL_error(turn_off_arg)
-
-
-    elif 'turn_on_arg' in args:
-        turn_on_arg = args.turn_on_arg
-        ALL_error(turn_on_arg)
-
-    ##########################################################
-    ##########################################################
-
-
+    """
+    # REMOVE LATER...this just shows what we're dealing with here
+    print('##########################################################')
+    print(args)
+    if additional_args:
+        print(additional_args)
+    print('##########################################################')
+    #raise SystemExit
+    """
 
     #--------------------------------------------------------------------------------------------------------------
-    # where stuff actually happens
+
     if noise.quiet:
         print('-'*60)
 
-    everything_already_installed = utils.all_pkgs_and_branches_for_all_pkg_types_already_installed(installed_pkgs_dir)
-    #print('\neverything_already_installed:') 
-    #print(everything_already_installed) 
 
 
-    command_and_items_to_process_when_multiple_items = {}   # but not for install command 
+    #######################################################################################################################
+    #### install pkg(s) 
+    kwargs = dict(packages_file=packages_file, packages_file_path=packages_file_path, 
+                 noise=noise, install_dirs=install_dirs, installed_pkgs_dir=installed_pkgs_dir)
 
-
-
-    # install pkg(s) 
-    if 'install_arg' in args:
-
-        # install from packages file
-        if install_arg == "packages":
-            try:  # bring in the packages file
-                sys.dont_write_bytecode = True  # to avoid writing a .pyc files (for the packages file)
-                pkgs_module = imp.load_source(packages_file, packages_file_path)    # used to import a hidden file (really hackey) 
-            except (ImportError, IOError):
-                print("No {0} file installed for use.".format(packages_file))
-                if not os.path.isfile(packages_file_path):  # create packages file if one doesn't already exist.
-                    #shutil.copy(join('data', packages_file), packages_file_path)    # create a template packages file
-                    #print("So created template {0} file for installation of packages.".format(packages_file))
-
-                    open(packages_file_path, 'a').close()  # creates an empty packages file
-                    print("So created empty {0} file for installation of packages.".format(packages_file))
-
-                raise SystemExit("Now add the desired packages to the {} file and re-run install.".format(packages_file))
-
-
-            for pkg_type, pkgs_from_pkgs_file in pkgs_module.packages.items():
-                utils.when_not_quiet_mode(utils.status('\t\tInstalling {0} packages'.format(pkg_type)), noise.quiet)
-
-                if pkgs_from_pkgs_file:
-
-                    for pkg_to_install in pkgs_from_pkgs_file: 
-
-                        lang_and_pkg_to_install = pkg_to_install.split('-->')  # to see if a language is given 
-                        if len(lang_and_pkg_to_install) == 2:
-                            lang_arg, pkg_to_install = lang_and_pkg_to_install
-                            pkg_inst = create_pkg_inst(lang_arg, pkg_type, install_dirs, packages_file)
-                        elif len(lang_and_pkg_to_install) != 2:
-                            print("\nError: need to specifiy a language in {0} for:".format(packages_file)) 
-                            print("\t{}".format(pkg_to_install))
-                            raise SystemExit
-
-                        # important to see what has previously been installed, so as to not turn on a 2nd version of a package.
-                        everything_already_installed = utils.all_pkgs_and_branches_for_all_pkg_types_already_installed(installed_pkgs_dir) 
-                        pkg_inst.install(pkg_to_install, noise, everything_already_installed=everything_already_installed)
-                else:
-                    utils.when_not_quiet_mode('\nNo {0} packages specified in {1} to install.'.format(pkg_type, packages_file), noise.quiet)
-
-        # install w/ command line arg(s)
-        elif install_arg != "packages":
-
-            pkg_type_and_pkg_to_process = install_arg
-            pkg_type_andor_pkg_to_process = pkg_type_and_pkg_to_process.split('=') # need this check b/c pkg_type has to be specified when using cmdline 
-            if len(pkg_type_andor_pkg_to_process) != 2:
-                utils.how_to_specify_installation(pkg_type_andor_pkg_to_process[0])
-                raise SystemExit
-
-            pkg_type, pkg_to_install = pkg_type_andor_pkg_to_process
-            pkg_to_install_specified_with_user_and_repo = pkg_to_install.split('/')
-            if len(pkg_to_install_specified_with_user_and_repo) == 1:
-                print("\nError: need to specifiy a user and branch for {}, like:".format(pkg_to_install))
-                print("\t{} install github=username/pkg_name[^optional_branch]".format(name))   
-                print("\t{} install bitbucket=hg+username/pkg_name[^optional_branch]".format(name))   
-                raise SystemExit
-
-            utils.when_not_quiet_mode(utils.status('\t\tInstalling {0} package'.format(pkg_type)), noise.quiet)
-            pkg_inst = create_pkg_inst(lang_arg, pkg_type, install_dirs)
-
-            # important to keep this here so it can be known what has previously been installed, so as to not turn on a 2nd version of a package.
-            everything_already_installed = utils.all_pkgs_and_branches_for_all_pkg_types_already_installed(installed_pkgs_dir) 
-            pkg_inst.install(pkg_to_install, noise, everything_already_installed=everything_already_installed)
-
+    if ('top_subparser' in args) and (args.top_subparser == 'install'):
+        any_pkgs_processed = actions.install_action(args, **kwargs)
+    #######################################################################################################################
     
 
 
-    # list installed pkg(s) (by each package type)
+    #######################################################################################################################
+    #### if nothting is installed, then don't continue on to other commands (since they only process currenly installed stuff)
+    everything_already_installed = utils.all_pkgs_and_branches_for_all_pkg_types_already_installed(installed_pkgs_dir) 
+    if not everything_already_installed:
+        raise SystemExit('\nNo packages installed.') 
+    #######################################################################################################################
+
+
+
+    #######################################################################################################################
+    #### list installed pkg(s) (by each package type)
     elif 'list_arg' in args:
-        if everything_already_installed:
-
-            count_of_listed = 0
-            for lang_dir_name, pkg_type_dict in everything_already_installed.items():
-
-                utils.when_not_quiet_mode("\n{0} packages installed:".format(lang_dir_name), noise.quiet)
-
-                for pkg_type, pkgs_and_branches in pkg_type_dict.items():
-
-                    if pkgs_and_branches:
-
-                        def list_packages(count_of_listed=count_of_listed):
-                            for pkg_for_listing, branches in pkgs_and_branches.items(): 
-                                for branch in branches:
-                                    if branch.startswith('.__'):
-                                        branch_if_were_on = branch.lstrip('.__')
-                                        branch_if_were_on = '[{0}]'.format(branch_if_were_on)
-                                        item_installed = '  {: >20} {: >25} {: >25} {: >10}'.format(pkg_for_listing, branch_if_were_on, pkg_type, "** off")
-
-                                    elif not branch.startswith('.__'):                    
-                                        branch = '[{0}]'.format(branch)
-                                        item_installed = '  {: >20} {: >25} {: >25}'.format(pkg_for_listing, branch, pkg_type)
-                                    count_of_listed += 1
-                                    print(item_installed)
-                            return count_of_listed
-
-                        count_of_listed = list_packages()
-
-            if count_of_listed == 0: 
-                utils.when_not_quiet_mode('\n[ No packages for listing ]'.format(pkg_type), noise.quiet) 
-        else:
-            print('\nNo packages installed.') 
-
-
-
-    # update pkg(s)
-    elif 'update_arg' in args:
-        if everything_already_installed:
-
-            top_count_of_pkgs_updated = 0
-            for lang_dir_name, pkg_type_dict in everything_already_installed.items():
-                for pkg_type, pkgs_and_branches in pkg_type_dict.items():
-
-                    if pkgs_and_branches:
-                        pkgs_status = utils.pkgs_and_branches_for_pkg_type_status(pkgs_and_branches)
-                        pkgs_and_branches_on = pkgs_status['pkg_branches_on']
-                        pkgs_and_branches_off = pkgs_status['pkg_branches_off']
-
-                        if update_arg == 'ALL':
-                            utils.when_not_quiet_mode(utils.status('\t\tUpdating {0} {1} packages'.format(lang_dir_name, pkg_type)), noise.quiet)
-                            pkg_inst = create_pkg_inst(lang_dir_name, pkg_type, install_dirs)
-
-                            count_of_pkgs_updated = 0
-                            for pkg_to_update, branch_on in pkgs_and_branches_on.items():
-                                for branch_to_update in branch_on:
-                                    pkg_inst.update(lang_dir_name, pkg_to_update, branch_to_update, noise)
-                                    count_of_pkgs_updated += 1
-                                    top_count_of_pkgs_updated += 1
-
-                            if count_of_pkgs_updated == 0:
-                                utils.when_not_quiet_mode('\nNo {0} {1} packages turned on for updating.'.format(lang_dir_name, pkg_type), noise.quiet) 
-                                top_count_of_pkgs_updated = -1
-
-
-                        else: # for a single command passed to update
-                            # a specific branch of a specific pkg of a specific pkg_type for a specific lang is what's updated.
-
-                            def how_to_update_branches(pkg_to_update, all_installed_for_pkg):
-                                how_to_count = 0
-                                for quad_tuple in all_installed_for_pkg: 
-                                    lang_installed, pkg_type_installed, pkg_name_installed, branch_installed = quad_tuple
-                                    if lang_installed == lang_dir_name: 
-                                        if pkg_type_installed == pkg_type: 
-                                            if not branch_installed.startswith('.__'): 
-                                                if branch_installed == 'master':
-                                                    print("\n# Update {0} {1} with:".format(pkg_to_update, lang_installed))
-                                                    print("{0} -l {1} update {2}={3}".format(name, lang_installed, 
-                                                                            pkg_type_installed, pkg_name_installed))
-
-                                                else:
-                                                    print("\n# Update {0} [{1}] {2} with:".format(pkg_to_update, branch_installed, 
-                                                                                                    lang_installed))
-                                                    print("{0} -l {1} update {2}={3}^{4}".format(name, lang_installed,
-                                                                            pkg_type_installed, pkg_name_installed, branch_installed))
-
-                                            elif branch_installed.startswith('.__'): 
-                                                branch_installed = branch_installed.lstrip('.__')
-                                                print("\n* {0} [{1}] {2} turned off:  turn on to update.".format(
-                                                                                    pkg_name_installed, branch_installed, lang_installed))
-                                            how_to_count += 1
-
-                                if how_to_count == 0:
-                                    return 0
-                                else:
-                                    return -1
-
-
-                            def update_branch(pkg_to_update, branch_to_update, was_pkg_processed):
-
-                                pkg_inst = create_pkg_inst(lang_arg, pkg_type, install_dirs)
-                                lang_cmd = pkg_inst.lang_cmd  # makes it so that the system default of a lang maps back on to it's particular version
-                                if lang_dir_name == lang_cmd:
-                                    for pkg_name, branch_on in pkgs_and_branches_on.items():
-                                        if pkg_name == pkg_to_update: 
-                                            if branch_to_update in branch_on: 
-                                                utils.when_not_quiet_mode(utils.status('\tUpdating {0} [{1}] {2} {3}'.format(
-                                                        pkg_to_update, branch_to_update, lang_dir_name, pkg_type)), noise.quiet)
-                                                pkg_inst.update(lang_cmd, pkg_to_update, branch_to_update, noise)
-                                                was_pkg_processed = True
-
-                                    for pkg_name, branches_off in pkgs_and_branches_off.items():
-                                        if pkg_name == pkg_to_update: 
-                                            if branch_to_update in branches_off: 
-                                                branch_installed = branch_to_update.lstrip('.__')
-                                                print("\n{0} [{1}] {2} turned off:  turn on to update.".format(
-                                                                                    pkg_name, branch_installed, lang_cmd))
-                                                was_pkg_processed = True
-
-                                    return was_pkg_processed
-
-
-                            was_pkg_updated = utils.package_processor(lang_arg,
-                                                                pkg_type,
-                                                                pkg_info_raw=update_arg, 
-                                                                how_to_func=how_to_update_branches,
-                                                                processing_func=update_branch,
-                                                                process_strs=dict(process='updating', action='update'),
-                                                                everything_already_installed=everything_already_installed,
-                                                                was_pkg_processed=False)       
-                            if was_pkg_updated:
-                                top_count_of_pkgs_updated += 1
-
-            if top_count_of_pkgs_updated == 0: 
-                utils.when_not_quiet_mode('\n[ No packages specified for updating ]'.format(pkg_type), noise.quiet) 
-        else:
-            print('\nNo packages installed.') 
-
-
-
-    # remove pkg(s) 
-    elif 'remove_arg' in args:
-        if everything_already_installed:
-
-            top_count_of_pkgs_removed = 0
-            for lang_dir_name, pkg_type_dict in everything_already_installed.items():
-                for pkg_type, pkgs_and_branches in pkg_type_dict.items():
-
-                    if pkgs_and_branches:
-                        pkgs_status = utils.pkgs_and_branches_for_pkg_type_status(pkgs_and_branches)
-                        pkgs_and_branches_on = pkgs_status['pkg_branches_on']
-                        pkgs_and_branches_off = pkgs_status['pkg_branches_off']
-
-
-                        def remove_turned_off_branches(top_count_of_pkgs_removed, count_of_pkgs_removed=0):
-                            for pkg_to_remove, branches_off in pkgs_and_branches_off.items():
-                                for branch_to_remove in branches_off:
-                                    branch_to_remove = '.__{0}'.format(branch_to_remove)
-                                    pkg_inst.remove(pkg_to_remove, branch_to_remove, noise)
-                                    count_of_pkgs_removed += 1; top_count_of_pkgs_removed += 1
-                            return count_of_pkgs_removed
-
-                        def remove_turned_on_branches(top_count_of_pkgs_removed, count_of_pkgs_removed=0):
-                            for pkg_to_remove, branch_on in pkgs_and_branches_on.items():
-                                for branch_to_remove in branch_on:
-                                    pkg_inst.remove(pkg_to_remove, branch_to_remove, noise)
-                                    count_of_pkgs_removed += 1; top_count_of_pkgs_removed += 1
-                            return count_of_pkgs_removed
-
-
-                        if remove_arg == 'ALL':
-                            utils.when_not_quiet_mode(utils.status('\t\tRemoving {0} {1} packages'.format(lang_dir_name, pkg_type)), noise.quiet)
-                            pkg_inst = create_pkg_inst(lang_dir_name, pkg_type, install_dirs)
-                            count_of_turned_on_removed = remove_turned_on_branches(top_count_of_pkgs_removed)
-                            count_of_turned_off_removed = remove_turned_off_branches(top_count_of_pkgs_removed)
-                            if (count_of_turned_on_removed or count_of_turned_off_removed):
-                                top_count_of_pkgs_removed = -1
-
-
-                        elif remove_arg == 'turned_off':
-                            utils.when_not_quiet_mode(utils.status('\tRemoving {0} {1} packages'.format(lang_dir_name, pkg_type)), noise.quiet)
-                            pkg_inst = create_pkg_inst(lang_dir_name, pkg_type, install_dirs)
-                            count_of_pkgs_removed = remove_turned_off_branches(top_count_of_pkgs_removed)
-                            if count_of_pkgs_removed == 0:
-                                utils.when_not_quiet_mode('\nNo {0} {1} packages turned off for removal.'.format(lang_dir_name, pkg_type), noise.quiet) 
-                                top_count_of_pkgs_removed = -1
-
-
-                        else: # for a single command passed to remove
-                            # a specific branch of a specific pkg of a specific pkg_type for a specific lang is what's removed
-
-                            def how_to_remove_branches(pkg_to_remove, all_installed_for_pkg):
-                                how_to_count = 0
-                                for quad_tuple in all_installed_for_pkg: 
-                                    lang_installed, pkg_type_installed, pkg_name_installed, branch_installed = quad_tuple
-                                    if lang_installed == lang_dir_name: 
-                                        if pkg_type_installed == pkg_type: 
-                                            if branch_installed.startswith('.__'): 
-                                                branch_installed = branch_installed.lstrip('.__')
-                                            if branch_installed == 'master':
-                                                print("\n# Remove {0} {1} with:".format(pkg_to_remove, lang_installed))
-                                                print("{0} -l {1} remove {2}={3}".format(name, lang_installed, 
-                                                                        pkg_type_installed, pkg_name_installed))
-                                            else:
-                                                print("\n# Remove {0} [{1}] {2} with:".format(pkg_to_remove, branch_installed, 
-                                                                                                lang_installed))
-                                                print("{0} -l {1} remove {2}={3}^{4}".format(name, lang_installed,
-                                                                        pkg_type_installed, pkg_name_installed, branch_installed))
-
-                                            how_to_count += 1
-
-                                if how_to_count == 0:
-                                    return 0
-                                else:
-                                    return -1
-
-
-                            def remove_branch(pkg_to_remove, branch_to_remove, was_pkg_processed):
-
-                                pkg_inst = create_pkg_inst(lang_arg, pkg_type, install_dirs)
-                                lang_cmd = pkg_inst.lang_cmd  # makes it so that the system default of a lang maps back on to it's particular version
-                                if lang_dir_name == lang_cmd:
-                                    for pkg_name, branch_on in pkgs_and_branches_on.items():
-                                        if pkg_name == pkg_to_remove: 
-                                            if branch_to_remove in branch_on: 
-                                                utils.when_not_quiet_mode(utils.status('\tRemoving {0} [{1}] {2} {3}'.format(
-                                                        pkg_to_remove, branch_to_remove, lang_dir_name, pkg_type)), noise.quiet)
-                                                pkg_inst.remove(pkg_to_remove, branch_to_remove, noise)
-                                                was_pkg_processed = True
-
-                                    for pkg_name, branches_off in pkgs_and_branches_off.items():
-                                        if pkg_name == pkg_to_remove: 
-                                            if branch_to_remove in branches_off: 
-                                                utils.when_not_quiet_mode(utils.status('\tRemoving {0} [{1}] {2} {3}'.format(
-                                                        pkg_to_remove, branch_to_remove, lang_dir_name, pkg_type)), noise.quiet)
-                                                branch_to_remove = '.__{0}'.format(branch_to_remove)
-                                                pkg_inst.remove(pkg_to_remove, branch_to_remove, noise)
-                                                was_pkg_processed = True
-
-                                    return was_pkg_processed
-
-
-                            was_pkg_removed = utils.package_processor(lang_arg,
-                                                                pkg_type,
-                                                                pkg_info_raw=remove_arg, 
-                                                                how_to_func=how_to_remove_branches,
-                                                                processing_func=remove_branch,
-                                                                process_strs=dict(process='removal', action='remove'),
-                                                                everything_already_installed=everything_already_installed,
-                                                                was_pkg_processed=False)       
-                            if was_pkg_removed:
-                                top_count_of_pkgs_removed += 1
-
-            if top_count_of_pkgs_removed == 0: 
-                utils.when_not_quiet_mode('\n[ No packages specified for removing ]'.format(pkg_type), noise.quiet) 
-        else:
-            print('\nNo packages installed.') 
-
-
-
-
-    # turn off pkg(s) 
-    elif 'turn_off_arg' in args:
-        if everything_already_installed:
-
-            top_count_of_pkgs_turned_off = 0
-            for lang_dir_name, pkg_type_dict in everything_already_installed.items():
-                for pkg_type, pkgs_and_branches in pkg_type_dict.items():
-
-                    if pkgs_and_branches:
-                        pkgs_status = utils.pkgs_and_branches_for_pkg_type_status(pkgs_and_branches)
-                        pkgs_and_branches_on = pkgs_status['pkg_branches_on']
-                        pkgs_and_branches_off = pkgs_status['pkg_branches_off']
-
-
-                        def turn_off_branches(top_count_of_pkgs_turned_off, count_of_pkgs_turned_off=0):
-                            for pkg_to_turn_off, branch_on in pkgs_and_branches_on.items():
-                                if pkg_to_turn_off == 'bep':  # don't allow bep to turn itself off
-                                    print("\n** Cannot use {name} to turn off {name}".format(name=name))
-                                    continue
-                                
-                                for branch_to_turn_off in branch_on:
-                                    pkg_inst.turn_off(pkg_to_turn_off, branch_to_turn_off, noise)
-                                    count_of_pkgs_turned_off += 1; top_count_of_pkgs_turned_off += 1
-                            return count_of_pkgs_turned_off
-
-
-                        if turn_off_arg == 'ALL':
-                            utils.when_not_quiet_mode(utils.status('\t\tTurning off {0} {1} packages'.format(lang_dir_name, pkg_type)), noise.quiet)
-                            pkg_inst = create_pkg_inst(lang_dir_name, pkg_type, install_dirs)
-                            count_of_turned_off = turn_off_branches(top_count_of_pkgs_turned_off)
-                            if count_of_turned_off:
-                                top_count_of_pkgs_turned_off = -1
-
-                        else: # for a single command passed to turn off
-                            # a specific branch of a specific pkg of a specific pkg_type for a specific lang is what's turned off
-
-                            def how_to_turn_off_branches(pkg_to_turn_off, all_installed_for_pkg):
-                                how_to_count = 0
-                                for quad_tuple in all_installed_for_pkg: 
-                                    lang_installed, pkg_type_installed, pkg_name_installed, branch_installed = quad_tuple
-                                    if lang_installed == lang_dir_name: 
-                                        if pkg_type_installed == pkg_type: 
-
-                                            if not branch_installed.startswith('.__'): 
-                                                if branch_installed == 'master':
-                                                    print("\n# Turn off {0} {1} with:".format(pkg_to_turn_off, lang_installed))
-                                                    print("{0} -l {1} turn_off {2}={3}".format(name, lang_installed, 
-                                                                            pkg_type_installed, pkg_name_installed))
-                                                else:
-                                                    print("\n# Turn off {0} [{1}] {2} with:".format(pkg_to_turn_off, branch_installed, 
-                                                                                                    lang_installed))
-                                                    print("{0} -l {1} turn_off {2}={3}^{4}".format(name, lang_installed,
-                                                                            pkg_type_installed, pkg_name_installed, branch_installed))
-
-                                            elif branch_installed.startswith('.__'): 
-                                                branch_installed = branch_installed.lstrip('.__')
-                                                print("\n* {0} [{1}] {2} already turned off.".format(pkg_name_installed, branch_installed, lang_installed))
-
-                                            how_to_count += 1
-
-                                if how_to_count == 0:
-                                    return 0
-                                else:
-                                    return -1
-
-
-                            def turn_off_branch(pkg_to_turn_off, branch_to_turn_off, was_pkg_processed):
-
-                                pkg_inst = create_pkg_inst(lang_arg, pkg_type, install_dirs)
-                                lang_cmd = pkg_inst.lang_cmd  # makes it so that the system default of a lang maps back on to it's particular version
-                                if lang_dir_name == lang_cmd:
-                                    for pkg_name, branch_on in pkgs_and_branches_on.items():
-                                        if pkg_name == pkg_to_turn_off: 
-
-                                            if pkg_to_turn_off == 'bep':  # don't allow bep to turn itself off
-                                                print("\n** Cannot use {name} to turn off {name}".format(name=name))
-                                                continue
-
-                                            if branch_to_turn_off in branch_on: 
-                                                utils.when_not_quiet_mode(utils.status('\tTurning off {0} [{1}] {2} {3}'.format(
-                                                        pkg_to_turn_off, branch_to_turn_off, lang_dir_name, pkg_type)), noise.quiet)
-                                                pkg_inst.turn_off(pkg_to_turn_off, branch_to_turn_off, noise)
-                                                was_pkg_processed = True
-
-                                    for pkg_name, branches_off in pkgs_and_branches_off.items():
-                                        if pkg_name == pkg_to_turn_off: 
-                                            if branch_to_turn_off in branches_off: 
-                                                #branch_installed = branch_to_turn_off.lstrip('.__')
-                                                print('\n{0} [{1}] {2} already turned off.'.format(pkg_to_turn_off, branch_to_turn_off, lang_cmd)) 
-                                                was_pkg_processed = True
-
-                                    return was_pkg_processed
-
-
-                            was_pkg_turned_off = utils.package_processor(lang_arg,
-                                                                pkg_type,
-                                                                pkg_info_raw=turn_off_arg, 
-                                                                how_to_func=how_to_turn_off_branches,
-                                                                processing_func=turn_off_branch,
-                                                                process_strs=dict(process='turning off', action='turn_off'),
-                                                                everything_already_installed=everything_already_installed,
-                                                                was_pkg_processed=False)       
-                            if was_pkg_turned_off:
-                                top_count_of_pkgs_turned_off += 1
-
-            if top_count_of_pkgs_turned_off == 0: 
-                utils.when_not_quiet_mode('\n[ No packages specified for turning off ]'.format(pkg_type), noise.quiet) 
-        else:
-            print('\nNo packages installed.') 
-
-
-    # turn on pkg(s) 
-    elif 'turn_on_arg' in args:
-        if everything_already_installed:
-
-            top_count_of_pkgs_turned_on = 0
-            for lang_dir_name, pkg_type_dict in everything_already_installed.items():
-                for pkg_type, pkgs_and_branches in pkg_type_dict.items():
-
-                    if pkgs_and_branches:
-                        pkgs_status = utils.pkgs_and_branches_for_pkg_type_status(pkgs_and_branches)
-                        pkgs_and_branches_on = pkgs_status['pkg_branches_on']
-                        pkgs_and_branches_off = pkgs_status['pkg_branches_off']
-
-                        if turn_on_arg: # for a single command passed to turn on
-                            # a specific branch of a specific pkg of a specific pkg_type for a specific lang is what's turned on
-
-                            def how_to_turn_on_branches(pkg_to_turn_on, all_installed_for_pkg):
-                                how_to_count = 0
-                                for quad_tuple in all_installed_for_pkg: 
-                                    lang_installed, pkg_type_installed, pkg_name_installed, branch_installed = quad_tuple
-                                    if lang_installed == lang_dir_name: 
-                                        if pkg_type_installed == pkg_type: 
-
-                                            if branch_installed.startswith('.__'): 
-                                                branch_installed = branch_installed.lstrip('.__')
-                                                if branch_installed == 'master':
-                                                    print("\n# Turn on {0} {1} with:".format(pkg_to_turn_on, lang_installed))
-                                                    print("{0} -l {1} turn_on {2}={3}".format(name, lang_installed, 
-                                                                            pkg_type_installed, pkg_name_installed))
-                                                else:
-                                                    print("\n# Turn on {0} [{1}] {2} with:".format(pkg_to_turn_on, branch_installed, 
-                                                                                                    lang_installed))
-                                                    print("{0} -l {1} turn_on {2}={3}^{4}".format(name, lang_installed,
-                                                                            pkg_type_installed, pkg_name_installed, branch_installed))
-
-                                            elif not branch_installed.startswith('.__'): 
-                                                print("\n* {0} [{1}] {2} already turned on.".format(pkg_name_installed, branch_installed, lang_installed))
-                                            how_to_count += 1
-
-                                if how_to_count == 0:
-                                    return 0
-                                else:
-                                    return -1
-
-
-                            def turn_on_branch(pkg_to_turn_on, branch_to_turn_on, was_pkg_processed):
-
-                                pkg_inst = create_pkg_inst(lang_arg, pkg_type, install_dirs)
-                                lang_cmd = pkg_inst.lang_cmd  # makes it so that the system default of a lang maps back on to it's particular version
-                                if lang_dir_name == lang_cmd:
-                                    for pkg_name, branch_on in pkgs_and_branches_on.items():
-                                        if pkg_name == pkg_to_turn_on: 
-                                            if branch_to_turn_on in branch_on: 
-                                                print('\n{0} [{1}] {2} already turned on.'.format(pkg_to_turn_on, branch_to_turn_on, lang_cmd)) 
-                                                was_pkg_processed = True
-
-                                    for pkg_name, branches_off in pkgs_and_branches_off.items():
-                                        if pkg_name == pkg_to_turn_on: 
-                                            if branch_to_turn_on in branches_off: 
-                                                utils.when_not_quiet_mode(utils.status('\tTurning on {0} [{1}] {2} {3}'.format(
-                                                        pkg_to_turn_on, branch_to_turn_on, lang_dir_name, pkg_type)), noise.quiet)
-                                                branch_to_turn_on = '.__{0}'.format(branch_to_turn_on)
-                                                pkg_inst.turn_on(pkg_to_turn_on, branch_to_turn_on, everything_already_installed, noise)
-                                                was_pkg_processed = True
-
-                                    return was_pkg_processed
-
-
-                            was_pkg_turned_on = utils.package_processor(lang_arg,
-                                                                pkg_type,
-                                                                pkg_info_raw=turn_on_arg, 
-                                                                how_to_func=how_to_turn_on_branches,
-                                                                processing_func=turn_on_branch,
-                                                                process_strs=dict(process='turning on', action='turn_on'),
-                                                                everything_already_installed=everything_already_installed,
-                                                                was_pkg_processed=False)       
-                            if was_pkg_turned_on:
-                                top_count_of_pkgs_turned_on += 1
-
-            if top_count_of_pkgs_turned_on == 0: 
-                utils.when_not_quiet_mode('\n[ No packages specified for turning on ]'.format(pkg_type), noise.quiet) 
-        else:
-            print('\nNo packages installed.') 
+        actions.list_action(everything_already_installed, noise)
+    #######################################################################################################################
+
+
+
+    #######################################################################################################################
+    # for everything else (update, remove, turn_on/off)
+    #elif args:  
+    #elif ((('top_subparser' in args) and (args.top_subparser in ['update', 'remove', 'turn_on', 'turn_off'])) or
+         #(('update' in additional_args) or ('remove' in additional_args) or ('turn_off' in additional_args) or
+          #('turn_on' in additional_args))):  
+    else:   # FIXME not sure this is as good as it could be by just using else instead of something more specific
+
+        actions_to_take = {}
+        #top_level_any_pkgs_processed = False
+        for lang_dir_name, pkg_type_dict in everything_already_installed.items():
+            for pkg_type, pkgs_and_branches in pkg_type_dict.items():
+                any_pkgs_processed = False
+                #if pkgs_and_branches:  # don't think i need this
+
+                pkgs_status = utils.pkgs_and_branches_for_pkg_type_status(pkgs_and_branches)
+                pkgs_and_branches_on = pkgs_status['pkg_branches_on']
+                pkgs_and_branches_off = pkgs_status['pkg_branches_off']
+
+                kwargs = dict(lang_dir_name=lang_dir_name, pkg_type=pkg_type, noise=noise, install_dirs=install_dirs, 
+                            pkgs_and_branches_on=pkgs_and_branches_on, pkgs_and_branches_off=pkgs_and_branches_off, 
+                            additional_args=additional_args, everything_already_installed=everything_already_installed)
+
+
+                if ('pkg_to_update' in args) or ('update' in additional_args):
+                    any_pkgs_processed = actions.update_action(args, **kwargs)
+
+                elif ('pkg_to_remove' in args) or ('remove' in additional_args):
+                    any_pkgs_processed = actions.remove_action(args, **kwargs)
+
+                elif ('pkg_to_turn_off' in args) or ('turn_off' in additional_args):
+                    any_pkgs_processed = actions.turn_off_action(args, **kwargs)
+
+                elif ('pkg_to_turn_on' in args) or ('turn_on' in additional_args):
+                    any_pkgs_processed = actions.turn_on_action(args, **kwargs)
+
+
+                if any_pkgs_processed:
+                    #top_level_any_pkgs_processed = True #+= 1 
+                    if type(any_pkgs_processed) == dict:    # it will be a dict when a pkg didn't actually get processed, but has commands to get processed 
+                        actions_to_take.update(any_pkgs_processed)
+
+        #if not top_level_any_pkgs_processed: # NOTE KEEP for now, but i don't think this will ever get hit? 
+            #utils.when_not_quiet_mode('\n[ No action performed ]'.format(pkg_type), noise.quiet) 
+
+
+        if actions_to_take:
+
+            if len(actions_to_take) == 1:
+                alert, cmd = actions_to_take.items()[0]  
+                option = '\n* {}\n{}\n'.format(alert, cmd)
+                print(option)
+
+                if not (cmd.startswith('****') and cmd.endswith('****')):
+
+                    print('-'*60)
+                    msg = "The above version is installed, would you like to run the command [y/N]? "
+                    response = raw_input(msg)
+                    if response:
+                        response = response.lower()
+                        if response in ['y', 'yes']:  
+                            utils.cmd_output(cmd)                    
+                        elif response in ['n', 'no']:  
+                            print("\nBye then.")
+                        else:
+                            raise SystemExit("\nError: {}: not valid input".format(response))
+                    else:
+                        print("\nBye then.")
+
+
+            elif len(actions_to_take) > 1: 
+
+                actions_to_take_with_num_keys = {}  # takes the alert, cmd (key, val) pairs from actions_to_take and makes them as a value tuple, w/ a num as each pair's key.
+                for num, alert_key in enumerate(actions_to_take, start=1): # actions_to_take is a dict with alert, cmd (key, val) pairs
+                    actions_to_take_with_num_keys[num] = (alert_key, actions_to_take[alert_key])
+                actions_to_take_with_num_keys = OrderedDict(sorted(actions_to_take_with_num_keys.items(), key=lambda t: t[0]))  # sorted by key (which are nums)
+
+                for num_key, alert_and_cmd_tuple_val in actions_to_take_with_num_keys.items():
+                    if num_key == 1:
+                        print('')
+                    alert, cmd =  alert_and_cmd_tuple_val
+                    option = '{}. {}\n{}\n'.format(num_key, alert, cmd)
+                    print(option)
+
+                print('-'*60)
+                msg = "The versions above are installed.  If you'd like to run the command\n"
+                msg = msg + "for an item, enter the number (if not, then just hit enter to exit). " 
+                response = raw_input(msg)
+                if response:
+                    try:
+                        response = int(response)
+                    except ValueError:
+                        raise SystemExit("\nError: invalid response: {}".format(response))
+                    if response in range(1, len(actions_to_take_with_num_keys)+1):
+                        #print response # now run the command
+                        # Could either 1. open a subprocess and run from the command line -- easy way
+                        # or 2. try to pass back into the the command that got us here -- better way
+
+                        # Number 2 would involve something like this with updating the kwargs:
+                        #kwargs = dict(lang_dir_name=lang_dir_name, pkg_type=pkg_type, noise=noise, install_dirs=install_dirs, 
+                                    #pkgs_and_branches_on=pkgs_and_branches_on, pkgs_and_branches_off=pkgs_and_branches_off, 
+                                    #additional_args=additional_args, everything_already_installed=everything_already_installed)
+                        #actions.update_action(args, **kwargs)
+
+                        # Doing number 1 above, just to get it working, though 2 would probably be better in long run.
+                        cmd = actions_to_take_with_num_keys[response][1]    # this gets the command from the alert, cmd tuple 
+                        if (cmd.startswith('****') and cmd.endswith('****')):
+                            print("\nNo command to process,\n{}".format(cmd))
+                        else:
+                            utils.cmd_output(cmd)                    
+                    else:
+                        raise SystemExit("\nError: invalid response: {}".format(response))
+                else:
+                    print("\nBye then.")

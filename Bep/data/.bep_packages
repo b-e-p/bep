@@ -1,39 +1,53 @@
-#! /usr/bin/env python
-# [this is so syntax highlighting works, b/c the script is just a python file.]
+#! /usr/bin/env python 
+#
+# You don't actually need this part at the top, it just provides 
+# for syntax highlighting as this is just a plain old python file.
+
+# Any of these can be specified like so, where
+# language & branch are optional, and repo_type only
+# needs to be specified if it comes from an ambiguous
+# source (eg. Bitbucket could be either git or hg):
+#
+# [language-->]repo_type+userName/repoName[^branch]
+# eg. hg+mchaput/whoosh                 # under bitbucket
+# eg. python3.3-->ipython/ipython       # under github
+# eg. pydata/pandas                     # under github 
 
 packages = dict(
     github = [
-        # 'language-->username/packagename', 
-        ### eg:
-        'python-->scikit-learn/scikit-learn',
-        'python-->pydata/pandas',
-        'python-->ipython/ipython',
+        #### 'username/projectname' is all that's required:
+        #'pydata/pandas',
+        #### but could give the full info if wanted:
+        #'python-->git+scikit-learn/scikit-learn',
+        #### or specify a lang other than default:
+        #'python3-->ipython/ipython',
+        #### or specify a branch other than master:
+        #'ipython/ipython^nbconvert',
             ],
 
 
     gitorious = [
-        ### eg:
-        # 'language-->username/packagename', 
-        #'python-->python-omega/python-omega'
+        #### same formating as github:
+        #'python-omega/python-omega'
                 ],
 
 
     bitbucket = [
-        ### need to say what type of repo it is (git or hg),
-        # 'language-->repo_type+username/packagename', 
-        # eg:
-        #'python-->hg+mchaput/whoosh',
-        #'python-->git+torotoki/corenlp-python',
+        #### repo_type is required and other options are again optional:
+        #'git+userName/repoName',
+        #'hg+mchaput/whoosh',
                 ],
 
 
-    local_repo = [
-        ### again, need to say what type of repo it is (git, hg, bzr),
-        # 'language-->repo_type+/a_dir/on_local_machine/packagename', 
-        # eg:
-        #'python-->hg+/home/your_username/some_dir/some_mercurial_repo',
-        #'python-->git+/home/your_username/some_dir/some_git_repo',
-        #'python-->bzr+/home/your_username/some_dir/some_bazaar_repo',
-        #'python-->git+/home/jgors/Documents/repos/ipython',
+    local = [
+        #### again, need to say what type of repo it is; also,
+        #### don't specify a branch -- when installed it uses the
+        #### currently checked out branch from the local repo:
+        #### 'repo_type+/a_dir/inside_a_dir/on_local_machine/pkg_name', 
+        ####'hg+/home/your_username/some_dir/some_mercurial_repo',
+        ####'git+/home/username/some_other_dir/some_git_repo',
+        ####'bzr+/home/username/another_dir/some_bazaar_repo',
+        #'git+/home/jgors/Documents/repos/ipython',
+        #'git+/home/jgors/Documents/repos/pandas',
                 ],
 )

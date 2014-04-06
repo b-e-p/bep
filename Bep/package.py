@@ -4,8 +4,7 @@
 #----------------------------------------------------------------
 Author: Jason Gors <jasonDOTgorsATgmail>
 Creation Date: 07-30-2013
-Purpose: this specifies what types of packages can be handles:
-        currently: git repos from github &
+Purpose: this specifies what types of packages can be handles: currently: git repos from github &
         gitorious; git & hg repos from bitbucket; git, hg & bzr local repos.  
 #----------------------------------------------------------------
 """
@@ -20,20 +19,20 @@ import glob
 import itertools
 import locale   # needed in py3 for decoding output from subprocess pipes 
 
-import Bep.languages.languages as languages
+from Bep.languages import languages
 from Bep.core.release_info import name
-import utils
-#from core.utils_db import (handle_db_after_an_install, handle_db_for_removal,
+from Bep.core import utils
+#from Bep.core.utils_db import (handle_db_after_an_install, handle_db_for_removal,
                         #handle_db_for_branch_renaming,
                         #get_lang_cmd_branch_was_installed_with)
 
 
 class Package(object):
-    def __init__(self, lang_arg, pkg_type, install_dirs, **kwargs):
+    def __init__(self, lang_arg, pkg_type, install_dirs, args, **kwargs):
 
         if 'python' in lang_arg:
             self.lang_using = languages.Python() # this is a class instance to have it's methods accessed throughout
-        #elif 'otherlanguage' in lang_arg:  # for other languages
+        #elif 'otherlanguage' in args.language:  # for other languages
             #self.lang_using = languages.OtherLanguage()
         else:
             print("\nError: {0} currently not supported.".format(lang_arg))
@@ -51,9 +50,19 @@ class Package(object):
 
         self.pkg_type_install_dir = join(self.lang_install_dir, self.pkg_type) 
         self.pkg_type_logs_dir = join(self.lang_logs_dir, self.pkg_type) 
+        
+        ################## try to  add in ######################
+        ##### TODO add this stuff in so they don't have to be defined repeatedly below
+        #self.pkg_name_install_dir =  join(self.pkg_type_install_dir, pkg_to_install_name)
+        #self.pkg_name_logs_dir = join(self.pkg_type_logs_dir, pkg_to_install_name)  
+
+        #branch_install_dir = join(self.pkg_name_install_dir, branch_to_install)
+        #branch_logs_dir = join(self.pkg_name_logs_dir, branch_to_install)
+
+        ########################################################
 
 
-    def _cmd_output(self, cmd, verbose):
+    def __cmd_output(self, cmd, verbose):
         encoding = locale.getdefaultlocale()[1]     # py3 stuff b/c this is encoded as b('...')
         if verbose:    # shows all the output when running cmd -- sometimes lots of stuff
             print(cmd)
@@ -87,49 +96,57 @@ class Package(object):
                 return str_to_strip                 # if nothing wrong, then just give back the string feed into this here.
 
         # this bit looks to see if a branch/version is specified for installing; if not, then it gets master.
-        pkg_branch_test = pkg_to_install.split('^')
-        assert len(pkg_branch_test) <= 2, "Only allowed to specify one branch/version per package listing for installation."
-        if len(pkg_branch_test) == 2:
-            pkg_to_install, branch = pkg_branch_test
-            pkg_to_install = strip_end_of_str(pkg_to_install) 
+        #pkg_branch_test = pkg_to_install.split('^')
+        #assert len(pkg_branch_test) <= 2, "Only allowed to specify one branch/version per package listing for installation."
+        #if len(pkg_branch_test) == 2:
+            #pkg_to_install, branch = pkg_branch_test
+            #pkg_to_install = strip_end_of_str(pkg_to_install) 
 
             #if len(pkg_to_install.split('/')) == 1:
-            if len(pkg_to_install.split('/')) != 2:
-                utils.how_to_specify_installation(pkg_to_install)
-                raise SystemExit
+            #if len(pkg_to_install.split('/')) != 2:
+                #utils.how_to_specify_installation(pkg_to_install)
+                #raise SystemExit
 
-            download_url = self.download_url.format(pkg_to_install=pkg_to_install)
-            download_info = self.download_url_cmd.format(branch=branch, download_url=download_url)
-        elif len(pkg_branch_test) == 1:
-            branch = 'master' 
-            pkg_to_install = pkg_branch_test[0]
-            pkg_to_install = strip_end_of_str(pkg_to_install) 
-            download_info = self.download_url.format(pkg_to_install=pkg_to_install)
+            #download_url = self.download_url.format(pkg_to_install=pkg_to_install)
+            #download_info = self.download_url_cmd.format(branch=branch, download_url=download_url)
+        #elif len(pkg_branch_test) == 1:
+            #branch = 'master' 
+            #pkg_to_install = pkg_branch_test[0]
+            #pkg_to_install = strip_end_of_str(pkg_to_install) 
+            #download_info = self.download_url.format(pkg_to_install=pkg_to_install)
+
 
         # if a repo branch name is specified with a nested path, then change its name (in   
         # order to make sure that all branches installed have flattened names in the pkg_dir).
         # (Eg. numpy on github has branches like this, where they are listed as as nested paths)
-        branch = branch.split('/')   
-        if len(branch) == 1:
-            branch = branch[0]
-        elif len(branch) >= 1:
-            branch = '_'.join(branch)
+        #branch = args.branch.split('/')   
+        #if len(branch) == 1:
+            #branch = branch[0]
+        #elif len(branch) >= 1:
+            #branch = '_'.join(branch)
+
+        pkg_to_install = strip_end_of_str(pkg_to_install) 
+        #if args.branch == 'master':
+            #download_info = self.download_url.format(pkg_to_install=pkg_to_install)
+        #else:
+            #download_info = self.download_url_cmd.format(branch=args.branch, download_url=self.download_url)
                 
         pkg_to_install_name = os.path.basename(pkg_to_install)
-        self.install_download_cmd = self.install_download_cmd.format(download_info=download_info, branch=branch)
+        #self.install_download_cmd = self.install_download_cmd.format(download_info=download_info, branch=args.branch)
 
-        return pkg_to_install_name, branch 
+        return pkg_to_install_name 
 
 
-    def _download_pkg(self, pkg_to_install_name, branch_to_install_name, noise):
+    def _download_pkg(self, pkg_to_install_name, branch_flattened_name, args, noise):
         ''' downloads/clones the specified package branch for installation '''
 
         # tests whether the vc application is installed ('git', 'hg', 'bzr', etc)
         app_check_cmd = self.application_check_cmd  # not sure if this is platform neutral
-        app_type = app_check_cmd.split(' ')[0]
-        return_val = self._cmd_output(app_check_cmd, verbose=False)
+        app_type = app_check_cmd.split(' ')[0] 
+        #app_type = args.repo_type
+        return_val = self.__cmd_output(app_check_cmd, verbose=False)
         if return_val:  # it would be zero if the program is installed (if anything other than zero, then it's not installed)
-            print("\nError: COULD NOT INSTALL {0} packages; are you sure {1} is installed?".format(self.pkg_type, app_type))
+            print("\nError: COULD NOT INSTALL {0} packages; are you sure {1} is installed?".format(args.pkg_type, app_type))
             return None
 
         # make the initial pkg_name_dir 
@@ -137,14 +154,14 @@ class Package(object):
         if not os.path.isdir(pkg_name_dir):
             os.makedirs(pkg_name_dir)
 
-        utils.when_not_quiet_mode('Downloading {0} [{1}]...'.format(pkg_to_install_name, branch_to_install_name), noise.quiet)
+        utils.when_not_quiet_mode('Downloading {0} [{1}]...'.format(pkg_to_install_name, branch_flattened_name), noise.quiet)
 
         # download the branch to the pkg_name_dir 
         os.chdir(pkg_name_dir)
-        return_val = self._cmd_output(self.install_download_cmd, verbose=noise.verbose)
+        return_val = self.__cmd_output(self.install_download_cmd, verbose=noise.verbose)
 
         if return_val != 0:
-            print("Could not properly download {0} [{1}] with {2}\n".format(pkg_to_install_name, branch_to_install_name, self.repo_type)) 
+            print("Could not properly download {0} [{1}] with {2}\n".format(pkg_to_install_name, branch_flattened_name, app_type))#args.repo_type)) 
 
             ### remove whatever may have been downloaded that didn't get successfully downloaded
             something_downloaded_or_already_in_pkg_name_dir = os.listdir(pkg_name_dir)
@@ -155,11 +172,11 @@ class Package(object):
                 if not os.listdir(self.lang_install_dir): # finally, if the lang install dir is empty, remove that
                     shutil.rmtree(self.lang_install_dir)
                 
-            # if the pkg_name_dir is not empty, then just remove the specific branch_to_install_name that was attempted to 
+            # if the pkg_name_dir is not empty, then just remove the specific branch_flattened_name that was attempted to 
             # be downloaded, and leave everything else in there alone. 
             else:
                 try:
-                    shutil.rmtree(branch_to_install_name)   #NOTE should probably use absolute dirs instead of this 
+                    shutil.rmtree(branch_flattened_name)   #NOTE should probably use absolute dirs instead of this 
                 # need this b/c maybe it didn't even create the branch_to_install_name dir; or, git automatically
                 # cleans up after itself, so the branch_to_install_name might not even exist b/c git deleted it already  
                 except: pass    
@@ -169,7 +186,7 @@ class Package(object):
             return True
 
 
-    def _installation_check(self, pkg_type, pkg_to_install_name, branch_to_install, everything_already_installed):
+    def _installation_check(self, pkg_type, pkg_to_install_name, branch_name, everything_already_installed):
         '''
         To make sure that only one version of any given package can be turned on (/active) at any given 
         time for a specific version of the lang.  If a package branch with the same name as an already 
@@ -178,7 +195,6 @@ class Package(object):
         branch, but under a diff pkg type.
         '''
         pkg_name = pkg_to_install_name
-        branch_name = branch_to_install
 
         all_branches_installed_for_pkgs_lang_ver = utils.branches_installed_for_given_pkgs_lang_ver(
                                                             self.lang_cmd, 
@@ -338,8 +354,8 @@ class Package(object):
             return True 
 
 
-
-    def install(self, pkg_to_install, noise, download_pkg=True, everything_already_installed=None):
+    # need to put pkg_to_install back in as an arg
+    def install(self, pkg_to_install, args, noise, download_pkg=True, everything_already_installed=None):
         ''' installs the specified package's branch ''' 
 
         def do_install(pkg_to_install_name, branch_to_install):
@@ -371,7 +387,7 @@ class Package(object):
                     os.makedirs(branch_logs_dir)
 
                 # see if the newly cloned dir installs properly
-                return_val = self._cmd_output(install_cmd, verbose=noise.verbose)
+                return_val = self.__cmd_output(install_cmd, verbose=noise.verbose)
 
                 if return_val == 0:
                     if download_pkg:
@@ -420,16 +436,27 @@ class Package(object):
                     print('Removing {0} [{1}].'.format(pkg_to_install_name, branch_to_install))
                     print("Reinstall a fresh install to use the package.")
 
-                # if the no setup file, then remove the branch dir that was attempted to be downloaded & installed
+                # if no setup file, then remove the branch dir that was attempted to be downloaded & installed
                 self._remove_install_dirs(pkg_to_install_name, branch_to_install, pkg_install_dir, branch_install_dir, noise)
+        #########################  End of embedded function  ######################### 
 
 
         if download_pkg:    # this is for the initial installation
-            pkg_to_install_name, branch_to_install = self.parse_pkg_to_install_name(pkg_to_install)
+            #pkg_to_install_name, branch_to_install = self.parse_pkg_to_install_name(pkg_to_install)
+            pkg_to_install_name = self.parse_pkg_to_install_name(args.pkg_to_install)  # this is just the pkg_to_install's basename  
 
-            print('\n--> {0}  [{1}]'.format(pkg_to_install_name, branch_to_install))
+            if args.branch in ['master', 'default']:
+                download_info = self.download_url.format(pkg_to_install=args.pkg_to_install)
+            else:
+                download_info = self.download_url_cmd.format(branch=args.branch, download_url=self.download_url)
+            
+            branch_flattened_name = utils.branch_name_flattener(args.branch)
+            self.install_download_cmd = self.install_download_cmd.format(download_info=download_info, branch=branch_flattened_name)
+            # TODO make a check here to see if the download url is real (doesn't 404 or something) 
 
-            should_it_be_installed = self._installation_check(self.pkg_type, pkg_to_install_name, branch_to_install, 
+            print('\n--> {0}  [{1}]'.format(pkg_to_install_name, branch_flattened_name))
+
+            should_it_be_installed = self._installation_check(args.pkg_type, pkg_to_install_name, branch_flattened_name, 
                                                                 everything_already_installed)
             if should_it_be_installed:
 
@@ -439,12 +466,12 @@ class Package(object):
                 if not os.path.isdir(self.pkg_type_logs_dir):
                     os.makedirs(self.pkg_type_logs_dir) 
 
-                download_success = self._download_pkg(pkg_to_install_name, branch_to_install, noise)
+                download_success = self._download_pkg(pkg_to_install_name, branch_flattened_name, args, noise)
+                # if the download fails, it is taken care of inside self._download_pkg 
                 if download_success:
-                    do_install(pkg_to_install_name, branch_to_install)
-                # if the download failed, it is taken care of inside self._download_pkg 
+                    do_install(pkg_to_install_name, branch_flattened_name)
 
-        else:  # if don't have to download pkg first -- this is for turning pkg back on (from being turned off)
+        else:  # when don't have to download pkg first -- this is for turning pkg back on (from being turned off)
             # pkg_to_install is passed to the install func from the turn_on method & self.branch_to_turn_on_renamed is from turn_on 
             pkg_to_install_name = pkg_to_install
             branch_to_install = self.branch_to_turn_on_renamed
@@ -461,7 +488,7 @@ class Package(object):
         print('\n--> {0} [{1}]'.format(pkg_to_update_name, branch_to_update))
         utils.when_not_quiet_mode('Checking for updates...', noise.quiet)
 
-        return_val = self._cmd_output(self.update_cmd, verbose=False)
+        return_val = self.__cmd_output(self.update_cmd, verbose=False)
         if return_val != 0:
             try:
                 print('{0} {1}'.format(self.out.rstrip(), self.err.rstrip()))
@@ -495,7 +522,7 @@ class Package(object):
             contents_of_pkg_branch_dir = os.listdir(branch_update_dir)
 
             if self.lang_using.setup_file in contents_of_pkg_branch_dir:
-                return_val = self._cmd_output(update_install_cmd, verbose=noise.verbose)
+                return_val = self.__cmd_output(update_install_cmd, verbose=noise.verbose)
             else:
                 print("UPDATE FAILED for {0} [{1}].".format(pkg_to_update_name, branch_to_update))
                 print("There is no longer a {0} to use for installing the package.".format(self.lang_using.setup_file))
@@ -546,9 +573,6 @@ class Package(object):
         ''' remove the files installed in the userbase by using the install log file '''
 
         for branch_install_log in branch_installation_log_files: 
-            ### *nix specific way that works
-            #try: os.system('cat {0} | xargs rm -rf'.format(pkg_install_log))
-            #except: pass
 
             # platform neutral way
             with open(branch_install_log, 'r') as install_log:
@@ -730,26 +754,36 @@ class Package(object):
 
 
     def _turn_on_check(self, pkg_type, pkg_to_turn_on_name, branch_to_turn_on, everything_already_installed, noise):
+
         all_branches_installed_for_pkgs_lang_ver = utils.branches_installed_for_given_pkgs_lang_ver(
-                                                self.lang_cmd, 
-                                                pkg_to_turn_on_name, everything_already_installed) 
+                                                    self.lang_cmd, pkg_to_turn_on_name, everything_already_installed) 
 
         any_package_branch_on = [branch for branch in all_branches_installed_for_pkgs_lang_ver if not branch.startswith('.__')]
 
-        for lang_installed, pkg_types_dict in everything_already_installed.items():
-            if lang_installed == self.lang_cmd:
-                for installed_pkg_type, pkgs_dict in pkg_types_dict.items():
-                    for installed_pkg_name, branches_list in pkgs_dict.items(): 
-                        if any_package_branch_on:
-                            print("Cannot turn on {0} {1} [{2}] {3} because".format(pkg_type, pkg_to_turn_on_name, branch_to_turn_on, self.lang_cmd)) 
-                            utils.when_not_quiet_mode("a version of {0} is already turned on for {1}.".format(pkg_to_turn_on_name, self.lang_cmd), noise.quiet) 
-                            utils.when_not_quiet_mode("[Execute `{} list` to see currently turned on packages.]".format(name), noise.quiet)
-                            return False
-                        else:
-                            return True
+        # NOTE something about this seems very wrong, but just keeping incase I'm missing something.
+        #if self.lang_cmd in everything_already_installed:
+            #pkg_types_dict = everything_already_installed[self.lang_cmd]
+            #for installed_pkg_type, pkgs_dict in pkg_types_dict.items():
+                #for installed_pkg_name, branches_list in pkgs_dict.items(): 
+                    #if any_package_branch_on:
+                        #print("Cannot turn on {0} {1} [{2}] {3} because".format(pkg_type, pkg_to_turn_on_name, branch_to_turn_on, self.lang_cmd)) 
+                        #utils.when_not_quiet_mode("a version of {0} is already turned on for {1}.".format(pkg_to_turn_on_name, self.lang_cmd), noise.quiet) 
+                        #utils.when_not_quiet_mode("[Execute `{} list` to see currently turned on packages.]".format(name), noise.quiet)
+                        #return False
+                    #else:
+                        #return True
+
+        if any_package_branch_on:
+            print("Cannot turn on {0} {1} [{2}] {3} because".format(pkg_type, pkg_to_turn_on_name, branch_to_turn_on, self.lang_cmd)) 
+            utils.when_not_quiet_mode("a version of {0} is already turned on for {1}.".format(pkg_to_turn_on_name, self.lang_cmd), noise.quiet) 
+            utils.when_not_quiet_mode("[Execute `{} list` to see currently turned on packages.]".format(name), noise.quiet)
+            return False
+        else:
+            return True
 
 
-    def turn_on(self, pkg_to_turn_on_name, branch_to_turn_on_name, everything_already_installed, noise):
+
+    def turn_on(self, pkg_to_turn_on_name, branch_to_turn_on_name, args, everything_already_installed, noise):
         self.branch_to_turn_on_renamed = branch_to_turn_on_renamed = branch_to_turn_on_name.lstrip('.__')  
 
         utils.when_not_quiet_mode('\nAttempting to turn on {0} [{1}]...'.format(pkg_to_turn_on_name, branch_to_turn_on_renamed), noise.quiet) 
@@ -778,42 +812,43 @@ class Package(object):
             # reinstall the branch files from the branch installation dir back into userbase
             if noise.verbose:
                 print('Reinstalling {0} {1}...'.format(pkg_to_turn_on_name, branch_dir_renamed))
-            Package.install(self, pkg_to_turn_on_name, noise, download_pkg=False)
+            Package.install(self, pkg_to_turn_on_name, args, noise, download_pkg=False)
 
             print('Successfully turned on {0} [{1}].'.format(pkg_to_turn_on_name, branch_to_turn_on_renamed))
 
 
 
 class Git(Package):
-    def __init__(self, lang_arg, pkg_type, install_dirs):
+    def __init__(self, lang_arg, pkg_type, install_dirs, args):
         self.repo_type = 'git'
-        self.application_check_cmd = 'git --version'
-        super(Git, self).__init__(lang_arg, pkg_type, install_dirs)
+        self.application_check_cmd = '{} --version'.format(self.repo_type)
+        super(Git, self).__init__(lang_arg, pkg_type, install_dirs, args)
     
-    def install(self, pkg_to_install, noise, **kwargs):
+    def install(self, pkg_to_install, args, noise, **kwargs):
         self.download_url_cmd = '-b {branch} {download_url}'
         #self.install_download_cmd = 'git clone --single-branch {0}' # maybe want "git clone --recursive" instead?
         self.install_download_cmd = 'git clone {download_info} {branch}' 
-        Package.install(self, pkg_to_install, noise, **kwargs)
+        #self.install_download_cmd = 'git clone --recursive {download_info} {branch}' 
+        Package.install(self, pkg_to_install, args, noise, **kwargs)
 
     def update(self, lang_to_update, pkg_to_update, branch_to_update, noise):
-        #self.update_cmd = 'git pull && git submodule update --init --recursive'
+        #self.update_cmd = 'git pull && git submodule update --recursive'     # NOTE this might break the up_to_date_output check above 
         self.update_cmd = 'git pull'
         self.up_to_date_output = 'Already up-to-date'
         Package.update(self, lang_to_update, pkg_to_update, branch_to_update, noise)
 
 
 class Mercurial(Package):
-    def __init__(self, lang_arg, pkg_type, install_dirs):
+    def __init__(self, lang_arg, pkg_type, install_dirs, args):
         self.repo_type = 'hg'
-        self.application_check_cmd = 'hg --version'
-        super(Mercurial, self).__init__(lang_arg, pkg_type, install_dirs)
+        self.application_check_cmd = '{} --version'.format(self.repo_type)
+        super(Mercurial, self).__init__(lang_arg, pkg_type, install_dirs, args)
 
-    def install(self, pkg_to_install, noise, **kwargs):
+    def install(self, pkg_to_install, args, noise, **kwargs):
         #self.download_url_cmd = '-r {0} {1}' # need to look more into these commands
         self.download_url_cmd = '-b {branch} {download_url}'
         self.install_download_cmd = 'hg clone {download_info} {branch}'
-        Package.install(self, pkg_to_install, noise, **kwargs)
+        Package.install(self, pkg_to_install, args, noise, **kwargs)
 
     def update(self, lang_to_update, pkg_to_update, branch_to_update, noise):
         self.update_cmd = 'hg pull -u'
@@ -822,15 +857,15 @@ class Mercurial(Package):
 
 
 class Bazaar(Package):
-    def __init__(self, lang_arg, pkg_type, install_dirs):
+    def __init__(self, lang_arg, pkg_type, install_dirs, args):
         self.repo_type = 'bzr'
-        self.application_check_cmd = 'bzr --version'
-        super(Bazaar, self).__init__(lang_arg, pkg_type, install_dirs)
+        self.application_check_cmd = '{} --version'.format(self.repo_type)
+        super(Bazaar, self).__init__(lang_arg, pkg_type, install_dirs, args)
 
-    def install(self, pkg_to_install, noise, **kwargs):
+    def install(self, pkg_to_install, args, noise, **kwargs):
         self.download_url_cmd =  '{branch} {download_url}'  # i think this is how you install a specific branch (not sure though)
         self.install_download_cmd = 'bzr branch {download_info} {branch}'    # bzr uses branch instead of clone
-        Package.install(self, pkg_to_install, noise, **kwargs)
+        Package.install(self, pkg_to_install, args, noise, **kwargs)
 
     def update(self, lang_to_update, pkg_to_update, branch_to_update, noise):
         self.update_cmd = 'bzr pull'
@@ -840,30 +875,26 @@ class Bazaar(Package):
 
 class RepoTypeCheck(Git, Mercurial, Bazaar):
 
-    def install(self, pkg_to_install, noise, **kwargs):
-        self.repo_type, pkg_to_install = pkg_to_install.split('+')
-        if self.repo_type == 'hg':
-            Mercurial.install(self, pkg_to_install, noise, **kwargs)
-        elif self.repo_type == 'git':
-            Git.install(self, pkg_to_install, noise, **kwargs)
+    def install(self, pkg_to_install, args, noise, **kwargs):
+        if self.repo_type == 'git':
+            Git.install(self, pkg_to_install, args, noise, **kwargs)
+        elif self.repo_type == 'hg':
+            Mercurial.install(self, pkg_to_install, args, noise, **kwargs)
         elif self.repo_type == 'bzr':
-            Bazaar.install(self, pkg_to_install, noise, **kwargs)
+            Bazaar.install(self, pkg_to_install, args, noise, **kwargs)
         #elif <future_repo_type>:    # NOTE for other types of repos
             #<FutureRepoType.install(etc...)>
-        else:   # should never hit this b/c it is(/should always be) covered in subclasses
-            print("\nError installing {0}:".format(pkg_to_install))   
-            print("Command to install packages needs to be specified as one of: {0}".format(self.allowed_repo_types))
-            return
+
 
     def update(self, lang_to_update, pkg_to_update, branch_to_update, noise):
         pkg_install_dir = join(self.pkg_type_install_dir, pkg_to_update)
         branch_install_dir = join(pkg_install_dir, branch_to_update)
         contents_of_branch_install_dir = os.listdir(branch_install_dir) 
 
-        if '.hg' in contents_of_branch_install_dir:
-            Mercurial.update(self, lang_to_update, pkg_to_update, branch_to_update, noise)
-        elif '.git' in contents_of_branch_install_dir:
+        if '.git' in contents_of_branch_install_dir:
             Git.update(self, lang_to_update, pkg_to_update, branch_to_update, noise)
+        elif '.hg' in contents_of_branch_install_dir:
+            Mercurial.update(self, lang_to_update, pkg_to_update, branch_to_update, noise)
         elif '.bzr' in contents_of_branch_install_dir:
             Bazaar.update(self, lang_to_update, pkg_to_update, branch_to_update, noise)
         #elif <future_repo_type>:    # NOTE for other types of repos
@@ -872,70 +903,143 @@ class RepoTypeCheck(Git, Mercurial, Bazaar):
 
 class Github(Git):
 
-    def install(self, pkg_to_install, noise, **kwargs):
-        #self.repo_type = 'git'
-        self.allowed_repo_types = ['git']
-        is_repo_type_specified = pkg_to_install.split('+')
-        if len(is_repo_type_specified) == 2:
-            #print("\nNote: do not have to specify repo type for Github repos.") 
-            pkg_to_install = is_repo_type_specified[-1]
+    def install(self, pkg_to_install, args, noise, **kwargs):
+        self.repo_type = 'git'
 
-        self.download_url = 'https://github.com/{pkg_to_install}.git'
-        Git.install(self, pkg_to_install, noise, **kwargs)
+        #self.download_url = 'https://github.com/{pkg_to_install}.git'
+        #self.download_url = 'https://github.com/{pkg_to_install}'.format(pkg_to_install=args.pkg_to_install)
+        self.download_url = 'https://github.com/{pkg_to_install}'.format(pkg_to_install=pkg_to_install)
+        Git.install(self, pkg_to_install, args, noise, **kwargs)
 
 
 class Gitorious(Git):
  
-    def install(self, pkg_to_install, noise, **kwargs):
-        #self.repo_type = 'git'
-        self.allowed_repo_types = ['git']
-        is_repo_type_specified = pkg_to_install.split('+')
-        if len(is_repo_type_specified) == 2:
-            #print("\nNote: do not have to specify repo type for Gitorious repos.") 
-            pkg_to_install = is_repo_type_specified[-1]
+    def install(self, pkg_to_install, args, noise, **kwargs):
+        self.repo_type = 'git'
 
-        self.download_url = 'http://git.gitorious.org/{pkg_to_install}.git'
-        Git.install(self, pkg_to_install, noise, **kwargs)
+        #self.download_url = 'http://git.gitorious.org/{pkg_to_install}.git'
+        #self.download_url = 'http://git.gitorious.org/{pkg_to_install}'.format(pkg_to_install=args.pkg_to_install)
+        self.download_url = 'http://git.gitorious.org/{pkg_to_install}'.format(pkg_to_install=pkg_to_install)
+        Git.install(self, pkg_to_install, args, noise, **kwargs)
 
 
 class Bitbucket(RepoTypeCheck):
 
-    def install(self, pkg_to_install, noise, **kwargs):
-        self.allowed_repo_types = ['git', 'hg']
-        self.repo_type = pkg_to_install.split('+')[0]
+    def install(self, pkg_to_install, args, noise, **kwargs):
+        self.repo_type = args.repo_type
         if self.repo_type == 'hg': 
-            self.download_url = 'https://bitbucket.org/{pkg_to_install}'
+            self.download_url = 'https://bitbucket.org/{pkg_to_install}'.format(pkg_to_install=pkg_to_install)
         elif self.repo_type == 'git':
-            self.download_url = 'https://bitbucket.org/{pkg_to_install}.git'
-        else:
-            print("\nError installing {0}:".format(pkg_to_install))   
-            print("Command to install {0} packages needs to be specified as one of: {1}".format(self.pkg_type, self.allowed_repo_types))
-            return
-        RepoTypeCheck.install(self, pkg_to_install, noise, **kwargs)
+            #self.download_url = 'https://bitbucket.org/{pkg_to_install}.git'
+            #self.download_url = 'https://bitbucket.org/{pkg_to_install}'.format(pkg_to_install=args.pkg_to_install)
+            self.download_url = 'https://bitbucket.org/{pkg_to_install}'.format(pkg_to_install=pkg_to_install)
+        RepoTypeCheck.install(self, pkg_to_install, args, noise, **kwargs)
 
 
-class Local_Repo(RepoTypeCheck):
+class LocalRepo(RepoTypeCheck):
  
-    def install(self, pkg_to_install, noise, **kwargs):
-        self.allowed_repo_types = ['git', 'hg', 'bzr']
-        download_url_andor_branch = pkg_to_install.split('+')[-1].split('^')     # if specified w/ a branch: ['user/repo', 'branch']
-        if len(download_url_andor_branch) == 2:     # means branch was specified
-            print('\nError: Cannot specify branch for {0} installations.'.format(self.pkg_type)) 
-            print("Just checkout desired branch from {0} first, then install.".format(self.pkg_type))
-            return
-        elif len(download_url_andor_branch) == 1:
-            self.download_url = download_url_andor_branch[0]
+    def install(self, pkg_to_install, args, noise, **kwargs):
+        #self.download_url = args.pkg_to_install
+        self.download_url = pkg_to_install  # will be a path on local filesystem
 
-        self.repo_type = pkg_to_install.split('+')[0]
-        if self.repo_type not in self.allowed_repo_types: 
-            print("\nError installing {0}:".format(pkg_to_install))   
-            print("Command to install {0} packages needs to be specified as one of: {1}".format(self.pkg_type, self.allowed_repo_types))
-            return
-        RepoTypeCheck.install(self, pkg_to_install, noise, **kwargs) 
+        self.repo_type = args.repo_type
+        RepoTypeCheck.install(self, pkg_to_install, args, noise, **kwargs) 
+
 
 
 # TODO to add in ability to use urls for ssh access and the like.
 #class Remote_Repo(RepoTypeCheck):
 
     #def install(self, pkg_to_install, noise):
-        #self.allowed_repo_types = ['git', 'hg', 'bzr'] # maybe 'svn'?
+        #pass
+
+
+
+# FIXME
+'''
+class Stable(Package):
+    def __init__(self, args, install_dirs):
+        self.repo_type = 'stable'
+        self.info_url = 'https://pypi.python.org/pypi/{pkg_name}'  
+        #self.application_check_cmd = 'git --version'   # need to do a check to see if pkg exists in the first place
+
+        super(Stable, self).__init__(args, install_dirs)
+
+
+    def install(self, args, noise, **kwargs):
+
+        #self.download_url = 'https://pypi.python.org/pypi/{pkg_name}/json'
+        #url_data = urllib.urlopen(self.download_url)
+        #data = json.loads(url_data.read())
+        ## # latest pkg version from pypi 
+        #self.pkg_version = data['info']['version']  # this is the name that the dir gets (instead of a branch name)
+
+        self.download_url_cmd = '-b {branch} {download_url}' 
+        self.install_download_cmd = 'git clone (download_info} {branch}' #(dir name)
+        Package.install(self, args, noise, **kwargs)
+
+
+    def update(self): 
+        if pkg_version < current_pkg_version:
+            #then update pkg
+            pass
+    
+
+
+    try:    #### for python2    # FIXME this is too hacky
+        from xmlrpclib import ServerProxy
+        from urllib import urlopen
+
+    except ImportError:     #### for python3
+        from xmlrpc.client import ServerProxy 
+        from urllib.request import urlopen
+
+    pkg_name = 'ipython'    # to be passed into the script
+    client = ServerProxy('http://pypi.python.org/pypi')
+    
+    # see if it can be downloaded
+    all_packages_available = client.list_packages()
+    if pkg_name not in all_packages_available:
+        raise SystemExit("{} not available for download")
+
+    pkg_version = client.package_releases(pkg_name)[0]      # a list of 1 item
+    pkg_info = client.release_urls(pkg_name, pkg_version)   # will be a list of dicts
+    download_urls = [d['url'] for d in pkg_info if 'url' in d]  # could be .tar.gz/.zip/etc.
+
+    download_url = download_urls[0]  # how to decide whether to pick the .zip/.tar.gz/etc?
+    download_url_basename = os.path.basename(download_url) 
+
+    #urllib.urlretrieve(download_urls[0], '/tmp/{}'.format(download_url_basename)) 
+    with open('/tmp/{}'.format(download_url_basename), 'wb') as f:
+        f.write(urlopen(download_url).read())
+'''
+
+
+
+
+def create_pkg_inst(lang_arg, pkg_type, install_dirs, args=None, packages_file=None):   #TODO args doesn't need to be passed in here...but maybe it could be useful later
+    ''' install_dirs is a dict with the installed_pkgs_dir and the install_logs_dir '''
+
+    # for future pkg_types, just add them to this dict
+    supported_pkg_types = dict(github=Github, bitbucket=Bitbucket,
+                               gitorious=Gitorious, local=LocalRepo
+                               #remote=RemoteRepo # TODO 
+                               #stable=Stable  # TODO
+                               )
+
+    def make_inst(pkg_type_cls):
+        return pkg_type_cls(lang_arg, pkg_type, install_dirs, args)
+    
+    try:    # make a class instance of the relevant type
+        return make_inst(supported_pkg_types[pkg_type])
+    except KeyError:
+        if packages_file:  # installs from the pkgs file are the only thing that get this argument 
+            not_pkg_type = '\nError: {0} in your {1} is an unrecognized package type.\n'.format(pkg_type, packages_file)
+            raise SystemExit(not_pkg_type)
+        else:
+            not_pkg_type = '\nError: {0} is an unrecognized package type.\n'.format(pkg_type)
+            raise SystemExit(not_pkg_type)
+
+
+
+
