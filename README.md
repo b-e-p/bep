@@ -9,18 +9,16 @@ Bep provides a simple way to allow running &/or testing the absolute newest vers
 
 Moreover, several versions/branches of the same package can be installed with Bep, with all but one of those installed versions being the currently active ("turned on") version.  Meaning, there will only be one version seen by the environment at any given time.  Thus, Bep makes switching between different versions of the same package easy to do.  And if all versions of a package installed with Bep are hidden from the environment ("turned off"), then access to a version of that same package installed at the system level (from a package manager or the like) can be achieved without needing to fully remove the package.
 
-### Bep makes life easier for a few key reasons: 
+### Bep is useful for a couple key reasons: 
 
-1. It allows installing packages when you don't have root privileges on a shared file system;
+1. Since the packages installed with Bep are put into their own location (in the user's home dir), Bep doesn't mess with anything installed at the system-level -- meaning, packages installed with Bep won't get mixed in with versions of packages installed system-wide from package managers or such.  (Note, it is easy to switch back to a system-level installed version of a package by turning off or removing the package installed with Bep);
 
-2. Since the packages installed with Bep are put into their own location (in the user's home dir), Bep doesn't mess with anything installed at the system-level -- meaning, packages installed with Bep won't get mixed in with versions of packages installed system-wide from package managers or such.  (Note, it is easy to switch back to a system-level installed version of a package by turning off or removing the package installed with Bep);
-
-3.  As briefly explained, Bep lets you install several branches of the same package side by side and allows you to easily switch between them.
+2.  As briefly explained, Bep lets you install several branches of the same package side by side and allows you to easily switch between them.
 
 
 ### Just a bit of the implementation details...
 
-What Bep does, is that it downloads packages to `.bep` in user's home directory and then installs them into `.local`.  This area is searched first on the user's path, thus the packages installed by Bep are called upon for use before the system-level packages.  Currently, all of these packages are simply version controlled repositories (git, mercurial &/or bazaar), which are cloned, built and then installed behind the scenes by using the `bep` commands in the various ways outlined below.  Just specify where to get these packages from -- supported are, github, gitorious, bitbucket, or repos located on the local file system.  By default, a package installed with Bep uses the development branch (master/default) of its specified repository; however, if a specific branch (other than master) is wanted for installation, then this can easily be done instead.
+What Bep does, is that it downloads & builds packages in `.bep` in user's home directory and then installs them into `.local`.  This area is searched first on the user's path, thus the packages installed by Bep are called upon for use before the system-level packages.  Currently, all of these packages are simply version controlled repositories (git, mercurial &/or bazaar), which are cloned, built and then installed behind the scenes by using the commands outlined below.  Just specify where to get these packages from -- supported are, github, gitorious, bitbucket, or repos located on the local file system.  By default, a package installed with Bep uses the development branch (master/default) of its specified repository; however, if a different branch is wanted for installation, then this can easily be done instead.
 
 
 ## The basic commands are as follows:
@@ -72,7 +70,7 @@ Note though, we can install a version of ipython under a different version of py
 ![](imgs/install_diff_lang_version.png)
 
 
-#### NOTE, for all other command operations, there are 2 ways to specify the command; however, "pkg_name" is really the only thing that needs to be specified, which shows the full syntax of the command, and then allows you to run the command, like so:
+#### NOTE, for all other command operations, there are 2 ways to specify the command; however, "pkg_name" is really the only thing that needs to be specified, which shows the full syntax of a command, and then allows you to run the command, like so:
 ```
 # bep {update, remove, turn_on, turn_off} pkg_name
 ```
@@ -147,11 +145,11 @@ Bep relies only on the python standard library and supports python >= 2.7.
 
 #### Just clone/download Bep to wherever you want (it doesn't matter) and then... 
 
-If you want to install Bep system-wide (**NOT** the recommended way, as likely requires root access):
+If you want to install Bep system-wide (**NOT the recommended way**, as likely requires root access):
 
 `python setup.py install`
 
-Alternatively, if you don't have root access and/or just want to install Bep locally under your user (the **RECOMMENDED WAY**):
+Alternatively, if you don't have root access and/or just want to install Bep locally under your user (**the RECOMMENDED WAY**):
 
 `python setup.py install --user`
 

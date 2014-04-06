@@ -9,6 +9,7 @@ License: BSD
 """
 
 import sys
+
 pyversion = float(sys.version[0:3])
 if pyversion < 2.7:
     raise SystemExit("Requires Python >= 2.7; Current version is %s" % pyversion)
