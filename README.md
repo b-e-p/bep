@@ -78,7 +78,6 @@ Note though, we can install a version of ipython under a different version of py
 ```
 
 ## But first, here are some examples of the full syntax:
-```
 For example:
 
 ![](imgs/update.png)
