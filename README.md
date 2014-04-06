@@ -70,7 +70,8 @@ Note though, we can install a version of ipython under a different version of py
 ![](imgs/install_diff_lang_version.png)
 
 
-## NOTE, for all other command operations, there are 2 ways to specify the command; however, "pkg_name" is really the only thing that needs to be specified, which shows the full syntax of a command, and then allows you to run the command, like so:
+### For all other command operations 
+### There are 2 ways to specify the command; however, "pkg_name" is really the only thing that needs to be specified, which shows the full syntax of a command, and then allows you to run the command, like so:
 ```
 # bep {update, remove, turn_on, turn_off} pkg_name
 ```
