@@ -6,6 +6,10 @@
 * **[The Basic Commands](#the-basic-commands)**
   * [To Install Packages](#to-install-packages)
   * [All Other Commands](#all-other-commands)
+    * [To Update Packages](to-update-packages)
+    * [To Remove Packages](to-remove-packages)
+    * [To Turn On & Off Packages](to-turn-on-&-off-packages)
+    * [To List Installed Packages](to-list-installed-packages)
 * **[Installing Bep](installing-bep)**
 
 
@@ -101,7 +105,7 @@ bep update --all
 ```
 
 
-### To Remove Packages: 
+#### To Remove Packages: 
 ```
 # Remove a single package:
 bep [-l python_version] remove pkg_name -b branch_name
@@ -111,7 +115,7 @@ bep remove --all
 
 ```
 
-### To Turn On & Off Packages: 
+#### To Turn On & Off Packages: 
 ```
 # Turn off a single package:
 bep [-l python_version] turn_off pkg_name -b branch_name
@@ -124,7 +128,7 @@ bep turn_off --all
 bep [-l python_version] turn_on pkg_name -b branch_name
 ```
 
-### As mentioned, all of these commands also accept just a pkg_name as a single argument, which allows you to see and run the full command (for update, remove, turn_on|off): 
+#### As mentioned, all of these commands also accept just a pkg_name as a single argument, which allows you to see and run the full command (for update, remove, turn_on|off): 
 ```
 bep {update, remove, turn_on, turn_off} pkg_name 
 ```
@@ -134,7 +138,7 @@ For example:
 ![](imgs/how_to_update.png)
 
 
-### To List Installed Packages:
+#### To List Installed Packages:
 #### (and whether each is turned on or off)
 ```
 # List installed packages:
