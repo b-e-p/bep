@@ -4,7 +4,7 @@
 ## Table of Contents
 * **[The Big Picture](#big-picture)**
 * **[The Basic Commands](#the-basic-commands)**
-    *[To Install Packages](#to-install-packages)
+  *[To Install Packages](#to-install-packages)
 
 ## The Big Picture
 ### The gist of it...
