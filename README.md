@@ -8,10 +8,10 @@
   * [All Other Commands](#all-other-commands)
     * [To Update Packages](#to-update-packages)
     * [To Remove Packages](#to-remove-packages)
-    * [To Turn On & Off Packages](#to-turn-on-&-off-packages)
+    * [To Turn On and Off Packages](#to-turn-on-and-off-packages)
     * [To List Installed Packages](#to-list-installed-packages)
 * **[Installing Bep](#installing-bep)**
-  * [Example of a Sample .bep_packages File](#example-of-a-sample-bep_packages-file)
+* **[Example of a Sample .bep_packages File](#example-of-a-sample-bep_packages-file)**
 
 
 ## The Big Picture:
@@ -116,7 +116,7 @@ bep remove --all
 
 ```
 
-#### To Turn On & Off Packages: 
+#### To Turn On and Off Packages: 
 ```
 # Turn off a single package:
 bep [-l python_version] turn_off pkg_name -b branch_name
