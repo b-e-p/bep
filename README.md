@@ -12,7 +12,7 @@
     * [To List Installed Packages](#to-list-installed-packages)
 * **[Installing Bep](#installing-bep)**
   * [Example of a Sample .bep_packages File](#example-of-a-sample-bep_packages-file)
-
+* **[TODO](#todo)
 
 ## The Big Picture:
 ### The gist of it...
@@ -268,7 +268,7 @@ packages = dict(
 for installation and it turns out that it cannot be built & installed due to it requiring a dependency not being installed on the system (or perhaps needing a newer version of the dependency than what is currently installed on the system), then Bep will(/tries to) display the installation error that occurs, which will likely point out the (newer) dependency that is needed.  If this occurs, then the dependency could be installed with Bep as well, if it's something that Bep is capable of handling, or if not, it will have to be installed otherwise (with an OS package manager, pip, etc).
 
 
-#### TODO
+### TODO
 - Unit tests.
 - Support for remote repos (in addition to the local repos).
 - Could support other languages besides just Python, but I'm not going to do it. 
