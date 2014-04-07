@@ -13,6 +13,7 @@
 * **[Installing Bep](#installing-bep)**
 * **[Example of a Sample .bep_packages File](#example-of-a-sample-bep_packages-file)**
 
+-----
 
 ## The Big Picture:
 ### The gist of it...
