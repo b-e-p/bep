@@ -36,7 +36,7 @@ What Bep does, is that it downloads & builds packages in `.bep` in user's home d
 
 (Note, for all commands, specify the language arg if wanting to process a package under a language version other than the system default)
 
-###To install packages: 
+### To install packages: 
 
 ```
 # A single package:
@@ -82,7 +82,7 @@ Note though, we can install a version of ipython under a different version of py
 
 
 ### All Other Commands: 
-#### There are 2 ways to specify the command; however, "pkg_name" is really the only thing that needs to be specified, which shows the full syntax of a command, and then allows you to run the command, like so:
+#### There are 2 ways to specify the commands -- the full syntax way and a shorter way.  The shorter way only requires that an already installed "pkg_name" is specified, which then shows the full syntax for a command, and allows you to run the command, done like so:
 ```
 # bep {update, remove, turn_on, turn_off} pkg_name
 ```
@@ -95,7 +95,7 @@ For example:
 ![](imgs/remove.png)
 
 
-### To Update Packages: 
+#### To Update Packages: 
 ```
 # A single package:
 bep [-l python_version] update pkg_name -b branch_name
