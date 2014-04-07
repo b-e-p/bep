@@ -6,7 +6,7 @@
 * **[The Basic Commands](#the-basic-commands)**
   * [To Install Packages](#to-install-packages)
   * [All Other Commands](#all-other-commands)
-  * [To Update Packages](to-update-packages)
+  * [Update Packages command](update-packages-command)
   * [To Remove Packages](to-remove-packages)
   * [To Turn On & Off Packages](to-turn-on-&-off-packages)
   * [To List Installed Packages](to-list-installed-packages)
@@ -95,7 +95,7 @@ For example:
 ![](imgs/remove.png)
 
 
-#### To Update Packages: 
+### Update Packages command:
 ```
 # A single package:
 bep [-l python_version] update pkg_name -b branch_name
