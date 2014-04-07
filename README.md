@@ -6,6 +6,10 @@
 * **[The Basic Commands](#the-basic-commands)**
   * [To Install Packages](#to-install-packages)
   * [All Other Commands](#all-other-commands)
+    * [To Update Packages](#to-update-packages)
+    * [To Remove Packages](#to-remove-packages)
+    * [To Turn On & Off Packages](#to-turn-on-&-off-packages)
+    * [To List Installed Packages](#to-list-installed-packages)
 * **[Installing Bep](#installing-bep)**
 
 
