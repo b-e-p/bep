@@ -2,7 +2,7 @@
 
 
 ## Table of Contents
-* **[The Big Picture](#big-picture)**
+* **[The Big Picture](#the-big-picture)**
 * **[The Basic Commands](#the-basic-commands)**
   * [To Install Packages](#to-install-packages)
   * [All Other Commands](#all-other-commands)
@@ -10,7 +10,8 @@
   * [To Remove Packages](to-remove-packages)
   * [To Turn On & Off Packages](to-turn-on-&-off-packages)
   * [To List Installed Packages](to-list-installed-packages)
-  * [To Install Bep](to-install-bep)
+* **[To Install Bep](to-install-bep)**
+
 
 ## The Big Picture:
 ### The gist of it...
@@ -202,7 +203,7 @@ Likewise, again if Bep was installed at the user level, then **to remove everyth
 `bep remove --all`
 
 
-### An example of a sample `.bep_packages` file would look like:
+### Example of a sample `.bep_packages` file:
 
 ```python
 #! /usr/bin/env python 
