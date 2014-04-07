@@ -5,8 +5,14 @@
 * **[The Big Picture](#big-picture)**
 * **[The Basic Commands](#the-basic-commands)**
   * [To Install Packages](#to-install-packages)
+  * [All Other Commands](#all-other-commands)
+  * [To Update Packages](to-update-packages)
+  * [To Remove Packages](to-remove-packages)
+  * [To Turn On & Off Packages](to-turn-on-&-off-packages)
+  * [To List Installed Packages](to-list-installed-packages)
+  * [To Install Bep](to-install-bep)
 
-## The Big Picture
+## The Big Picture:
 ### The gist of it...
 
 Bep provides a simple way to allow running &/or testing the absolute newest versions (bleeding edge versions) of any particular set of packages, it does not interfere with packages installed at the system level and it does not require root access for use.  To use, simply specify at the command line a package for either installation, updating or removal.  Alternatively, several packages can be installed at the same time by just specifying them in a `.bep_packages` file under the user's home directory; once done, then simply issue the installation command.
@@ -25,7 +31,7 @@ Moreover, several versions/branches of the same package can be installed with Be
 What Bep does, is that it downloads & builds packages in `.bep` in user's home directory and then installs them into `.local`.  This area is searched first on the user's path, thus the packages installed by Bep are called upon for use before the system-level packages.  Currently, all of these packages are simply version controlled repositories (git, mercurial &/or bazaar), which are cloned, built and then installed behind the scenes by using the commands outlined below.  Just specify where to get these packages from -- supported are, github, gitorious, bitbucket, or repos located on the local file system.  By default, a package installed with Bep uses the development branch (master/default) of its specified repository; however, if a different branch is wanted for installation, then this can easily be done instead.
 
 
-## The Basic Commands
+## The Basic Commands:
 
 (Note, for all commands, specify the language arg if wanting to process a package under a language version other than the system default)
 
@@ -74,7 +80,7 @@ Note though, we can install a version of ipython under a different version of py
 ![](imgs/install_diff_lang_version.png)
 
 
-### For all other command operations: 
+### All Other Commands: 
 #### There are 2 ways to specify the command; however, "pkg_name" is really the only thing that needs to be specified, which shows the full syntax of a command, and then allows you to run the command, like so:
 ```
 # bep {update, remove, turn_on, turn_off} pkg_name
@@ -88,7 +94,7 @@ For example:
 ![](imgs/remove.png)
 
 
-### To update packages: 
+### To Update Packages: 
 ```
 # A single package:
 bep [-l python_version] update pkg_name -b branch_name
@@ -98,7 +104,7 @@ bep update --all
 ```
 
 
-### To remove packages: 
+### To Remove Packages: 
 ```
 # Remove a single package:
 bep [-l python_version] remove pkg_name -b branch_name
@@ -108,7 +114,7 @@ bep remove --all
 
 ```
 
-### To turn on & off packages: 
+### To Turn On & Off Packages: 
 ```
 # Turn off a single package:
 bep [-l python_version] turn_off pkg_name -b branch_name
@@ -131,7 +137,7 @@ For example:
 ![](imgs/how_to_update.png)
 
 
-### And lastly, to list installed packages and whether each is turned on or off:
+### To List Installed Packages and whether each is turned on or off:
 ```
 # List installed packages:
 bep list
@@ -144,7 +150,7 @@ bep list
 
 
 
-## To install bep:
+## To Install Bep:
 
 Bep relies only on the python standard library and supports python >= 2.7.  
 
