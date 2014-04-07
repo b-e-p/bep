@@ -11,7 +11,7 @@
     * [To Turn On & Off Packages](#to-turn-on-&-off-packages)
     * [To List Installed Packages](#to-list-installed-packages)
 * **[Installing Bep](#installing-bep)**
-  * [Example of a Sample `.bep_packages` File](#example-of-a-sample-`.bep_packages`-file)
+  * [Example of a Sample .bep_packages File](#example-of-a-sample-.bep_packages-file)
 
 
 ## The Big Picture:
@@ -205,7 +205,7 @@ Likewise, again if Bep was installed at the user level, then **to remove everyth
 `bep remove --all`
 
 
-### Example of a Sample `.bep_packages` File
+### Example of a Sample .bep_packages File
 
 ```python
 #! /usr/bin/env python 
