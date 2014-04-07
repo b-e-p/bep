@@ -10,7 +10,7 @@
   * [To Remove Packages](to-remove-packages)
   * [To Turn On & Off Packages](to-turn-on-&-off-packages)
   * [To List Installed Packages](to-list-installed-packages)
-* **[To Install Bep](to-install-bep)**
+* **[Installing Bep](installing-bep)**
 
 
 ## The Big Picture:
@@ -152,7 +152,7 @@ bep list
 
 
 
-## To Install Bep:
+## Installing Bep
 
 Bep relies only on the python standard library and supports python >= 2.7.  
 
