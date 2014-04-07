@@ -392,7 +392,7 @@ def main(): # needs to be done as a main func for setuptools to work correctly i
                 if not (cmd.startswith('****') and cmd.endswith('****')):
 
                     print('-'*60)
-                    msg = "The above version is installed, would you like to run the command [y/N]? "
+                    msg = "The above version is installed, would \nyou like to run the command [y/N]? "
                     response = raw_input(msg)
                     if response:
                         response = response.lower()
