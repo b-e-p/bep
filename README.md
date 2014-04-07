@@ -1,9 +1,11 @@
 # Bep
 
 
+## Table of Contents
+* **[Big Picture](#big-picture)**
 
-
-## The gist of it...
+## Big Picture
+### The gist of it...
 
 Bep provides a simple way to allow running &/or testing the absolute newest versions (bleeding edge versions) of any particular set of packages, it does not interfere with packages installed at the system level and it does not require root access for use.  To use, simply specify at the command line a package for either installation, updating or removal.  Alternatively, several packages can be installed at the same time by just specifying them in a `.bep_packages` file under the user's home directory; once done, then simply issue the installation command.
 
