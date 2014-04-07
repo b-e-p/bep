@@ -138,7 +138,8 @@ For example:
 ![](imgs/how_to_update.png)
 
 
-### To List Installed Packages and whether each is turned on or off:
+### To List Installed Packages:
+#### (and whether each is turned on or off)
 ```
 # List installed packages:
 bep list
