@@ -6,7 +6,7 @@
 * **[The Basic Commands](#the-basic-commands)**
   * [To Install Packages](#to-install-packages)
   * [All Other Commands](#all-other-commands)
-* **[To Install Bep](to-install-bep)**
+* **[To Install Bep:](to-install-bep)**
 
 
 ## The Big Picture:
