@@ -272,5 +272,5 @@ for installation and it turns out that it cannot be built & installed due to it 
 ### TODO
 - Unit tests.
 - Support for remote repos (in addition to the local repos).
-- Could support other languages besides just Python, but I'm not going to do it. 
-- Maybe latest "stable" packages?
+- Written in a way that could support other languages besides just Python (might do this). 
+- Potentially add support for latest "stable" packages.
