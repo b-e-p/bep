@@ -274,14 +274,25 @@ def main(): # needs to be done as a main func for setuptools to work correctly i
 
         args = top_parser.parse_args()
 
-
-        if ('top_subparser' in args) and (args.top_subparser == 'install'):
+        # handle branches here
+        if ('top_subparser' in args) and (args.top_subparser == 'install'): 
             if ('branch' in args) and (args.branch == None):
                 if args.pkg_type == 'local':    # for local, grab the currently checked out branch from the repo and set that as the branch to install 
                     branch = utils.get_checked_out_local_branch(args.pkg_to_install, args.repo_type)
                 else:
                     branch = utils.get_default_branch(args.repo_type)
                 args.branch = branch
+            elif ('branch' in args) and (args.branch != None):
+                if args.pkg_type == 'local':    # for local, don't allow branch to be specified; just use currently checked out branch 
+                    error_msg = "for `local` packages a branch cannot be specified;\n"
+                    error_msg = error_msg + "check out the desired branch from the repo itself, then install."
+                    raise top_parser.error(error_msg)
+        elif ('top_subparser' in args) and (args.top_subparser != 'install'):
+            if ('branch' in args) and (args.branch == None):
+                error_msg = 'need to make sure a branch is specified;\n'
+                error_msg = error_msg + "[Execute `{} list` to see installed packages and branches.]".format(name)
+                raise top_parser.error(error_msg)
+
         #print "args changed\n", args
 
 

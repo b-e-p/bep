@@ -89,21 +89,21 @@ def get_checked_out_local_branch(local_pkg_to_install_path, repo_type):
     if ('.hg' in contents_of_branch_install_dir) and (repo_type == 'hg'):
         cmd = 'hg branch'
         outdict = cmd_output_capture_all(cmd)
-        output = outdict['out'].splitlines() 
+        output = outdict['out'].splitlines() # the default is "default" 
         return output[0]
 
     elif ('.git' in contents_of_branch_install_dir) and (repo_type == 'git'):
         cmd = 'git branch'
         outdict = cmd_output_capture_all(cmd)
         output = outdict['out'].splitlines() 
-        cur_branch = [b for b in output if b.startswith('* ')][0]
+        cur_branch = [b for b in output if b.startswith('* ')][0] # the default is "* master"
         return cur_branch.lstrip('* ')
 
     elif ('.bzr' in contents_of_branch_install_dir) and (repo_type == 'bzr'):
         cmd = 'bzr branches'
         outdict = cmd_output_capture_all(cmd)
         output = outdict['out'].splitlines() 
-        cur_branch = [b for b in output if b.startswith('* ')][0]
+        cur_branch = [b for b in output if b.startswith('* ')][0] # the default is "* (default)"
         b = cur_branch.lstrip('* (').rstrip(')')
         return b
     else:
