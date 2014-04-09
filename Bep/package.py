@@ -19,6 +19,12 @@ import glob
 import itertools
 import locale   # needed in py3 for decoding output from subprocess pipes 
 
+pyversion = float(sys.version[0:3])
+if pyversion == 2.7:
+    from urllib import urlopen  # for py2
+else:
+    from urllib.request import urlopen # for py3
+
 from Bep.languages import languages
 from Bep.core.release_info import name
 from Bep.core import utils
@@ -441,18 +447,34 @@ class Package(object):
         #########################  End of embedded function  ######################### 
 
 
+
         if download_pkg:    # this is for the initial installation
             #pkg_to_install_name, branch_to_install = self.parse_pkg_to_install_name(pkg_to_install)
             pkg_to_install_name = self.parse_pkg_to_install_name(args.pkg_to_install)  # this is just the pkg_to_install's basename  
+            
+            download_url = self.download_url.format(pkg_to_install=args.pkg_to_install)
+            
+            try: # check to see if the download url actually exists
+                # broken for gitorious (but will likely get caught in the download subprocess exiting not being == 0)
+                if args.pkg_type != 'gitorious':
+                    resp = urlopen(download_url)
+                    if resp.getcode() != 200:   # will be 200 if website exists
+                        raise Exception
+            except:
+                error_msg = "Error:  could not get package {} from\n{}".format(pkg_to_install_name, download_url)
+                raise SystemExit(error_msg)
+            
 
             if args.branch in ['master', 'default']:
-                download_info = self.download_url.format(pkg_to_install=args.pkg_to_install)
+                #download_info = self.download_url.format(pkg_to_install=args.pkg_to_install)
+                download_info = download_url
             else:
                 download_info = self.download_url_cmd.format(branch=args.branch, download_url=self.download_url)
             
             branch_flattened_name = utils.branch_name_flattener(args.branch)
+
             self.install_download_cmd = self.install_download_cmd.format(download_info=download_info, branch=branch_flattened_name)
-            # TODO make a check here to see if the download url is real (doesn't 404 or something) 
+
 
             print('\n--> {0}  [{1}]'.format(pkg_to_install_name, branch_flattened_name))
 
@@ -919,7 +941,7 @@ class Gitorious(Git):
 
         #self.download_url = 'http://git.gitorious.org/{pkg_to_install}.git'
         #self.download_url = 'http://git.gitorious.org/{pkg_to_install}'.format(pkg_to_install=args.pkg_to_install)
-        self.download_url = 'http://git.gitorious.org/{pkg_to_install}'.format(pkg_to_install=pkg_to_install)
+        self.download_url = 'https://git.gitorious.org/{pkg_to_install}'.format(pkg_to_install=pkg_to_install)
         Git.install(self, pkg_to_install, args, noise, **kwargs)
 
 
