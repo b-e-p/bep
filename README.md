@@ -11,7 +11,7 @@
     * [To Turn On and Off Packages](#to-turn-on-and-off-packages)
     * [To List Installed Packages](#to-list-installed-packages)
 * **[Installing Bep](#installing-bep)**
-  * [Bep can manage Bep](#bep-can-manage-bep)
+  * [Also...Bep can manage Bep](#bep-can-manage-bep)
 * **[Example of a Sample .bep_packages file](#example-of-a-sample-bep_packages-file)**
 
 -----
