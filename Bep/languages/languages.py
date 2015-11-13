@@ -1,14 +1,12 @@
 #!/usr/bin/python
 
-"""
 #----------------------------------------------------------------
-Author: Jason Gors <jasonDOTgorsATgmail>
-Creation Date: 09-19-2013
-Purpose:  This is where language specific installation commands
-        live.  This is also the top level class for the classes 
-        defined in the package.py file.
+# Author: Jason Gors <jasonDOTgorsATgmail>
+# Creation Date: 09-19-2013
+# Purpose:  This is where language specific installation commands
+        # live.  This is also the top level class for the classes
+        # defined in the package.py file.
 #----------------------------------------------------------------
-"""
 
 import datetime
 import subprocess
@@ -30,13 +28,13 @@ class Language(object):
             raise SystemExit
 
         out, err = p.communicate()
-        out = out.decode(encoding) 
+        out = out.decode(encoding)
         return out
 
 
     def _create_record_log_file(self, pkg_type_logs_dir, pkg_name, pkg_branch_name):
         time_stamp = datetime.datetime.now().strftime('%Y_%m_%d_%H_%M_%S')
-        record_file = join(pkg_type_logs_dir, pkg_name, pkg_branch_name, 
+        record_file = join(pkg_type_logs_dir, pkg_name, pkg_branch_name,
                                             'log_{0}.txt'.format(time_stamp))
         return record_file
 
@@ -50,7 +48,7 @@ class Python(Language):
     def get_lang_cmd(self, lang_arg):
         #self.lang_arg = lang_arg
 
-        get_version_cmd = [lang_arg, "-c", "import sys; print(sys.version[0:3])"] 
+        get_version_cmd = [lang_arg, "-c", "import sys; print(sys.version[0:3])"]
         version = self.execute_shell_cmd(lang_arg, get_version_cmd)
 
         if lang_arg in [self.system_default, 'python3']:
@@ -62,12 +60,12 @@ class Python(Language):
 
 
     def get_install_cmd(self, pkg_name, branch_name, lang_cmd, record_file):
-        ''' To install packages from specified languages, in a user's home directory (~/.local 
-            in *nix, elsewhere on windows), which is seen by the env before the system-wide 
+        ''' To install packages from specified languages, in a user's home directory (~/.local
+            in *nix, elsewhere on windows), which is seen by the env before the system-wide
             installed packages) '''
 
         # as per PEP 370 (http://www.python.org/dev/peps/pep-0370)
-        install_cmd = '{0} {1} install --user --record {2}'.format(lang_cmd, 
+        install_cmd = '{0} {1} install --user --record {2}'.format(lang_cmd,
                                                             self.setup_file, record_file)
         return install_cmd
 

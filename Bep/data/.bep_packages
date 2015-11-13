@@ -1,6 +1,6 @@
-#! /usr/bin/env python 
+#! /usr/bin/env python
 #
-# You don't actually need this part at the top, it just provides 
+# You don't actually need this part at the top, it just provides
 # for syntax highlighting as this is just a plain old python file.
 
 # Any of these can be specified like so, where
@@ -11,7 +11,7 @@
 # [language-->]repo_type+userName/repoName[^branch]
 # eg. hg+mchaput/whoosh                 # under bitbucket
 # eg. python3.3-->ipython/ipython       # under github
-# eg. pydata/pandas                     # under github 
+# eg. pydata/pandas                     # under github
 
 packages = dict(
     github = [
@@ -43,7 +43,7 @@ packages = dict(
         #### again, need to say what type of repo it is; also,
         #### don't specify a branch -- when installed it uses the
         #### currently checked out branch from the local repo:
-        #### 'repo_type+/a_dir/inside_a_dir/on_local_machine/pkg_name', 
+        #### 'repo_type+/a_dir/inside_a_dir/on_local_machine/pkg_name',
         ####'hg+/home/your_username/some_dir/some_mercurial_repo',
         ####'git+/home/username/some_other_dir/some_git_repo',
         ####'bzr+/home/username/another_dir/some_bazaar_repo',

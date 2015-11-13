@@ -1,27 +1,25 @@
 #!/usr/bin/python
 
-"""
 #----------------------------------------------------------------
-Author: Jason Gors <jasonDOTgorsATgmail>
-Creation Date: 09-29-2013
-Purpose: general utilites used by the packages script
+# Author: Jason Gors <jasonDOTgorsATgmail>
+# Creation Date: 09-29-2013
+# Purpose: general utilites used by the packages script
 #----------------------------------------------------------------
-"""
 
 import os
 import json
 
-def handle_db_after_an_install(pkg_type, pkg_to_install_name, branch_to_install, 
+def handle_db_after_an_install(pkg_type, pkg_to_install_name, branch_to_install,
                                     lang_cmd_for_install, db_pname):
 
-    branch_to_install_dict = {'installation_lang_cmd': lang_cmd_for_install, 
+    branch_to_install_dict = {'installation_lang_cmd': lang_cmd_for_install,
                              }
 
     if not os.path.exists(db_pname):
         with open(db_pname, 'w') as f:
             db = {pkg_type: {
                     pkg_to_install_name: {
-                        branch_to_install: branch_to_install_dict 
+                        branch_to_install: branch_to_install_dict
                             }}}
             json.dump(db, f, indent=4)
 
@@ -35,18 +33,18 @@ def handle_db_after_an_install(pkg_type, pkg_to_install_name, branch_to_install,
                         pass
                     else:  # then have to add branch_to_install
                         db[pkg_type][pkg_to_install_name].update({
-                            branch_to_install: branch_to_install_dict 
+                            branch_to_install: branch_to_install_dict
                                 })
                 else:  # then have to add pkg_to_install_name
-                    db[pkg_type].update({ 
+                    db[pkg_type].update({
                             pkg_to_install_name: {
-                                branch_to_install: branch_to_install_dict 
+                                branch_to_install: branch_to_install_dict
                                     }})
             else:   # then have to add pkg_type
-                db.update({ 
+                db.update({
                     pkg_type: {
                         pkg_to_install_name: {
-                            branch_to_install: branch_to_install_dict 
+                            branch_to_install: branch_to_install_dict
                                 }}})
 
         with open(db_pname, 'w') as f:
@@ -58,7 +56,7 @@ def get_lang_cmd_branch_was_installed_with(pkg_type, pkg_name, branch, db_pname)
     with open(db_pname, 'r') as f:
         db = json.load(f)
         lang_branch_installed_with = db[pkg_type][pkg_name][branch]['installation_lang_cmd']
-        return lang_branch_installed_with 
+        return lang_branch_installed_with
 
 
 
@@ -74,10 +72,10 @@ def handle_db_for_removal(pkg_type, pkg_to_remove_name, branch_to_remove, db_pna
                     if branch_to_remove in db[pkg_type][pkg_to_remove_name]:
                         # remove the branch from the pkg_name, from the pkg_type
                         del db[pkg_type][pkg_to_remove_name][branch_to_remove]
-                    else:  
+                    else:
                         # branch is not here to remove
                         pass
-                else:  
+                else:
                     # pkg_to_remove_name is not here to remove
                     pass
             else:
@@ -85,7 +83,7 @@ def handle_db_for_removal(pkg_type, pkg_to_remove_name, branch_to_remove, db_pna
                 pass
 
         for pkg_type, pkgs_to_remove_dict in db.items():
-            if not pkgs_to_remove_dict: 
+            if not pkgs_to_remove_dict:
                 del db[pkg_type] # if the pkgs_to_remove_dict doesn't have anything in it, then remove it
 
             for pkg_to_remove, branches_to_remove_dict in pkgs_to_remove_dict.items():
@@ -106,11 +104,11 @@ def handle_db_for_branch_renaming(pkg_type, pkg_name, branch_orig_name, branch_r
                 if pkg_name in db[pkg_type]:
                     if branch_orig_name in db[pkg_type][pkg_name]:
                         # rename the branch key from the pkg_name, from the pkg_type
-                         db[pkg_type][pkg_name][branch_renamed] = db[pkg_type][pkg_name].pop(branch_orig_name) 
-                    else:  
+                         db[pkg_type][pkg_name][branch_renamed] = db[pkg_type][pkg_name].pop(branch_orig_name)
+                    else:
                         # branch is not there
                         pass
-                else:  
+                else:
                     # pkg_name is not there
                     pass
             else:

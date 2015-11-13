@@ -1,12 +1,10 @@
 
-"""
 #----------------------------------------------------------------
-Author: Jason Gors <jasonDOTgorsATgmail>
-Creation Date: 09-20-2013
-Purpose: this is the point of call from the bep script.
-License: BSD
+# Author: Jason Gors <jasonDOTgorsATgmail>
+# Creation Date: 09-20-2013
+# Purpose: this is the point of call from the bep script.
+# License: BSD
 #----------------------------------------------------------------
-"""
 
 import sys
 
