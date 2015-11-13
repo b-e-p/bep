@@ -1,20 +1,18 @@
 #!/usr/bin/python
 
-"""
 #----------------------------------------------------------------
-Author: Jason Gors <jasonDOTgorsATgmail>
-Creation Date: 09-20-2013
-Purpose: how to set-up & install.
-License: BSD
+# Author: Jason Gors <jasonDOTgorsATgmail>
+# Creation Date: 09-20-2013
+# Purpose: how to set-up & install.
+# License: BSD
 #----------------------------------------------------------------
-"""
 
 import os
 
 # bring in the info from core.release_info
 from Bep.core.release_info import (
         name,
-        __version__, 
+        __version__,
         description,
         author,
         email,
@@ -24,7 +22,7 @@ from Bep.core.release_info import (
 
 setup_args = dict(
     name=name,
-    version=__version__, 
+    version=__version__,
     description=description,
     #long_description=open('README.md').read(),
     #long_description='For installation and use info see {}'.format(url),
@@ -36,7 +34,7 @@ setup_args = dict(
 )
 
 # this should be done by setup(), but just in case (so we don't overwrite someone's packages file):
-usr_home_dir = os.path.expanduser('~')  # specifies the user's home dir  
+usr_home_dir = os.path.expanduser('~')  # specifies the user's home dir
 bep_pkgs_fname = '.bep_packages'
 if not os.path.exists( os.path.join(usr_home_dir, bep_pkgs_fname) ):
     #setup_args['data_files'] = [('Bep/data/', ['Bep/data/{}'.format(bep_pkgs_fname)])]
