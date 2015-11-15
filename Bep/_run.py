@@ -148,13 +148,13 @@ def main(): # needs to be done as a main func for setuptools to work correctly i
         parser_list.add_argument('list_arg', action="store_true", help=usage.list_sub_use) #metavar="arg")
 
 
+
         class CheckIfCanBeInstalled(argparse.Action):
-            ''' makes sure a repo to install has both a user_name and repo_name:
+            ''' makes sure a repo to install has both a user name and repo name:
                 eg. ipython/ipython '''
 
             def __call__(self, parser, namespace, arg_value, option_string=None):
-                pkg_type = parser.prog.split(' ')[-1]
-                if pkg_type == 'local':
+                if namespace.pkg_type in ['local']:
                     # check to see if the local path exists
                     if os.path.exists(arg_value):
                         setattr(namespace, self.dest, arg_value)
@@ -162,8 +162,8 @@ def main(): # needs to be done as a main func for setuptools to work correctly i
                         error_msg = "\n\tIs not a path that exists on local filesystem."
                         raise parser.error(arg_value + error_msg)
 
-                # TODO not implement yet, but just a placeholder for when i add this in
-                elif pkg_type == 'remote':  # check if repo exists
+                # TODO check if repo exists (or for stable, if web-link 404's a response) (do that later)
+                elif namespace.pkg_type in ['remote']: # TODO not implement yet
                     # do some kind of check on these as well to see if the url exists (probably do this later in the flow)
                     setattr(namespace, self.dest, arg_value)
 
@@ -175,88 +175,98 @@ def main(): # needs to be done as a main func for setuptools to work correctly i
                         raise parser.error(arg_value + error_msg)
 
 
+
         ##################################################
+        ### install command
+        install_parser = top_subparser.add_parser('install', help=usage.install_use.format(packages_file),
+                                                  formatter_class=argparse.RawTextHelpFormatter)
+        install_parser.set_defaults(top_subparser='install')
+        install_subparser = install_parser.add_subparsers(dest='pkg_type', help=usage.install_sub_use.format(packages_file))
+
+        for c in repo_choices:
+            pkg_type_to_install = install_subparser.add_parser(c)
+            # pkg_type_to_install.set_defaults(pkg_type_to_install=c) # is the same as 'pkg_type' dest above
+
+            pkg_type_to_install.add_argument('pkg_to_install',   # like ipython/ipython
+                                             action=CheckIfCanBeInstalled)   # actions here to make sure it's legit
+
+            # local repos don't get to have a branch specified; a branch would need to be checked out first, then installed.
+            #if c != 'local':
+                #pkg_type_to_install.add_argument('-b', '--branch', dest='branch', default=None)#, action=CheckBranch)    # the branch bit is filled out below
+
+            if c in ['github']:
+                pkg_type_to_install.add_argument('repo_type', default='git', nargs='?')
+
+            elif c == 'bitbucket':
+                pkg_type_to_install.add_argument('repo_type', choices=['git', 'hg'])
+
+            elif c == 'local':
+                pkg_type_to_install.add_argument('repo_type', choices=['git', 'hg', 'bzr'])
+
+            #elif c == 'remote':    # TODO not implemented
+                #pkg_type_to_install.add_argument('repo_type', choices=['git', 'hg', 'bzr'])
+
+            pkg_type_to_install.add_argument('-b', '--branch', dest='branch', default=None)#, action=CheckBranch)    # the branch bit is filled out below
+
+        for c in other_choices:
+            if c == 'packages':
+                pkg_type_to_install = install_subparser.add_parser(c, help=usage.packages_file_use.format(packages_file))
+
+            #elif c == 'stable': # TODO not implemented
+                #pkg_type_to_install = install_subparser.add_parser(c)
+                #pkg_type_to_install.add_argument('pkg_to_install')  # like ipython
+                ##pkg_type_to_install.add_argument('--pversion')      # TODO like 1.2.1 (add this in later to install different version of a stable pkg)
+
+        # NOTE this seems like a better way to go in the future:
+        # install_parser.set_defaults(func=run_install)
+        # then run_install would be defined to run the install process (rather than having the conditionals below)
+        # def run_install(args):
+        #   install_arg = args.install_arg  # would be a list of pkgs or a string of the packages file
+        #   ...process the install_arg to decide what to install
+        #   ...then do the install
+        ##################################################
+
+
+
+
+        ##################################################
+        # commands other than install
         cmd_help = vars(usage.cmd_help)
-        for cmd in ['install', 'update', 'remove', 'turn_off', 'turn_on']:
-            if cmd == 'install':
-                install_parser = top_subparser.add_parser(cmd, help=usage.install_use.format(packages_file),
-                                                          formatter_class=argparse.RawTextHelpFormatter)
-                install_parser.set_defaults(top_subparser=cmd)
-                install_subparser = install_parser.add_subparsers(dest='pkg_type', help=usage.install_sub_use.format(packages_file))
-                for c in repo_choices:
-                    pkg_type_to_install = install_subparser.add_parser(c)
-                    # pkg_type_to_install.set_defaults(pkg_type_to_install=c) # is the same as 'pkg_type' dest above
+        for cmd in ['update', 'remove', 'turn_off', 'turn_on']:
+            subparser_parser = top_subparser.add_parser(cmd, help=cmd_help['{}_use'.format(cmd)],
+                                                        formatter_class=argparse.RawTextHelpFormatter)
+            subparser_parser.set_defaults(top_subparser=cmd)
 
-                    pkg_type_to_install.add_argument('pkg_to_install',   # like ipython/ipython
-                                                     action=CheckIfCanBeInstalled)   # actions here to make sure it's legit
+            ### didn't work, not sure why, but this is getting kind of complex with
+            ### the nested subparsers
+            #all_dest = '{}_ALL'.format(cmd)
+            #subparser_parser.add_argument('--all',
+                                            ##help=usage.remove_sub_use.format(name=name),    # FIXME not sure why this wouldn't work
+                                            ##action=CheckIfALL, action='store_true')
 
-                    # local repos don't get to have a branch specified; a branch would need to be checked out first, then installed.
-                    #if c != 'local':
-                        #pkg_type_to_install.add_argument('-b', '--branch', dest='branch', default=None)#, action=CheckBranch)    # the branch bit is filled out below
+            #cur_args = vars(top_parser.parse_args())
+            #print(cur_args)
+            #if 'all' in cur_args:
+                #if cur_args['all']:
+                    #break
+            this_cmds_help = cmd_help['{}_sub_use'.format(cmd)].format(name=name)
+            subparsers_subparser = subparser_parser.add_subparsers(dest='pkg_type', help=this_cmds_help)
 
-                    if c == 'github':
-                        pkg_type_to_install.add_argument('repo_type', default='git', nargs='?')
+            for c in repo_choices:
+                pkg_type_to_proc = subparsers_subparser.add_parser(c)
+                pkg_type_to_proc.add_argument('pkg_to_{}'.format(cmd))   # like ipython
+                pkg_type_to_proc.add_argument('-b', '--branch', dest='branch', default=None)  # needs to be specified in script (for installs though it use default name if not specified)
 
-                    elif c == 'bitbucket':
-                        pkg_type_to_install.add_argument('repo_type', choices=['git', 'hg'])
+            #for c in other_choices: #TODO
+                ##if c == 'packages':    # packages args only used for installs
+                    ##pkg_type_to_proc = subparsers_subparser.add_parser(c)
+                #if c == 'stable':
+                    #pkg_type_to_proc = subparsers_subparser.add_parser(c)
+                    #pkg_type_to_proc.add_argument('pkg_to_{}'.format(cmd))  # like ipython
+                    #pkg_type_to_proc.add_argument('--pversion', help='package version')      # like 1.2.1 (default should be the newest, but can specify older ones)
+        ##################################################
 
-                    elif c == 'local':
-                        pkg_type_to_install.add_argument('repo_type', choices=['git', 'hg', 'bzr'])
 
-                    #elif c == 'remote':    # TODO not implemented
-                        #pkg_type_to_install.add_argument('repo_type', choices=['git', 'hg', 'bzr'])
-
-                    pkg_type_to_install.add_argument('-b', '--branch', dest='branch', default=None)#, action=CheckBranch)    # the branch bit is filled out below
-
-                for c in other_choices:
-                    if c == 'packages':
-                        pkg_type_to_install = install_subparser.add_parser(c, help=usage.packages_file_use.format(packages_file))
-
-                    #elif c == 'stable': # TODO not implemented
-                        #pkg_type_to_install = install_subparser.add_parser(c)
-                        #pkg_type_to_install.add_argument('pkg_to_install')  # like ipython
-                        ##pkg_type_to_install.add_argument('--pversion')      # TODO like 1.2.1 (add this in later to install different version of a stable pkg)
-
-                # NOTE this seems like a better way to go in the future:
-                # install_parser.set_defaults(func=run_install)
-                # then run_install would be defined to run the install process (rather than having the conditionals below)
-                # def run_install(args):
-                #   install_arg = args.install_arg  # would be a list of pkgs or a string of the packages file
-                #   ...process the install_arg to decide what to install
-                #   ...then do the install
-                ##################################################
-            else:
-                subparser_parser = top_subparser.add_parser(cmd, help=cmd_help['{}_use'.format(cmd)],
-                                                            formatter_class=argparse.RawTextHelpFormatter)
-                subparser_parser.set_defaults(top_subparser=cmd)
-
-                ### didn't work, not sure why yet
-                #all_dest = '{}_ALL'.format(cmd)
-                #subparser_parser.add_argument('--all',
-                                                ##help=usage.remove_sub_use.format(name=name),    # FIXME not sure why this wouldn't work
-                                                ##action=CheckIfALL, action='store_true')
-
-                #cur_args = vars(top_parser.parse_args())
-                #print(cur_args)
-                #if 'all' in cur_args:
-                    #if cur_args['all']:
-                        #break
-                this_cmds_help = cmd_help['{}_sub_use'.format(cmd)].format(name=name)
-                subparsers_subparser = subparser_parser.add_subparsers(dest='pkg_type', help=this_cmds_help)
-
-                for c in repo_choices:
-                    pkg_type_to_proc = subparsers_subparser.add_parser(c)
-                    pkg_type_to_proc.add_argument('pkg_to_{}'.format(cmd))   # like ipython
-                    pkg_type_to_proc.add_argument('-b', '--branch', dest='branch', default=None)  # needs to be specified in script (for installs though it use default name if not specified)
-
-                #for c in other_choices: #TODO
-                    ##if c == 'packages':    # packages args only used for installs
-                        ##pkg_type_to_proc = subparsers_subparser.add_parser(c)
-                    #if c == 'stable':
-                        #pkg_type_to_proc = subparsers_subparser.add_parser(c)
-                        #pkg_type_to_proc.add_argument('pkg_to_{}'.format(cmd))  # like ipython
-                        #pkg_type_to_proc.add_argument('--pversion', help='package version')      # like 1.2.1 (default should be the newest, but can specify older ones)
-            ##################################################
 
 
 
