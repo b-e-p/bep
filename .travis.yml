@@ -6,5 +6,7 @@ python:
   - "3.3"
   - "3.4"
   - "3.5"
+before_install:
+  - export PATH=$HOME/.local/bin:$PATH
 install: "python setup.py install --user"
 script: nosetests
