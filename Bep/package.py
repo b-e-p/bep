@@ -9,7 +9,8 @@
 
 import os
 from os.path import join
-from site import getuserbase
+# from site import getuserbase
+from site import USER_BASE as user_base
 import shutil
 import subprocess
 import sys
@@ -713,7 +714,7 @@ class Package(object):
         self._remove_install_dirs(pkg_to_remove_name, branch_to_remove_name, pkg_dir, branch_dir, noise)
 
         # look recursively to see if the dirs in userbase are empty and remove those empty dirs.
-        self._remove_empty_dirs_recursively(getuserbase(), noise)
+        self._remove_empty_dirs_recursively(user_base, noise)
 
         # remove the branch listing from the installation_db
         #if noise.verbose:
@@ -749,7 +750,7 @@ class Package(object):
         self._remove_log_dirs(pkg_to_turn_off_name, branch_to_turn_off_name, pkg_logs_dir, branch_logs_dir, noise)
 
         # look recursively to see if the dirs in userbase are empty and removes those empty dirs.
-        self._remove_empty_dirs_recursively(getuserbase(), noise)
+        self._remove_empty_dirs_recursively(user_base, noise)
 
         # rename the branch dir name (in the pkg_dir)
         if noise.verbose:
