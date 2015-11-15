@@ -15,5 +15,8 @@ before_install:
   - PYTHONPATH=$PYTHONPATH:$HOME/.local/lib/python3.5/site-packages/
 
 #install: "python setup.py install --user"
-install: "python setup.py install"
-script: nosetests
+#install: "python setup.py install"
+script:
+  - "python setup.py install"
+  - nosetests
+#script: nosetests
