@@ -6,12 +6,12 @@ python:
 - 3.3
 - 3.4
 - 3.5
-addons:
-  apt:
-    packages:
-    - git
-    - mercurial
-    - bzr
+#addons:
+  #apt:
+    #packages:
+    #- git
+    #- mercurial
+    #- bzr
 before_install:
 - export PATH=$HOME/.local/bin:$PATH
 - export PYTHONPATH=$HOME/.local/lib/python2.7/site-packages/
@@ -19,8 +19,11 @@ before_install:
 - export PYTHONPATH=$PYTHONPATH:$HOME/.local/lib/python3.3/site-packages/
 - export PYTHONPATH=$PYTHONPATH:$HOME/.local/lib/python3.4/site-packages/
 - export PYTHONPATH=$PYTHONPATH:$HOME/.local/lib/python3.5/site-packages/
-install:
+- sudo apt-get install git
+- sudo apt-get install mercurial
+- sudo apt-get install bzr
 - pip install pip --upgrade
 - pip install nose
+install:
 - python setup.py install
 script: nosetests -s -v
