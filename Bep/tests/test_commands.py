@@ -8,9 +8,8 @@
 
 import subprocess
 
-
-repo1, r1 = 'pypa/pip', 'pip'
-repo2, r2 = 'ipython/ipython', 'ipython'
+repo1, r1 = 'ipython/ipython', 'ipython'
+repo2, r2 = 'pypa/pip', 'pip'
 
 
 def test_install():
@@ -33,9 +32,9 @@ def test_update():
     assert ret_code == 0
 
 
-def test_install_another_repo():
-    ret_code = subprocess.call("bep install github {}".format(repo2), shell=True)
-    assert ret_code == 0
+# def test_install_another_repo():
+    # ret_code = subprocess.call("bep install github {}".format(repo2), shell=True)
+    # assert ret_code == 0
 
 
 def test_update_all():
@@ -53,9 +52,9 @@ def test_remove():
     assert ret_code == 0
 
 
-def test_remove_r2():
-    ret_code = subprocess.call("bep remove github {} --branch=master".format(r2), shell=True)
-    assert ret_code == 0
+# def test_remove_r2():
+    # ret_code = subprocess.call("bep remove github {} --branch=master".format(r2), shell=True)
+    # assert ret_code == 0
 
 
 # TODO make temporary test repos to use instead of using these real repos
