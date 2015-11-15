@@ -15,6 +15,8 @@
 
 -----
 
+* [![Build Status](https://travis-ci.org/b-e-p/bep.svg?branch=master)](https://travis-ci.org/b-e-p/bep) travis-ci.org (master branch)
+
 ## The Big Picture
 ### The gist of it...
 
