@@ -65,8 +65,8 @@ Installing a single package.
 is not given, then the most current(/master/default)
 branch is installed; also, repo_type needs only to be
 specified if it is not obvious given the pkg_type:
-github/gitorious could only be git, but bitbucket would
-need to be specified, as it could be either git or hg)
+github could only be git, but bitbucket would need
+to be specified, as it could be either git or hg)
   `%(prog)s pkg_type pkg_name [repo_type] [branch]`
 
   eg.  %(prog)s github ipython/ipython

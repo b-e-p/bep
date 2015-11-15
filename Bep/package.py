@@ -3,8 +3,8 @@
 #----------------------------------------------------------------
 # Author: Jason Gors <jasonDOTgorsATgmail>
 # Creation Date: 07-30-2013
-# Purpose: this specifies what types of packages can be handles: currently: git repos from github &
-        # gitorious; git & hg repos from bitbucket; git, hg & bzr local repos.
+# Purpose: this specifies what types of packages can be handled: currently: git repos from github;
+        # git & hg repos from bitbucket; git, hg & bzr local repos.
 #----------------------------------------------------------------
 
 import os
@@ -453,11 +453,9 @@ class Package(object):
             download_url = self.download_url.format(pkg_to_install=args.pkg_to_install)
 
             try: # check to see if the download url actually exists
-                # broken for gitorious (but will likely get caught in the download subprocess exiting not being == 0)
-                if args.pkg_type != 'gitorious':
-                    resp = urlopen(download_url)
-                    if resp.getcode() != 200:   # will be 200 if website exists
-                        raise Exception
+                resp = urlopen(download_url)
+                if resp.getcode() != 200:   # will be 200 if website exists
+                    raise Exception
             except:
                 error_msg = "Error:  could not get package {} from\n{}".format(pkg_to_install_name, download_url)
                 raise SystemExit(error_msg)
@@ -932,17 +930,6 @@ class Github(Git):
         Git.install(self, pkg_to_install, args, noise, **kwargs)
 
 
-class Gitorious(Git):
-
-    def install(self, pkg_to_install, args, noise, **kwargs):
-        self.repo_type = 'git'
-
-        #self.download_url = 'http://git.gitorious.org/{pkg_to_install}.git'
-        #self.download_url = 'http://git.gitorious.org/{pkg_to_install}'.format(pkg_to_install=args.pkg_to_install)
-        self.download_url = 'https://git.gitorious.org/{pkg_to_install}'.format(pkg_to_install=pkg_to_install)
-        Git.install(self, pkg_to_install, args, noise, **kwargs)
-
-
 class Bitbucket(RepoTypeCheck):
 
     def install(self, pkg_to_install, args, noise, **kwargs):
@@ -1042,7 +1029,7 @@ def create_pkg_inst(lang_arg, pkg_type, install_dirs, args=None, packages_file=N
 
     # for future pkg_types, just add them to this dict
     supported_pkg_types = dict(github=Github, bitbucket=Bitbucket,
-                               gitorious=Gitorious, local=LocalRepo
+                               local=LocalRepo
                                #remote=RemoteRepo # TODO
                                #stable=Stable  # TODO
                                )

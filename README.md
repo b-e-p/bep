@@ -31,7 +31,7 @@ Moreover, several versions/branches of the same package can be installed with Be
 
 ### Just a bit of the implementation details...
 
-What Bep does, is that it downloads & builds packages in `.bep` in user's home directory and then installs them into `.local`.  This area is searched first on the user's path, thus the packages installed by Bep are called upon for use before the system-level packages.  Currently, all of these packages are simply version controlled repositories (git, mercurial &/or bazaar), which are cloned, built and then installed behind the scenes by using the commands outlined below.  Just specify where to get these packages from -- supported are, github, gitorious, bitbucket, or repos located on the local file system.  By default, a package installed with Bep uses the development branch (master/default) of its specified repository; however, if a different branch is wanted for installation, then this can easily be done instead.
+What Bep does, is that it downloads & builds packages in `.bep` in user's home directory and then installs them into `.local`.  This area is searched first on the user's path, thus the packages installed by Bep are called upon for use before the system-level packages.  Currently, all of these packages are simply version controlled repositories (git, mercurial &/or bazaar), which are cloned, built and then installed behind the scenes by using the commands outlined below.  Just specify where to get these packages from -- supported are, github, bitbucket, or repos located on the local file system.  By default, a package installed with Bep uses the development branch (master/default) of its specified repository; however, if a different branch is wanted for installation, then this can easily be done instead.
 
 
 ## The Basic Commands
@@ -50,7 +50,7 @@ bep install packages
 
 # NOTE, for package installs, the above should be specified like so:
 #
-# "pkg_type":	    either github, gitorious, bitbucket, local
+# "pkg_type":	    either github, bitbucket, local
 # "pkg_name":   	either "user/package_name" from the pkg_type code hosting
 #               	site, or the path to the package on the local file system.
 # "repo_type":	    either git, hg, bzr (specify only if it comes from an
@@ -235,12 +235,6 @@ packages = dict(
         #### or specify a branch other than master:
         'ipython/ipython^nbconvert',
             ],
-
-
-    gitorious = [
-        #### same formating as github:
-        'python-omega/python-omega'
-                ],
 
 
     bitbucket = [

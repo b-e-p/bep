@@ -36,7 +36,7 @@ install_dirs = dict(installed_pkgs_dir=installed_pkgs_dir, install_logs_dir=inst
 packages_file = '.{}_packages'.format(name)
 packages_file_path = join(usr_home_dir, packages_file)
 
-repo_choices = ['github', 'gitorious', 'bitbucket', 'local'] # 'remote'
+repo_choices = ['github', 'bitbucket', 'local'] # 'remote'
 other_choices = ['packages'] # 'stable'
 possible_choices = repo_choices + other_choices
 
@@ -64,7 +64,6 @@ def main(): # needs to be done as a main func for setuptools to work correctly i
     ### this goes at the top level
     top_parser.add_argument('--version', action='version', version='%(prog)s {}'.format(__version__))
     top_parser.add_argument('-l', '--language', nargs='?', default='python', help=usage.lang_use)
-
 
     group = top_parser.add_mutually_exclusive_group()
     group.add_argument("-v", "--verbose", action="store_true", help=usage.verbose_use)
@@ -195,7 +194,7 @@ def main(): # needs to be done as a main func for setuptools to work correctly i
             #if c != 'local':
                 #pkg_type_to_install.add_argument('-b', '--branch', dest='branch', default=None)#, action=CheckBranch)    # the branch bit is filled out below
 
-            if c in ['github', 'gitorious']:
+            if c in ['github']:
                 pkg_type_to_install.add_argument('repo_type', default='git', nargs='?')
 
             elif c == 'bitbucket':

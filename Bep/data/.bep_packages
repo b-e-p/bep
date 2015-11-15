@@ -26,12 +26,6 @@ packages = dict(
             ],
 
 
-    gitorious = [
-        #### same formating as github:
-        #'python-omega/python-omega'
-                ],
-
-
     bitbucket = [
         #### repo_type is required and other options are again optional:
         #'git+userName/repoName',

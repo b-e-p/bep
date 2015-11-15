@@ -101,7 +101,7 @@ def install_action(args, packages_file, packages_file_path, noise, install_dirs,
 
                         elif len(repo_type_N_pkg_to_install_N_branch) == 1:     # if repo_type not given
                             pkg_to_install_N_branch = repo_type_N_pkg_to_install_N_branch[0]
-                            if pkg_type in ['github', 'gitorious']:
+                            if pkg_type in ['github']:
                                 repo_type = 'git'
 
                                 pkg_to_install_N_branch = pkg_to_install_N_branch.split('^')    # to see if branch is given
@@ -155,7 +155,7 @@ def install_action(args, packages_file, packages_file_path, noise, install_dirs,
 
                         elif len(repo_type_N_pkg_to_install_N_branch) == 1:     # if repo_type not given
                             pkg_to_install_N_branch = repo_type_N_pkg_to_install_N_branch[0]
-                            if pkg_type in ['github', 'gitorious']:
+                            if pkg_type in ['github']:
                                 repo_type = 'git'
 
                                 pkg_to_install_N_branch = pkg_to_install_N_branch.split('^')    # to see if branch is given
