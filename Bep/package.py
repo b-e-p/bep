@@ -9,7 +9,6 @@
 
 import os
 from os.path import join
-# from site import getuserbase
 from site import USER_BASE as user_base
 import shutil
 import subprocess
