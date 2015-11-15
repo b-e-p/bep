@@ -6,13 +6,13 @@ python:
   - 3.3
   - 3.4
   - 3.5
-before_install:
-#  - export PATH=$HOME/.local/bin:$PATH
-  - PYTHONPATH=$HOME/.local/lib/python2.7/site-packages/
-  - PYTHONPATH=$PYTHONPATH:$HOME/.local/lib/python3.2/site-packages/
-  - PYTHONPATH=$PYTHONPATH:$HOME/.local/lib/python3.3/site-packages/
-  - PYTHONPATH=$PYTHONPATH:$HOME/.local/lib/python3.4/site-packages/
-  - PYTHONPATH=$PYTHONPATH:$HOME/.local/lib/python3.5/site-packages/
+#before_install:
+  #- export PATH=$HOME/.local/bin:$PATH
+  #- PYTHONPATH=$HOME/.local/lib/python2.7/site-packages/
+  #- PYTHONPATH=$PYTHONPATH:$HOME/.local/lib/python3.2/site-packages/
+  #- PYTHONPATH=$PYTHONPATH:$HOME/.local/lib/python3.3/site-packages/
+  #- PYTHONPATH=$PYTHONPATH:$HOME/.local/lib/python3.4/site-packages/
+  #- PYTHONPATH=$PYTHONPATH:$HOME/.local/lib/python3.5/site-packages/
 
 #install: "python setup.py install --user"
 #install: "python setup.py install"
@@ -20,6 +20,12 @@ install:
   - sudo apt-get install git
   - sudo apt-get install mercurial
   - sudo apt-get install bzr
+  - export PATH=$HOME/.local/bin:$PATH
+  - PYTHONPATH=$HOME/.local/lib/python2.7/site-packages/
+  - PYTHONPATH=$PYTHONPATH:$HOME/.local/lib/python3.2/site-packages/
+  - PYTHONPATH=$PYTHONPATH:$HOME/.local/lib/python3.3/site-packages/
+  - PYTHONPATH=$PYTHONPATH:$HOME/.local/lib/python3.4/site-packages/
+  - PYTHONPATH=$PYTHONPATH:$HOME/.local/lib/python3.5/site-packages/
 
 script:
   - python setup.py install
