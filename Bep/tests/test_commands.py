@@ -3,31 +3,58 @@
 #----------------------------------------------------------------
 # Author: Jason Gors <jasonDOTgorsATgmail>
 # Creation Date: 09-20-2013
-# Purpose: to make sure that everything works as expected.
+# Purpose: make sure everything works as expected.
 #----------------------------------------------------------------
 
 import subprocess
 
 
+repo1, r1 = 'pypa/pip', 'pip'
+repo2, r2 = 'ipython/ipython', 'ipython'
+
 def test_install():
-    ret_code = subprocess.call("bep install github pypa/pip", shell=True)
+    ret_code = subprocess.call("bep install github {}".format(repo1), shell=True)
     assert ret_code == 0
 
-def test_update():
-    ret_code = subprocess.call("bep update github pip --branch=master", shell=True)
-    assert ret_code == 0
 
 def test_turn_off():
-    ret_code = subprocess.call("bep turn_off github pip --branch=master", shell=True)
+    ret_code = subprocess.call("bep turn_off github {} --branch=master".format(r1), shell=True)
     assert ret_code == 0
+
 
 def test_turn_on():
-    ret_code = subprocess.call("bep turn_on github pip --branch=master", shell=True)
+    ret_code = subprocess.call("bep turn_on github {} --branch=master".format(r1), shell=True)
     assert ret_code == 0
+
+
+def test_update():
+    ret_code = subprocess.call("bep update github {} --branch=master".format(r1), shell=True)
+    assert ret_code == 0
+
+
+def test_install_another_repo():
+    ret_code = subprocess.call("bep install github {}".format(repo2), shell=True)
+    assert ret_code == 0
+
+
+def test_update_all():
+    ret_code = subprocess.call("bep update --all", shell=True)
+    assert ret_code == 0
+
+
+def test_list():
+    ret_code = subprocess.call("bep list", shell=True)
+    assert ret_code == 0
+
 
 def test_remove():
-    ret_code = subprocess.call("bep remove github pip --branch=master", shell=True)
+    ret_code = subprocess.call("bep remove github {} --branch=master".format(r1), shell=True)
     assert ret_code == 0
 
 
-# TODO more specific testing funcs
+def test_remove_r2():
+    ret_code = subprocess.call("bep remove github {} --branch=master".format(r2), shell=True)
+    assert ret_code == 0
+
+
+# TODO make temporary test repos to use instead of using these real repos
