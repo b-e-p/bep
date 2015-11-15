@@ -16,29 +16,29 @@ repo2, r2 = 'b-e-p/testrepo2', 'testrepo2'
 
 
 
-def test_install():
+def test_install_repo1():
     ret_code = subprocess.call("bep install github {}".format(repo1), shell=True)
     assert ret_code == 0
 
 
-def test_turn_off():
+def test_turn_off_r1():
     ret_code = subprocess.call("bep turn_off github {} --branch=master".format(r1), shell=True)
     assert ret_code == 0
 
 
-def test_turn_on():
+def test_turn_on_r1():
     ret_code = subprocess.call("bep turn_on github {} --branch=master".format(r1), shell=True)
     assert ret_code == 0
 
 
-def test_update():
+def test_update_r1():
     ret_code = subprocess.call("bep update github {} --branch=master".format(r1), shell=True)
     assert ret_code == 0
 
 
-# def test_install_another_repo():
-    # ret_code = subprocess.call("bep install github {}".format(repo2), shell=True)
-    # assert ret_code == 0
+def test_install_repo2():
+    ret_code = subprocess.call("bep install github {}".format(repo2), shell=True)
+    assert ret_code == 0
 
 
 def test_update_all():
@@ -51,12 +51,12 @@ def test_list():
     assert ret_code == 0
 
 
-def test_remove():
+def test_remove_r1():
     ret_code = subprocess.call("bep remove github {} --branch=master".format(r1), shell=True)
     assert ret_code == 0
 
 
-# def test_remove_r2():
-    # ret_code = subprocess.call("bep remove github {} --branch=master".format(r2), shell=True)
-    # assert ret_code == 0
+def test_remove_r2():
+    ret_code = subprocess.call("bep remove github {} --branch=master".format(r2), shell=True)
+    assert ret_code == 0
 
