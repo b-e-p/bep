@@ -12,6 +12,7 @@ import subprocess
 repo1, r1 = 'pypa/pip', 'pip'
 repo2, r2 = 'ipython/ipython', 'ipython'
 
+
 def test_install():
     ret_code = subprocess.call("bep install github {}".format(repo1), shell=True)
     assert ret_code == 0
