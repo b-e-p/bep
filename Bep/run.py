@@ -45,7 +45,6 @@ possible_choices = repo_choices + other_choices
 def main(): # needs to be done as a main func for setuptools to work correctly in creating an executable
     # for the approach i am taking here using nested subparsers:
     # https://mail.python.org/pipermail/python-list/2010-August/585617.html
-    # (update: damn, the stdlib broken my subparsers: http://bugs.python.org/issue24251)
 
     # nargs options:
     # (default): by not specifying nargs at all, you just get a string of 1 item
@@ -448,4 +447,4 @@ def main(): # needs to be done as a main func for setuptools to work correctly i
                     else:
                         raise SystemExit("\nError: invalid response: {}".format(response))
                 else:
-                    print("\nBye then.")
+                    print("\nOk, bye then.")
