@@ -1,5 +1,6 @@
 # Bep
 
+[![Build Status](https://travis-ci.org/b-e-p/bep.svg?branch=master)](https://travis-ci.org/b-e-p/bep) travis-ci.org (master branch)
 
 ## Table of Contents
 * **[The Big Picture](#the-big-picture)**
@@ -14,8 +15,6 @@
 * **[Example of a Sample .bep_packages file](#example-of-a-sample-bep_packages-file)**
 
 -----
-
-[![Build Status](https://travis-ci.org/b-e-p/bep.svg?branch=master)](https://travis-ci.org/b-e-p/bep) travis-ci.org (master branch)
 
 ## The Big Picture
 ### The gist of it...
