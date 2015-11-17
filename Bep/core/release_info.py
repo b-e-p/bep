@@ -7,7 +7,7 @@
 #----------------------------------------------------------------
 
 name = 'bep'
-__version__ = '0.7'
+__version__ = '0.7.1'
 description = 'A tool to make source package installations easier.'
 author = 'jason gors'
 email = 'jasonDOTgorsATgmailDOTcom'
