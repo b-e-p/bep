@@ -30,7 +30,7 @@ setup_args = dict(
     author_email=email,
     url=url,
     license=license,
-    packages=['Bep', 'Bep.core', 'Bep.languages', 'Bep.scripts', 'Bep.tests'],
+    packages=['Bep', 'Bep.cmds', 'Bep.core', 'Bep.languages', 'Bep.scripts', 'Bep.tests'],
 )
 
 # this should be done by setup(), but just in case (so we don't overwrite someone's packages file):
