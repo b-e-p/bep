@@ -25,7 +25,7 @@ Bep provides a very simple way to install, update and run the absolute newest ve
 
 #### Bep is useful for a couple key reasons:
 
-1. Packages installed with Bep are put into the default installation area under the user's home dir, thus Bep doesn't mess with anything installed at the system-level.  Meaning, packages installed with Bep won't get mixed in with stable versions of packages that were installed from package managers.
+1. Packages installed with Bep are put into the default installation area under the user's home directory, thus Bep doesn't mess with anything installed at the system-level.  Meaning, packages installed with Bep won't get mixed in with stable versions of packages that were installed from package managers.
 
 2. Bep lets you install several versions/branches of the same package side-by-side allowing you to easily switch between them.
 
