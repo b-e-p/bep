@@ -454,10 +454,7 @@ class Package(object):
 
             # check to see if the download url actually exists
             error_msg = "Error:  could not get package {} from\n{}".format(pkg_to_install_name, download_url)
-            if self.__class__.__name__ == 'LocalRepo':
-                if not os.path.exists(download_url):
-                    raise SystemExit(error_msg)
-            else:
+            if self.__class__.__name__ != 'LocalRepo':
                 try:
                     resp = urlopen(download_url)
                     if resp.getcode() != 200:   # will be 200 if website exists
