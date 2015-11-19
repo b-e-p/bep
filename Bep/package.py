@@ -452,16 +452,20 @@ class Package(object):
 
             download_url = self.download_url.format(pkg_to_install=args.pkg_to_install)
 
-            try: # check to see if the download url actually exists
-                resp = urlopen(download_url)
-                if resp.getcode() != 200:   # will be 200 if website exists
-                    raise Exception
-            except:
-                error_msg = "Error:  could not get package {} from\n{}".format(pkg_to_install_name, download_url)
-                raise SystemExit(error_msg)
+            # check to see if the download url actually exists
+            error_msg = "Error:  could not get package {} from\n{}".format(pkg_to_install_name, download_url)
+            if self.__class__.__name__ == 'LocalRepo':
+                if not os.path.exists(download_url):
+                    raise SystemExit(error_msg)
+            else:
+                try:
+                    resp = urlopen(download_url)
+                    if resp.getcode() != 200:   # will be 200 if website exists
+                        raise Exception
+                except:
+                    raise SystemExit(error_msg)
 
-
-            if args.branch in ['master', 'default']:
+            if args.branch in {'master', 'default'}:
                 #download_info = self.download_url.format(pkg_to_install=args.pkg_to_install)
                 download_info = download_url
             else:
@@ -470,7 +474,6 @@ class Package(object):
             branch_flattened_name = utils.branch_name_flattener(args.branch)
 
             self.install_download_cmd = self.install_download_cmd.format(download_info=download_info, branch=branch_flattened_name)
-
 
             print('\n--> {0}  [{1}]'.format(pkg_to_install_name, branch_flattened_name))
 
@@ -800,7 +803,6 @@ class Package(object):
             return True
 
 
-
     def turn_on(self, pkg_to_turn_on_name, branch_to_turn_on_name, args, everything_already_installed, noise):
         self.branch_to_turn_on_renamed = branch_to_turn_on_renamed = branch_to_turn_on_name.lstrip('.__')
 
@@ -833,7 +835,6 @@ class Package(object):
             Package.install(self, pkg_to_turn_on_name, args, noise, download_pkg=False)
 
             print('Successfully turned on {0} [{1}].'.format(pkg_to_turn_on_name, branch_to_turn_on_renamed))
-
 
 
 class Git(Package):
