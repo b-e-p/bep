@@ -16,7 +16,8 @@ from collections import OrderedDict
 from Bep.core import usage
 from Bep.core.release_info import __version__, name
 from Bep.core import utils
-from Bep import actions
+# from Bep.cmds import install, list_packages, remove_packages, turn_off, turn_on, update_packages
+from .cmds import install, list_packages, remove_packages, turn_off, turn_on, update_packages
 
 
 
@@ -312,7 +313,7 @@ def main(): # needs to be done as a main func for setuptools to work correctly i
                  noise=noise, install_dirs=install_dirs, installed_pkgs_dir=installed_pkgs_dir)
 
     if ('top_subparser' in args) and (args.top_subparser == 'install'):
-        any_pkgs_processed = actions.install_action(args, **kwargs)
+        any_pkgs_processed = install.install_cmd(args, **kwargs)
     #######################################################################################################################
 
 
@@ -329,7 +330,7 @@ def main(): # needs to be done as a main func for setuptools to work correctly i
     #######################################################################################################################
     #### list installed pkg(s) (by each package type)
     elif 'list_arg' in args:
-        actions.list_action(everything_already_installed, noise)
+        list_packages.list_cmd(everything_already_installed, noise)
     #######################################################################################################################
 
 
@@ -359,16 +360,16 @@ def main(): # needs to be done as a main func for setuptools to work correctly i
 
 
                 if ('pkg_to_update' in args) or ('update' in additional_args):
-                    any_pkgs_processed = actions.update_action(args, **kwargs)
+                    any_pkgs_processed = update_packages.update_cmd(args, **kwargs)
 
                 elif ('pkg_to_remove' in args) or ('remove' in additional_args):
-                    any_pkgs_processed = actions.remove_action(args, **kwargs)
+                    any_pkgs_processed = remove_packages.remove_cmd(args, **kwargs)
 
                 elif ('pkg_to_turn_off' in args) or ('turn_off' in additional_args):
-                    any_pkgs_processed = actions.turn_off_action(args, **kwargs)
+                    any_pkgs_processed = turn_off.turn_off_cmd(args, **kwargs)
 
                 elif ('pkg_to_turn_on' in args) or ('turn_on' in additional_args):
-                    any_pkgs_processed = actions.turn_on_action(args, **kwargs)
+                    any_pkgs_processed = turn_on.turn_on_cmd(args, **kwargs)
 
 
                 if any_pkgs_processed:
@@ -401,7 +402,7 @@ def main(): # needs to be done as a main func for setuptools to work correctly i
                         else:
                             raise SystemExit("\nError: {}: not valid input".format(response))
                     else:
-                        print("\nBye then.")
+                        print("\nOk, bye then.")
 
 
             elif len(actions_to_take) > 1:

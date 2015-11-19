@@ -2,6 +2,11 @@
 
 [![Build Status](https://travis-ci.org/b-e-p/bep.svg?branch=master)](https://travis-ci.org/b-e-p/bep) travis-ci.org (master branch)
 
+
+#### tl;dr
+Bep provides a very simple way to install, update and run the absolute newest versions (bleeding edge development versions) of any particular set of Python packages.
+
+
 ## Table of Contents
 * **[The Big Picture](#the-big-picture)**
 * **[The Basic Commands](#the-basic-commands)**
@@ -18,17 +23,12 @@
 
 ## The Big Picture
 
-#### tl;dr
-Bep provides a very simple way to install, update and run the absolute newest versions (bleeding edge development versions) of any particular set of Python packages.
-
-
 
 #### Bep is useful for a couple key reasons:
 
 1. Packages installed with Bep are put into the default installation area under the user's home directory, thus Bep doesn't mess with anything installed at the system-level.  Meaning, packages installed with Bep won't get mixed in with stable versions of packages that were installed from package managers.
 
 2. Bep lets you install several versions/branches of the same package side-by-side and allows you to easily switch between them.
-
 
 
 ### The gist of it...
