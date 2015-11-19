@@ -21,11 +21,14 @@
 #### tl;dr
 Bep provides a very simple way to install, update and run the absolute newest versions (bleeding edge development versions) of any particular set of Python packages.
 
+
+
 #### Bep is useful for a couple key reasons:
 
 1. Packages installed with Bep are put into the default installation area under the user's home dir, thus Bep doesn't mess with anything installed at the system-level.  Meaning, packages installed with Bep won't get mixed in with stable versions of packages that were installed from package managers.
 
 2. Bep lets you install several versions/branches of the same package side-by-side allowing you to easily switch between them.
+
 
 
 ### The gist of it...
@@ -35,7 +38,7 @@ To use, simply specify at the command line a package for either installation, up
 As mentioned, several versions/branches of the same package can be installed alongside one another with Bep, with all but one of those installed versions being the currently active ("turned on") version.  Meaning, there will only be one version seen by the environment at any given time.  And Bep makes switching between different versions of the same package very easy to do.  Also, if all versions of the same package that were installed with Bep are "turned off" (i.e. hidden from the environment), then access to a version of that same package installed at the system level (from a package manager) can be achieved without needing to fully remove any of the packages installed with Bep -- this can save large amounts of time when a given package has a long build/compile/install time.
 
 
-### A bit of the implementation details...
+### A bit of implementation details...
 
 What Bep does is it downloads & builds packages in `.bep` in the user's home directory and then installs them into `.local`.  This area is searched first on the user's python path, thus the packages installed by Bep are called upon for use before the system-level packages.  Currently, all of these packages are simply version controlled repositories (git, mercurial &/or bazaar), which are cloned, built and then installed behind the scenes while using the commands outlined below.  Just specify where to get these packages from -- supported are, github, bitbucket, or repos located on the local file system.  By default, a package installed with Bep uses the development branch (master/default) of its specified repository; however, if a different branch is wanted for installation, then this can easily be done instead.
 
