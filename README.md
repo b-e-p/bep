@@ -237,19 +237,20 @@ packages = dict(
     github = [
         #### 'username/projectname' is all that's required:
         'pydata/pandas',
-        #### but could give the full info if wanted:
-        'python-->git+scikit-learn/scikit-learn',
-        #### or specify a lang other than default:
+        #### but could specify a lang other than the default:
         'python3-->ipython/ipython',
         #### or specify a branch other than master:
         'ipython/ipython^nbconvert',
+        #### or both:
+        'python3-->ipython/ipython^nbconvert',
             ],
 
 
     bitbucket = [
-        #### repo_type is required and other options are again optional:
-        #'git+userName/repoName',
+        #### repo_type is required (git or hg) and other parameters are again optional:
+        # 'git+userName/repoName',
         'hg+mchaput/whoosh',
+        # etc, similiar to github specifications above
                 ],
 
 
