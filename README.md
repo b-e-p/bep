@@ -17,22 +17,27 @@
 -----
 
 ## The Big Picture
+
+#### tl;dr
+Bep provides a very simple way to install, update and run the absolute newest versions (bleeding edge development versions) of any particular set of Python packages.
+
+#### Bep is useful for a couple key reasons:
+
+1. Packages installed with Bep are put into the default installation area under the user's home dir, thus Bep doesn't mess with anything installed at the system-level.  Meaning, packages installed with Bep won't get mixed in with stable versions of packages that were installed from package managers.
+
+2. Bep lets you install several versions/branches of the same package side-by-side allowing you to easily switch between them.
+
+
 ### The gist of it...
 
-Bep provides a simple way to allow running &/or testing the absolute newest versions (bleeding edge versions) of any particular set of packages, it does not interfere with packages installed at the system level and it does not require root access for use.  To use, simply specify at the command line a package for either installation, updating or removal.  Alternatively, several packages can be installed at the same time by just specifying them in a `.bep_packages` file under the user's home directory; once done, then simply issue the installation command.
+To use, simply specify at the command line a package for either installation, updating or removal.  Additionally, several packages can be installed at once by just specifying them in a `.bep_packages` file under your user's home directory and then issuing the install command.
 
-Moreover, several versions/branches of the same package can be installed with Bep, with all but one of those installed versions being the currently active ("turned on") version.  Meaning, there will only be one version seen by the environment at any given time.  Thus, Bep makes switching between different versions of the same package easy to do.  And if all versions of a package installed with Bep are hidden from the environment ("turned off"), then access to a version of that same package installed at the system level (from a package manager or the like) can be achieved without needing to fully remove the package.
-
-### Bep is useful for a couple key reasons:
-
-1. Since the packages installed with Bep are put into their own location (in the user's home dir), Bep doesn't mess with anything installed at the system-level -- meaning, packages installed with Bep won't get mixed in with versions of packages installed system-wide from package managers or such.  (Note, it is easy to switch back to a system-level installed version of a package by turning off or removing the package installed with Bep);
-
-2.  As briefly explained, Bep lets you install several branches of the same package side by side and allows you to easily switch between them.
+As mentioned, several versions/branches of the same package can be installed alongside one another with Bep, with all but one of those installed versions being the currently active ("turned on") version.  Meaning, there will only be one version seen by the environment at any given time.  And Bep makes switching between different versions of the same package very easy to do.  Also, if all versions of the same package that were installed with Bep are "turned off" (i.e. hidden from the environment), then access to a version of that same package installed at the system level (from a package manager) can be achieved without needing to fully remove any of the packages installed with Bep -- this can save large amounts of time when a given package has a long build/compile/install time.
 
 
-### Just a bit of the implementation details...
+### A bit of the implementation details...
 
-What Bep does, is that it downloads & builds packages in `.bep` in user's home directory and then installs them into `.local`.  This area is searched first on the user's path, thus the packages installed by Bep are called upon for use before the system-level packages.  Currently, all of these packages are simply version controlled repositories (git, mercurial &/or bazaar), which are cloned, built and then installed behind the scenes by using the commands outlined below.  Just specify where to get these packages from -- supported are, github, bitbucket, or repos located on the local file system.  By default, a package installed with Bep uses the development branch (master/default) of its specified repository; however, if a different branch is wanted for installation, then this can easily be done instead.
+What Bep does is it downloads & builds packages in `.bep` in the user's home directory and then installs them into `.local`.  This area is searched first on the user's python path, thus the packages installed by Bep are called upon for use before the system-level packages.  Currently, all of these packages are simply version controlled repositories (git, mercurial &/or bazaar), which are cloned, built and then installed behind the scenes while using the commands outlined below.  Just specify where to get these packages from -- supported are, github, bitbucket, or repos located on the local file system.  By default, a package installed with Bep uses the development branch (master/default) of its specified repository; however, if a different branch is wanted for installation, then this can easily be done instead.
 
 
 ## The Basic Commands
@@ -42,10 +47,10 @@ What Bep does, is that it downloads & builds packages in `.bep` in user's home d
 ### To install packages:
 
 ```
-# A single package:
+# 1. A single package:
 bep [--language=python_version] install pkg_type pkg_name [repo_type] [-b branch_name]
 
-# All packages specified in the .bep_packages file:
+# or 2. all packages specified in the .bep_packages file:
 bep install packages
 
 
