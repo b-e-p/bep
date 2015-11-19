@@ -10,9 +10,9 @@ import os
 import sys
 import imp
 
-from ..core.release_info import name
-from ..core import utils
-import package
+from Bep.core.release_info import name
+from Bep.core import utils
+from Bep import package
 
 
 

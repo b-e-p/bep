@@ -16,12 +16,7 @@ from collections import OrderedDict
 from Bep.core import usage
 from Bep.core.release_info import __version__, name
 from Bep.core import utils
-from Bep.cmds import install
-from Bep.cmds import list_packages
-from Bep.cmds import remove_packages
-from Bep.cmds import turn_off
-from Bep.cmds import turn_on
-from Bep.cmds import update_packages
+from Bep.cmds import install, list_packages, remove_packages, turn_off, turn_on, update_packages
 
 
 
