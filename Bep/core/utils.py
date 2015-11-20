@@ -75,7 +75,7 @@ def get_default_branch(repo_type):
     elif repo_type in ['hg', 'bzr']:
         default_branch = 'default'
     else:
-        raise SystemExit("error: {} not a recognized repo type".format(repo_type))
+        raise SystemExit("Error: {} not a recognized repo type".format(repo_type))
     return default_branch
 
 
@@ -105,7 +105,7 @@ def get_checked_out_local_branch(local_pkg_to_install_path):
         b = cur_branch.lstrip('* (').rstrip(')')
         return b, 'bzr'
     else:
-        print("Error: cannot process {} -- not a repository.".format(local_pkg_to_install_path))
+        print("Error: {} not a recognized repository.".format(local_pkg_to_install_path))
         raise SystemExit
 
 
