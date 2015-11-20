@@ -16,12 +16,6 @@ import sys
 import glob
 import itertools
 import locale   # needed in py3 for decoding output from subprocess pipes
-
-# pyversion = float(sys.version[0:3])
-# if pyversion == 2.7:
-    # from urllib import urlopen  # for py2
-# else:
-    # from urllib.request import urlopen # for py3
 from six.moves.urllib.request import urlopen
 
 from Bep.languages import languages
