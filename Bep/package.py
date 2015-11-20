@@ -17,11 +17,12 @@ import glob
 import itertools
 import locale   # needed in py3 for decoding output from subprocess pipes
 
-pyversion = float(sys.version[0:3])
-if pyversion == 2.7:
-    from urllib import urlopen  # for py2
-else:
-    from urllib.request import urlopen # for py3
+# pyversion = float(sys.version[0:3])
+# if pyversion == 2.7:
+    # from urllib import urlopen  # for py2
+# else:
+    # from urllib.request import urlopen # for py3
+from six.moves.urllib.request import urlopen
 
 from Bep.languages import languages
 from Bep.core.release_info import name
@@ -158,7 +159,7 @@ class Package(object):
         if not os.path.isdir(pkg_name_dir):
             os.makedirs(pkg_name_dir)
 
-        utils.when_not_quiet_mode('Downloading {0} [{1}]...'.format(pkg_to_install_name, branch_flattened_name), noise.quiet)
+        utils.when_not_quiet_mode('Downloading {0} [{1}]'.format(pkg_to_install_name, branch_flattened_name), noise.quiet)
 
         # download the branch to the pkg_name_dir
         os.chdir(pkg_name_dir)
@@ -256,12 +257,12 @@ class Package(object):
                             # be (turned on) in a different pkg_type (under the same pkg name of course).
                                 #(ipy_master)        (anything but ipy_master)
                             if branch_name not in pkg_branch_names_all_for_pkg_type:
-                                print("A branch of {0} is already turned on for {1}.".format(pkg_name, lang_installed))
+                                print("A branch of {0} is already turned on for {1}".format(pkg_name, lang_installed))
                                 return False # b/c there is already a branch on somewhere
 
                                 #(ipy_master)   (in the list of any branch turned on for this pkg, regardless of pkg_type)
                             if branch_name in any_package_branch_on:
-                                print("A branch of {0} is already turned on for {1}.".format(pkg_name, lang_installed))
+                                print("A branch of {0} is already turned on for {1}".format(pkg_name, lang_installed))
                                 return False # b/c there is already a branch on somewhere
 
                             #(Github)     (Local Repo)
@@ -270,12 +271,12 @@ class Package(object):
                                 #(ipy_master)   (ipy_master)
                             if branch_name in pkg_branch_names_on_for_pkg_type:
                                 #print("A branch of {} is already turned on under {} packages.".format(pkg_name, installed_pkg_type))
-                                print("A branch of {0} is already turned on for {1}.".format(pkg_name, lang_installed))
+                                print("A branch of {0} is already turned on for {1}".format(pkg_name, lang_installed))
                                 return False # b/c there is already a pkg branch turned on somewhere
 
                                 #(ipy_master)       (anything not ipy_master)
                             if branch_name not in pkg_branch_names_all_for_pkg_type:
-                                print("A branch of {0} is already turned on for {1}.".format(pkg_name, lang_installed))
+                                print("A branch of {0} is already turned on for {1}".format(pkg_name, lang_installed))
                                 return False # b/c there is already a pkg branch turned on somewhere
 
                             #if branch_name in any_package_branch_on:
@@ -379,11 +380,11 @@ class Package(object):
             contents_of_pkg_branch_dir = os.listdir(branch_install_dir)
             if self.lang_using.setup_file in contents_of_pkg_branch_dir:
                 if download_pkg:
-                    utils.when_not_quiet_mode('Building & Installing {0} [{1}]...'.format(
+                    utils.when_not_quiet_mode('Building & Installing {0} [{1}]'.format(
                                                             pkg_to_install_name, branch_to_install), noise.quiet)
                 else:   # for turning branch back on
                     if noise.verbose:
-                        print('Reinstalling {0} [{1}]...'.format(pkg_to_install_name, branch_to_install))
+                        print('Reinstalling {0} [{1}]'.format(pkg_to_install_name, branch_to_install))
 
 
                 # make the log files directory for this pkg (need this for the record file)
@@ -395,10 +396,10 @@ class Package(object):
 
                 if return_val == 0:
                     if download_pkg:
-                        print('Successfully installed {0} [{1}].'.format(pkg_to_install_name, branch_to_install))
+                        print('Successfully installed {0} [{1}]'.format(pkg_to_install_name, branch_to_install))
                     else:
                         if noise.verbose:
-                            print('Successfully reinstalled {0} [{1}].'.format(pkg_to_install_name, branch_to_install))
+                            print('Successfully reinstalled {0} [{1}]'.format(pkg_to_install_name, branch_to_install))
 
 
                     # if the pkg installed properly, then add the cmd that performed the installation to the database
@@ -413,17 +414,17 @@ class Package(object):
                     if not noise.verbose:
                         try:
                             print('{0} {1}'.format(self.out.rstrip(), self.err.rstrip()))
-                            print("\n\tCOULD NOT INSTALL {0} [{1}].".format(pkg_to_install_name, branch_to_install))
+                            print("\n\tCOULD NOT INSTALL {0} [{1}]".format(pkg_to_install_name, branch_to_install))
                             print("\tA likely cause is a dependency issue.")
                             print("\t...see Traceback for information.")
                         except UnicodeEncodeError:
-                            print("\n\tCOULD NOT INSTALL {0} [{1}].".format(pkg_to_install_name, branch_to_install))
+                            print("\n\tCOULD NOT INSTALL {0} [{1}]".format(pkg_to_install_name, branch_to_install))
                             print("\tA likely cause is a dependency issue.")
 
                     if not download_pkg:
                         # remove the stuff for both download_pkg or not, but only print this stuff when trying to turn a package
                         # back on (b/c when doing an install for the first time, the pkg won't have ever been used anyways).
-                        print('Removing {0} [{1}].'.format(pkg_to_install_name, branch_to_install))
+                        print('Removing {0} [{1}]'.format(pkg_to_install_name, branch_to_install))
                         print("Reinstall a fresh install to use the package.")
 
                     # remove stuff with failed install
@@ -434,16 +435,15 @@ class Package(object):
 
 
             else:
-                print("\n\tCANNOT INSTALL {0} [{1}].".format(pkg_to_install_name, branch_to_install))
+                print("\n\tCANNOT INSTALL {0} [{1}]".format(pkg_to_install_name, branch_to_install))
                 print("\tThere is no {0} in this repo.".format(self.lang_using.setup_file))
                 if not download_pkg:
-                    print('Removing {0} [{1}].'.format(pkg_to_install_name, branch_to_install))
+                    print('Removing {0} [{1}]'.format(pkg_to_install_name, branch_to_install))
                     print("Reinstall a fresh install to use the package.")
 
                 # if no setup file, then remove the branch dir that was attempted to be downloaded & installed
                 self._remove_install_dirs(pkg_to_install_name, branch_to_install, pkg_install_dir, branch_install_dir, noise)
         #########################  End of embedded function  #########################
-
 
 
         if download_pkg:    # this is for the initial installation
@@ -504,15 +504,16 @@ class Package(object):
         os.chdir(branch_update_dir)
 
         print('\n--> {0} [{1}]'.format(pkg_to_update_name, branch_to_update))
-        utils.when_not_quiet_mode('Checking for updates...', noise.quiet)
+        utils.when_not_quiet_mode('Checking for updates', noise.quiet)
 
         return_val = self.__cmd_output(self.update_cmd, verbose=False)
+        # return_val = self.__cmd_output(self.update_cmd, verbose=noise.verbose)
         if return_val != 0:
             try:
                 print('{0} {1}'.format(self.out.rstrip(), self.err.rstrip()))
             except UnicodeEncodeError:
                 pass
-            print("\nCould not properly update {0} [{1}].".format(pkg_to_update_name, branch_to_update))
+            print("\nCould not properly update {0} [{1}]".format(pkg_to_update_name, branch_to_update))
             print("Likely a network connection error.  Try again in a moment.")
             return
 
@@ -524,7 +525,8 @@ class Package(object):
 
         if self.up_to_date_output in output_end:    # this is if it's already up to date.
             #print(output_end)  # this is different for the different repo_types, so just print out a common thing:
-            print('Already up to date.')
+            # print('Already up to date.')
+            print(self.up_to_date_output)
             return
         else:   # this is if it's not up to date (and if not, then update it here)
             if noise.verbose:
@@ -542,7 +544,7 @@ class Package(object):
             if self.lang_using.setup_file in contents_of_pkg_branch_dir:
                 return_val = self.__cmd_output(update_install_cmd, verbose=noise.verbose)
             else:
-                print("UPDATE FAILED for {0} [{1}].".format(pkg_to_update_name, branch_to_update))
+                print("UPDATE FAILED for {0} [{1}]".format(pkg_to_update_name, branch_to_update))
                 print("There is no longer a {0} to use for installing the package.".format(self.lang_using.setup_file))
                 print("Try removing the package & then reinstalling it.")
                 return
@@ -571,18 +573,17 @@ class Package(object):
                 for rf in record_fnames:
                     os.remove(rf)
 
-                print('Successfully updated {0} [{1}].'.format(pkg_to_update_name, branch_to_update))
-
+                print('Successfully updated {0} [{1}]'.format(pkg_to_update_name, branch_to_update))
 
             else:   # if not 0, then it failed to install properly
                 if not noise.verbose:    #  when in quiet mode, show output with a failed update installation to see the Traceback
                     try:
                         print('{0} {1}'.format(self.out.rstrip(), self.err.rstrip()))
-                        print(utils.status("\tUPDATE FAILED for {0} [{1}].".format(pkg_to_update_name, branch_to_update)))
+                        print(utils.status("\tUPDATE FAILED for {0} [{1}]".format(pkg_to_update_name, branch_to_update)))
                         print("\tA likely cause is a dependency issue, eg. needing a (newer) dependency.")
                         print("\t...see Traceback for information.")
                     except UnicodeEncodeError:
-                        print(utils.status("\tUPDATE FAILED for {0} [{1}].".format(pkg_to_update_name, branch_to_update)))
+                        print(utils.status("\tUPDATE FAILED for {0} [{1}]".format(pkg_to_update_name, branch_to_update)))
                         print("\tA likely cause is a dependency issue, eg. needing a (newer) dependency.")
                 # TODO FIXME maybe something else needs to be done here -- like removing the update since it failed to install?
 
@@ -625,7 +626,7 @@ class Package(object):
 
     def _remove_log_dirs(self, pkg_to_remove_name, branch_to_remove_name, pkg_logs_dir, branch_logs_dir, noise):
         if noise.verbose:
-            print('Removing installation log files for {0} [{1}]...'.format(pkg_to_remove_name, branch_to_remove_name))
+            print('Removing installation log files for {0} [{1}]'.format(pkg_to_remove_name, branch_to_remove_name))
         if os.path.isdir(branch_logs_dir): # need this check for turned off branches (b/c if turned off, then this dir won't exist anyways)
             shutil.rmtree(branch_logs_dir)
 
@@ -653,7 +654,7 @@ class Package(object):
 
     def _remove_install_dirs(self, pkg_to_remove_name, branch_to_remove_name, pkg_dir, branch_dir, noise):
         if noise.verbose:
-            print('Removing the downloaded package contents for {0} [{1}]...'.format(pkg_to_remove_name, branch_to_remove_name))
+            print('Removing the downloaded package contents for {0} [{1}]'.format(pkg_to_remove_name, branch_to_remove_name))
         shutil.rmtree(branch_dir)
 
         def remove_dir(dir_to_remove, str_out):
@@ -691,11 +692,11 @@ class Package(object):
             # for a branch that is turned on, this will be the same thing
             actual_dir_name_for_branch_to_remove = branch_to_remove_name
 
-        utils.when_not_quiet_mode('\nRemoving {0} [{1}]...'.format(pkg_to_remove_name, branch_to_remove_name), noise.quiet)
+        utils.when_not_quiet_mode('\nRemoving {0} [{1}]'.format(pkg_to_remove_name, branch_to_remove_name), noise.quiet)
 
         # remove the installed branch from the installation area (the area produced from using --user)
         if noise.verbose:
-            print('Removing build & installation files for {0} [{1}]...'.format(pkg_to_remove_name, branch_to_remove_name))
+            print('Removing build & installation files for {0} [{1}]'.format(pkg_to_remove_name, branch_to_remove_name))
         pkg_logs_dir = join(self.pkg_type_logs_dir, pkg_to_remove_name)
         branch_logs_dir = join(pkg_logs_dir, branch_to_remove_name)
 
@@ -717,10 +718,10 @@ class Package(object):
 
         # remove the branch listing from the installation_db
         #if noise.verbose:
-            #print('Removing the {0} [{1}] listing from {2}...'.format(pkg_to_remove_name, branch_to_remove_name, installation_db))
+            #print('Removing the {0} [{1}] listing from {2}'.format(pkg_to_remove_name, branch_to_remove_name, installation_db))
         #handle_db_for_removal(self.pkg_type, pkg_to_remove_name, branch_to_remove_name, installation_db_path)
 
-        print('Successfully uninstalled {0} [{1}].'.format(pkg_to_remove_name, branch_to_remove_name))
+        print('Successfully uninstalled {0} [{1}]'.format(pkg_to_remove_name, branch_to_remove_name))
         #when_not_quiet_mode("Don't forget to remove {0}^{1} from your {2} file.".format(pkg_to_remove_name, branch_to_remove_name, packages_file), noise.quiet)
 
 
@@ -732,11 +733,11 @@ class Package(object):
         remove the branches's files that were installed into the path.  This is nice b/c the downloads and builds
         are what take so long for most package installations.'''
 
-        utils.when_not_quiet_mode('\nTurning off {0} [{1}]...'.format(pkg_to_turn_off_name, branch_to_turn_off_name), noise.quiet)
+        utils.when_not_quiet_mode('\nTurning off {0} [{1}]'.format(pkg_to_turn_off_name, branch_to_turn_off_name), noise.quiet)
 
         # remove stuff from userbase with the log file
         if noise.verbose:
-            print('Removing built & installed files for {0} [{1}]...'.format(pkg_to_turn_off_name, branch_to_turn_off_name))
+            print('Removing built & installed files for {0} [{1}]'.format(pkg_to_turn_off_name, branch_to_turn_off_name))
         pkg_logs_dir = join(self.pkg_type_logs_dir, pkg_to_turn_off_name)
         branch_logs_dir = join(pkg_logs_dir, branch_to_turn_off_name)
 
@@ -753,7 +754,7 @@ class Package(object):
 
         # rename the branch dir name (in the pkg_dir)
         if noise.verbose:
-            print('Renaming the downloaded package {0} [{1}]...'.format(pkg_to_turn_off_name, branch_to_turn_off_name))
+            print('Renaming the downloaded package {0} [{1}]'.format(pkg_to_turn_off_name, branch_to_turn_off_name))
         pkg_dir = join(self.pkg_type_install_dir, pkg_to_turn_off_name)
         branch_dir = join(pkg_dir, branch_to_turn_off_name)
 
@@ -763,12 +764,12 @@ class Package(object):
 
         # rename the branch in the installation_db
         #if noise.verbose:
-            #print('Renaming the package {0} [{1}] in the {2} file...'.format(
+            #print('Renaming the package {0} [{1}] in the {2} file.'.format(
                                                     #pkg_to_turn_off_name, branch_to_turn_off_name, installation_db))
         #handle_db_for_branch_renaming(self.pkg_type, pkg_to_turn_off_name, branch_to_turn_off_name,
                                     #branch_to_turn_off_renamed, db_pname=installation_db_path)
 
-        print('Successfully turned off {0} [{1}].'.format(pkg_to_turn_off_name, branch_to_turn_off_name))
+        print('Successfully turned off {0} [{1}]'.format(pkg_to_turn_off_name, branch_to_turn_off_name))
 
 
     def _turn_on_check(self, pkg_type, pkg_to_turn_on_name, branch_to_turn_on, everything_already_installed, noise):
@@ -785,16 +786,16 @@ class Package(object):
                 #for installed_pkg_name, branches_list in pkgs_dict.items():
                     #if any_package_branch_on:
                         #print("Cannot turn on {0} {1} [{2}] {3} because".format(pkg_type, pkg_to_turn_on_name, branch_to_turn_on, self.lang_cmd))
-                        #utils.when_not_quiet_mode("a version of {0} is already turned on for {1}.".format(pkg_to_turn_on_name, self.lang_cmd), noise.quiet)
-                        #utils.when_not_quiet_mode("[Execute `{} list` to see currently turned on packages.]".format(name), noise.quiet)
+                        #utils.when_not_quiet_mode("a version of {0} is already turned on for {1}".format(pkg_to_turn_on_name, self.lang_cmd), noise.quiet)
+                        #utils.when_not_quiet_mode("[Execute `{} list` to see currently turned on packages]".format(name), noise.quiet)
                         #return False
                     #else:
                         #return True
 
         if any_package_branch_on:
             print("Cannot turn on {0} {1} [{2}] {3} because".format(pkg_type, pkg_to_turn_on_name, branch_to_turn_on, self.lang_cmd))
-            utils.when_not_quiet_mode("a version of {0} is already turned on for {1}.".format(pkg_to_turn_on_name, self.lang_cmd), noise.quiet)
-            utils.when_not_quiet_mode("[Execute `{} list` to see currently turned on packages.]".format(name), noise.quiet)
+            utils.when_not_quiet_mode("a version of {0} is already turned on for {1}".format(pkg_to_turn_on_name, self.lang_cmd), noise.quiet)
+            utils.when_not_quiet_mode("[Execute `{} list` to see currently turned on packages]".format(name), noise.quiet)
             return False
         else:
             return True
@@ -803,14 +804,14 @@ class Package(object):
     def turn_on(self, pkg_to_turn_on_name, branch_to_turn_on_name, args, everything_already_installed, noise):
         self.branch_to_turn_on_renamed = branch_to_turn_on_renamed = branch_to_turn_on_name.lstrip('.__')
 
-        utils.when_not_quiet_mode('\nAttempting to turn on {0} [{1}]...'.format(pkg_to_turn_on_name, branch_to_turn_on_renamed), noise.quiet)
+        utils.when_not_quiet_mode('\nAttempting to turn on {0} [{1}]'.format(pkg_to_turn_on_name, branch_to_turn_on_renamed), noise.quiet)
 
         should_turn_back_on = self._turn_on_check(self.pkg_type, pkg_to_turn_on_name, branch_to_turn_on_renamed, everything_already_installed, noise)
         if should_turn_back_on:
 
             # rename the branch dir name back to it's original name
             if noise.verbose:
-                print('Renaming {0} {1}...'.format(pkg_to_turn_on_name, branch_to_turn_on_renamed))
+                print('Renaming {0} {1}'.format(pkg_to_turn_on_name, branch_to_turn_on_renamed))
 
             pkg_dir = join(self.pkg_type_install_dir, pkg_to_turn_on_name)
 
@@ -821,17 +822,17 @@ class Package(object):
 
             # rename the branch back to it's original name in the installation_db
             #if noise.verbose:
-                #print('Renaming the package {0} [{1}] in the {2} file...'.format(
+                #print('Renaming the package {0} [{1}] in the {2} file.'.format(
                                                     #pkg_to_turn_on_name, branch_to_turn_on_name, installation_db))
             #handle_db_for_branch_renaming(self.pkg_type, pkg_to_turn_on_name, branch_to_turn_on_name,
                                         #branch_to_turn_on_renamed, db_pname=installation_db_path)
 
             # reinstall the branch files from the branch installation dir back into userbase
             if noise.verbose:
-                print('Reinstalling {0} {1}...'.format(pkg_to_turn_on_name, branch_dir_renamed))
+                print('Reinstalling {0} {1}'.format(pkg_to_turn_on_name, branch_dir_renamed))
             Package.install(self, pkg_to_turn_on_name, args, noise, download_pkg=False)
 
-            print('Successfully turned on {0} [{1}].'.format(pkg_to_turn_on_name, branch_to_turn_on_renamed))
+            print('Successfully turned on {0} [{1}]'.format(pkg_to_turn_on_name, branch_to_turn_on_renamed))
 
 
 class Git(Package):
@@ -850,7 +851,7 @@ class Git(Package):
     def update(self, lang_to_update, pkg_to_update, branch_to_update, noise):
         #self.update_cmd = 'git pull && git submodule update --recursive'     # NOTE this might break the up_to_date_output check above
         self.update_cmd = 'git pull'
-        self.up_to_date_output = 'Already up-to-date'
+        self.up_to_date_output = 'Current branch {} is up to date.'.format(branch_to_update)
         Package.update(self, lang_to_update, pkg_to_update, branch_to_update, noise)
 
 
@@ -898,7 +899,6 @@ class RepoTypeCheck(Git, Mercurial, Bazaar):
             Mercurial.install(self, pkg_to_install, args, noise, **kwargs)
         elif self.repo_type == 'bzr':
             Bazaar.install(self, pkg_to_install, args, noise, **kwargs)
-
 
     def update(self, lang_to_update, pkg_to_update, branch_to_update, noise):
         pkg_install_dir = join(self.pkg_type_install_dir, pkg_to_update)
