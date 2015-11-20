@@ -57,7 +57,7 @@ def when_not_quiet_mode(output, be_quiet=False):
 def check_if_valid_pkg_to_install(usrname_and_repo_name, pkg_type=None):
     if pkg_type == 'local':
         if os.path.exists(usrname_and_repo_name):
-            return usrname_and_repo_name
+            return usrname_and_repo_name    # this is just the path
         else:
             return False
     else:
@@ -80,33 +80,32 @@ def get_default_branch(repo_type):
 
 
 
-def get_checked_out_local_branch(local_pkg_to_install_path, repo_type):
+def get_checked_out_local_branch(local_pkg_to_install_path):
 
     contents_of_branch_install_dir = os.listdir(local_pkg_to_install_path)
     os.chdir(local_pkg_to_install_path)
-    if ('.hg' in contents_of_branch_install_dir) and (repo_type == 'hg'):
+    if ('.hg' in contents_of_branch_install_dir):
         cmd = 'hg branch'
         outdict = cmd_output_capture_all(cmd)
         output = outdict['out'].splitlines() # the default is "default"
-        return output[0]
+        return output[0], 'hg'
 
-    elif ('.git' in contents_of_branch_install_dir) and (repo_type == 'git'):
+    elif ('.git' in contents_of_branch_install_dir):
         cmd = 'git branch'
         outdict = cmd_output_capture_all(cmd)
         output = outdict['out'].splitlines()
         cur_branch = [b for b in output if b.startswith('* ')][0] # the default is "* master"
-        return cur_branch.lstrip('* ')
+        return cur_branch.lstrip('* '), 'git'
 
-    elif ('.bzr' in contents_of_branch_install_dir) and (repo_type == 'bzr'):
+    elif ('.bzr' in contents_of_branch_install_dir):
         cmd = 'bzr branches'
         outdict = cmd_output_capture_all(cmd)
         output = outdict['out'].splitlines()
         cur_branch = [b for b in output if b.startswith('* ')][0] # the default is "* (default)"
         b = cur_branch.lstrip('* (').rstrip(')')
-        return b
+        return b, 'bzr'
     else:
-        print("Error: cannot process {} with {}".format(local_pkg_to_install_path, repo_type))
-        print("Are you sure this is the correct repo_type for the package?")
+        print("Error: cannot process {} -- not a repository.".format(local_pkg_to_install_path))
         raise SystemExit
 
 

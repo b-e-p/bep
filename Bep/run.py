@@ -149,28 +149,19 @@ def main(): # needs to be done as a main func for setuptools to work correctly i
 
         class CheckIfCanBeInstalled(argparse.Action):
             ''' makes sure a repo to install has both a user_name and repo_name:
-                eg. ipython/ipython '''
+                    eg. ipython/ipython
+                or is an actual path to a repo on the local filesystem'''
 
             def __call__(self, parser, namespace, arg_value, option_string=None):
                 pkg_type = parser.prog.split(' ')[-1]
-                if pkg_type == 'local':
-                    # check to see if the local path exists
-                    if os.path.exists(arg_value):
-                        setattr(namespace, self.dest, arg_value)
-                    else:
+                if utils.check_if_valid_pkg_to_install(arg_value, pkg_type):
+                    setattr(namespace, self.dest, arg_value)
+                else:
+                    if pkg_type == 'local':
                         error_msg = "\n\tIs not a path that exists on local filesystem."
                         raise parser.error(arg_value + error_msg)
-
-                # TODO not implement yet, but just a placeholder for when i add this in
-                elif pkg_type == 'remote':  # check if repo exists
-                    # do some kind of check on these as well to see if the url exists (probably do this later in the flow)
-                    setattr(namespace, self.dest, arg_value)
-
-                else:
-                    if utils.check_if_valid_pkg_to_install(arg_value): # this also contains the appropriate stuff for 'local' check
-                        setattr(namespace, self.dest, arg_value)
                     else:
-                        error_msg = '\nneed to make sure a user name and repo name are specified, like so:\n\tipython/ipython'
+                        error_msg = '\nneed to make sure a username and repo_name are specified, like so:\n\tusername/repo_name'
                         raise parser.error(arg_value + error_msg)
 
 
@@ -199,10 +190,10 @@ def main(): # needs to be done as a main func for setuptools to work correctly i
                     elif c == 'bitbucket':
                         pkg_type_to_install.add_argument('repo_type', choices=['git', 'hg'])
 
-                    elif c == 'local':
-                        pkg_type_to_install.add_argument('repo_type', choices=['git', 'hg', 'bzr'])
+                    # elif c == 'local':    # just get the type of repo from the local filesystem so it doesn't have to be specified
+                        # pkg_type_to_install.add_argument('repo_type', choices=['git', 'hg', 'bzr'])
 
-                    #elif c == 'remote':    # TODO not implemented
+                    #elif c == 'remote':    # TODO not implemented but would be specified like so
                         #pkg_type_to_install.add_argument('repo_type', choices=['git', 'hg', 'bzr'])
 
                     pkg_type_to_install.add_argument('-b', '--branch', dest='branch', default=None)#, action=CheckBranch)    # the branch bit is filled out below
@@ -265,7 +256,8 @@ def main(): # needs to be done as a main func for setuptools to work correctly i
         if ('top_subparser' in args) and (args.top_subparser == 'install'):
             if ('branch' in args) and (args.branch == None):
                 if args.pkg_type == 'local':    # for local, grab the currently checked out branch from the repo and set that as the branch to install
-                    branch = utils.get_checked_out_local_branch(args.pkg_to_install, args.repo_type)
+                    branch, repo_type = utils.get_checked_out_local_branch(args.pkg_to_install)
+                    args.repo_type = repo_type
                 else:
                     branch = utils.get_default_branch(args.repo_type)
                 args.branch = branch
@@ -279,9 +271,6 @@ def main(): # needs to be done as a main func for setuptools to work correctly i
                 error_msg = 'need to make sure a branch is specified;\n'
                 error_msg = error_msg + "[Execute `{} list` to see installed packages and branches.]".format(name)
                 raise top_parser.error(error_msg)
-
-        #print "args changed\n", args
-
 
 
     class noise(object):

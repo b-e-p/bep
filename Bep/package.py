@@ -898,8 +898,6 @@ class RepoTypeCheck(Git, Mercurial, Bazaar):
             Mercurial.install(self, pkg_to_install, args, noise, **kwargs)
         elif self.repo_type == 'bzr':
             Bazaar.install(self, pkg_to_install, args, noise, **kwargs)
-        #elif <future_repo_type>:    # NOTE for other types of repos
-            #<FutureRepoType.install(etc...)>
 
 
     def update(self, lang_to_update, pkg_to_update, branch_to_update, noise):
@@ -913,8 +911,6 @@ class RepoTypeCheck(Git, Mercurial, Bazaar):
             Mercurial.update(self, lang_to_update, pkg_to_update, branch_to_update, noise)
         elif '.bzr' in contents_of_branch_install_dir:
             Bazaar.update(self, lang_to_update, pkg_to_update, branch_to_update, noise)
-        #elif <future_repo_type>:    # NOTE for other types of repos
-            #<FutureRepoType.update(etc...)>
 
 
 class Github(Git):
@@ -946,21 +942,18 @@ class LocalRepo(RepoTypeCheck):
     def install(self, pkg_to_install, args, noise, **kwargs):
         #self.download_url = args.pkg_to_install
         self.download_url = pkg_to_install  # will be a path on local filesystem
-
         self.repo_type = args.repo_type
         RepoTypeCheck.install(self, pkg_to_install, args, noise, **kwargs)
 
 
-
 # TODO to add in ability to use urls for ssh access and the like.
-#class Remote_Repo(RepoTypeCheck):
+#class RemoteRepo(RepoTypeCheck):
 
     #def install(self, pkg_to_install, noise):
         #pass
 
 
 
-# FIXME
 '''
 class Stable(Package):
     def __init__(self, args, install_dirs):
