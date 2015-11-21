@@ -11,8 +11,10 @@ import tempfile
 import subprocess
 import shutil
 
+from Bep.run import packages_file, packages_file_path
 from nose.tools import ok_
 
+# TODO think about using mocking to simulate the actual calls out to github & bitbucket
 
 github_repo1 = 'b-e-p/testrepo1'
 github_repo2 = 'b-e-p/testrepo2'
@@ -132,3 +134,23 @@ def test_remove_github_repo2():
 def test_remove_bitbucket_repo_git():
     ret_code = subprocess.call("bep remove bitbucket {} --branch=master".format(repo_name(bitbucket_repo_git)), shell=True)
     ok_(ret_code == 0)
+
+
+def test_bep_packages_file():
+    pwd = os.path.split(os.path.abspath(__file__))[0]
+    packages_file_test = os.path.join(pwd, packages_file)
+    packages_file_path_orig = packages_file_path + '_orig'
+    if os.path.isfile(packages_file_path):
+        os.rename(packages_file_path, packages_file_path_orig)
+    shutil.copy(packages_file_test, packages_file_path)
+    try:
+        ret_code = subprocess.call("bep install packages", shell=True)
+        ok_(ret_code == 0)
+    finally:
+        os.rename(packages_file_path_orig, packages_file_path)
+
+    # just reuse the tests from above to clean-up the packages installed here
+    test_remove_github_repo1()
+    test_remove_github_repo2()
+    test_remove_bitbucket_repo_git()
+    test_remove_bitbucket_repo_hg()
