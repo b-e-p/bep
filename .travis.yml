@@ -21,6 +21,7 @@ before_install:
 - export PYTHONPATH=$PYTHONPATH:$HOME/.local/lib/python3.5/site-packages/
 - pip install pip --upgrade
 - pip install nose --upgrade
+- pip install six
 install:
 - python setup.py install
 script: nosetests -s -v
