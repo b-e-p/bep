@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 #
 # You don't actually need this part at the top, it just provides
-# for syntax highlighting as this is just a plain old python file.
+# for syntax highlighting (as this is just a plain python file).
 
 # Any of these can be specified like so, where
 # language & branch are optional, and repo_type only
@@ -29,7 +29,7 @@ packages = dict(
     bitbucket = [
         #### repo_type is required and other options are again optional:
         #'git+userName/repoName',
-        #'hg+mchaput/whoosh',
+        #'hg+userName/repoName',
                 ],
 
 
@@ -37,11 +37,11 @@ packages = dict(
         #### again, need to say what type of repo it is; also,
         #### don't specify a branch -- when installed it uses the
         #### currently checked out branch from the local repo:
-        #### 'repo_type+/a_dir/inside_a_dir/on_local_machine/pkg_name',
-        ####'hg+/home/your_username/some_dir/some_mercurial_repo',
-        ####'git+/home/username/some_other_dir/some_git_repo',
-        ####'bzr+/home/username/another_dir/some_bazaar_repo',
-        #'git+/home/jgors/Documents/repos/ipython',
-        #'git+/home/jgors/Documents/repos/pandas',
+        #### 'repoType+/some_dir/inside_a_dir/on_local_machine/pkg_name',
+        ####'hg+/home/username/some_dir/a_mercurial_repo',
+        ####'git+/home/username/some_other_dir/a_git_repo',
+        ####'bzr+/home/username/another_dir/a_bazaar_repo',
+        #'git+/home/jgors/repos/ipython',
+        #'git+/tmp/pandas',
                 ],
 )
