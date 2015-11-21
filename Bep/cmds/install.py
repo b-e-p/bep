@@ -39,7 +39,7 @@ def install_cmd(args, packages_file, packages_file_path, noise, install_dirs, in
     installed_pkgs_dir:  the absolute path to the where the downloaded and built pkgs are stored.
     '''
 
-    ##### install from packages file    # FIXME --this is hacky -- fix this
+    ##### install from packages file    # FIXME -- this is hacky, fix this
     #if ('pkg_type' in args) and (args.pkg_type == "packages"):
     if args.pkg_type == "packages":
         try:  # bring in the packages file
