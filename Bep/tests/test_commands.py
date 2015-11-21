@@ -11,92 +11,109 @@ import tempfile
 import subprocess
 import shutil
 
-
-repo1, r1 = 'b-e-p/testrepo1', 'testrepo1'
-repo2, r2 = 'b-e-p/testrepo2', 'testrepo2'
-
-# make something like this into decorator so that local funcs can be wrapped with a temp dir to use and then
-# removed once finished
-# def make_test_repo():
-    # with open(os.path.join(tdir, 'test_file.txt'), 'w') as f:
-        # f.write('some text')
-    # cwd = os.getcwd()
-    # os.chdir(tdir)
-    # ret_code = subprocess.call("git init; git add .; git commit -m 'add test_file to repo'", shell=True)
-    # assert ret_code == 0
-    # os.chdir(cwd)
-    # os.rmdir(tdir)
+from nose.tools import ok_
 
 
-def test_local_git_repo():
+github_repo1 = 'b-e-p/testrepo1'
+github_repo2 = 'b-e-p/testrepo2'
+bitbucket_repo_git = 'jgors/testrepo_git'
+bitbucket_repo_hg = 'jgors/testrepo_hg'
+repo_name = lambda r: r.split('/')[-1]
+
+
+def check_local_repo(cmd, local_repo_name, branch):
     try:
         tdir = tempfile.mkdtemp()
-        local_repo_name = 'testrepo_local'
         local_repo_dir = os.path.join(tdir, local_repo_name)
 
-        cmd = "git clone https://github.com/b-e-p/testrepo1 {}".format(local_repo_dir)
-        ret_code = subprocess.call(cmd, shell=True)
-        assert ret_code == 0
+        # cmd = "git clone https://github.com/b-e-p/testrepo1 {}".format(local_repo_dir)
+        sp_cmd = "{} {}".format(cmd, local_repo_dir)
+        ret_code = subprocess.call(sp_cmd, shell=True)
+        ok_(ret_code == 0)
 
         ret_code = subprocess.call("bep install local {}".format(local_repo_dir), shell=True)
-        assert ret_code == 0
+        ok_(ret_code == 0)
 
-        ret_code = subprocess.call("bep turn_off local {} --branch=master".format(local_repo_name), shell=True)
-        assert ret_code == 0
+        ret_code = subprocess.call("bep turn_off local {} --branch={}".format(local_repo_name, branch), shell=True)
+        ok_(ret_code == 0)
 
-        ret_code = subprocess.call("bep turn_on local {} --branch=master".format(local_repo_name), shell=True)
-        assert ret_code == 0
+        ret_code = subprocess.call("bep turn_on local {} --branch={}".format(local_repo_name, branch), shell=True)
+        ok_(ret_code == 0)
 
-        ret_code = subprocess.call("bep update local {} --branch=master".format(local_repo_name), shell=True)
-        assert ret_code == 0
+        ret_code = subprocess.call("bep update local {} --branch={}".format(local_repo_name, branch), shell=True)
+        ok_(ret_code == 0)
 
-        ret_code = subprocess.call("bep remove local {} --branch=master".format(local_repo_name), shell=True)
-        assert ret_code == 0
+        ret_code = subprocess.call("bep remove local {} --branch={}".format(local_repo_name, branch), shell=True)
+        ok_(ret_code == 0)
     finally:
         shutil.rmtree(tdir)
 
 
-
-def test_install_repo1():
-    ret_code = subprocess.call("bep install github {}".format(repo1), shell=True)
-    assert ret_code == 0
-
-
-def test_turn_off_r1():
-    ret_code = subprocess.call("bep turn_off github {} --branch=master".format(r1), shell=True)
-    assert ret_code == 0
+def test_local_repo():
+    yield check_local_repo, 'git clone https://github.com/{}'.format(github_repo1), 'github_testrepo_local1', 'master'
+    yield check_local_repo, 'git clone https://github.com/{}'.format(github_repo2), 'github_testrepo_local2', 'master'
+    yield check_local_repo, 'git clone https://bitbucket.org/{}'.format(bitbucket_repo_git), 'bitbucket_testrepo_git_local', 'master'
+    yield check_local_repo, 'hg clone https://bitbucket.org/{}'.format(bitbucket_repo_hg), 'bitbucket_testrepo_hg_local', 'default'
 
 
-def test_turn_on_r1():
-    ret_code = subprocess.call("bep turn_on github {} --branch=master".format(r1), shell=True)
-    assert ret_code == 0
+def check_install_github_repo(github_repo):
+    ret_code = subprocess.call("bep install github {}".format(github_repo), shell=True)
+    ok_(ret_code == 0)
+
+def test_install_github_repo():
+    yield check_install_github_repo, github_repo1
+    yield check_install_github_repo, github_repo2
 
 
-def test_update_r1():
-    ret_code = subprocess.call("bep update github {} --branch=master".format(r1), shell=True)
-    assert ret_code == 0
+def check_install_bitbucket_repo(bitbucket_repo, repo_type):
+    ret_code = subprocess.call("bep install bitbucket {} {}".format(bitbucket_repo, repo_type), shell=True)
+    ok_(ret_code == 0)
+
+def test_install_bitbucket_hg_repo():
+    yield check_install_bitbucket_repo, bitbucket_repo_git, 'git'
+    yield check_install_bitbucket_repo, bitbucket_repo_hg, 'hg'
 
 
-def test_install_repo2():
-    ret_code = subprocess.call("bep install github {}".format(repo2), shell=True)
-    assert ret_code == 0
+def test_turn_off_github_repo1():
+    ret_code = subprocess.call("bep turn_off github {} --branch=master".format(repo_name(github_repo1)), shell=True)
+    ok_(ret_code == 0)
 
+def test_turn_off_bitbucket_repo_hg():
+    ret_code = subprocess.call("bep turn_off bitbucket {} --branch=default".format(repo_name(bitbucket_repo_hg)), shell=True)
+    ok_(ret_code == 0)
+
+
+def test_turn_on_github_repo1():
+    ret_code = subprocess.call("bep turn_on github {} --branch=master".format(repo_name(github_repo1)), shell=True)
+    ok_(ret_code == 0)
+
+
+def test_update_github_repo1():
+    ret_code = subprocess.call("bep update github {} --branch=master".format(repo_name(github_repo1)), shell=True)
+    ok_(ret_code == 0)
 
 def test_update_all():
     ret_code = subprocess.call("bep update --all", shell=True)
-    assert ret_code == 0
+    ok_(ret_code == 0)
 
 
 def test_list():
     ret_code = subprocess.call("bep list", shell=True)
-    assert ret_code == 0
+    ok_(ret_code == 0)
 
 
-def test_remove_r1():
-    ret_code = subprocess.call("bep remove github {} --branch=master".format(r1), shell=True)
-    assert ret_code == 0
+def test_remove_github_repo1():
+    ret_code = subprocess.call("bep remove github {} --branch=master".format(github_repo1), shell=True)
+    ok_(ret_code == 0)
 
+def test_remove_bitbucket_repo_hg():
+    ret_code = subprocess.call("bep remove github {} --branch=default".format(repo_name(bitbucket_repo_hg)), shell=True)
+    ok_(ret_code == 0)
 
-def test_remove_r2():
-    ret_code = subprocess.call("bep remove github {} --branch=master".format(r2), shell=True)
-    assert ret_code == 0
+def test_remove_all():
+    ret_code = subprocess.call("bep remove --all", shell=True)
+    ok_(ret_code == 0)
+
+def test_list():
+    ret_code = subprocess.call("bep list", shell=True)
+    ok_(ret_code == 0)
