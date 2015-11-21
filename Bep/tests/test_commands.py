@@ -118,11 +118,17 @@ def test_turn_on_github_repo2():
     ret_code = subprocess.call("bep turn_off github {} --branch=master".format(repo_name(github_repo2)), shell=True)
     ok_(ret_code == 0)
 
-def test_remove_all():
-    ret_code = subprocess.call("bep remove --all", shell=True)
+
+# don't remove all in unit-tests; leave potentially already installed pkgs alone.
+# def test_remove_all():
+    # ret_code = subprocess.call("bep remove --all", shell=True)
+    # ok_(ret_code == 0)
+
+# only remove pkgs used to test during unit-testing
+def test_remove_github_repo2():
+    ret_code = subprocess.call("bep remove github {} --branch=master".format(github_repo2), shell=True)
     ok_(ret_code == 0)
 
-# FIXME not sure why doing this simple list bombs the unit-tests
-# def test_list2():
-    # ret_code = subprocess.call("bep list", shell=True)
-    # ok_(ret_code == 0)
+def test_remove_bitbucket_repo_git():
+    ret_code = subprocess.call("bep remove bitbucket {} --branch=master".format(repo_name(bitbucket_repo_git)), shell=True)
+    ok_(ret_code == 0)
