@@ -4,7 +4,7 @@
 # Author: Jason Gors <jasonDOTgorsATgmail>
 # Creation Date: 07-30-2013
 # Purpose: this provides utility functions for managing
-         # the packages.
+#          the packages.
 #----------------------------------------------------------------
 
 import os
@@ -17,8 +17,11 @@ import locale
 
 
 def cmd_output(cmd):
+    ''' Delivers all captured output to stdout from running the specified cmd.
+
+    cmd:  str of the full command to run when performing action.
+    '''
     encoding = locale.getdefaultlocale()[1]     # py3 stuff b/c this is encoded as b('...')
-    #print(cmd)
     cmd = cmd.split(' ') # to use w/o needing to set shell=True
     p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     for line in p.stdout:
@@ -30,6 +33,10 @@ def cmd_output(cmd):
 
 
 def cmd_output_capture_all(cmd):
+    ''' Captures all output that would be delivered to stdout from running the specified cmd.
+
+    cmd:  str of the full command to run when performing action.
+    '''
     encoding = locale.getdefaultlocale()[1]     # py3 stuff b/c this is encoded as b('...')
     cmd = cmd.split(' ') # to use w/o needing to set shell=True
     p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stdin=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -46,6 +53,7 @@ status = lambda x: "\n\n{0}\n{1}\n{0}".format('-'*65, x)
 
 
 def when_not_quiet_mode(output, be_quiet=False):
+    ''' Delivers output to stdout when not in quiet verbosity mode. '''
     if not be_quiet:
         print('{0}'.format(output))
     elif be_quiet:
@@ -53,11 +61,16 @@ def when_not_quiet_mode(output, be_quiet=False):
         pass
 
 
-
 def check_if_valid_pkg_to_install(usrname_and_repo_name, pkg_type=None):
+    ''' Checks if the repo given is a legit name to actually proceed with during
+    an install.
+
+    usrname_and_repo_name:  str of the usrname/repo_name that was specified for install.
+    pkg_type:  str of the pkg type that given for install
+    '''
     if pkg_type == 'local':
         if os.path.exists(usrname_and_repo_name):
-            return usrname_and_repo_name    # this is just the path
+            return usrname_and_repo_name    # this is just the path on the filesystem
         else:
             return False
     else:
@@ -70,6 +83,10 @@ def check_if_valid_pkg_to_install(usrname_and_repo_name, pkg_type=None):
 
 
 def get_default_branch(repo_type):
+    ''' Returns the correct default name for the specified repo_type.
+
+    repo_type:  str of the type of repo to install.
+    '''
     if repo_type == 'git':
         default_branch = 'master'
     elif repo_type in ['hg', 'bzr']:
@@ -79,9 +96,12 @@ def get_default_branch(repo_type):
     return default_branch
 
 
-
 def get_checked_out_local_branch(local_pkg_to_install_path):
+    ''' When doing an install from the local file-system, this returns
+    the currently checked out branch to install from that repo.
 
+    local_pkg_to_install_path:  str path to local pkg's repo to install.
+    '''
     contents_of_branch_install_dir = os.listdir(local_pkg_to_install_path)
     os.chdir(local_pkg_to_install_path)
     if ('.hg' in contents_of_branch_install_dir):
@@ -110,8 +130,12 @@ def get_checked_out_local_branch(local_pkg_to_install_path):
 
 
 def all_pkgs_and_branches_for_all_pkg_types_already_installed(installed_pkgs_dir):
-    ''' builds up info on all pkgs and branches installed for all pkg_types for a
-        specific version of the install lang. '''
+    ''' Builds up info on all pkgs and branches installed for all pkg_types for a
+        specific version of the lang specified for the pkg to install.
+
+    installed_pkgs_dir:  the absolute path to the where the downloaded and built pkgs are stored.
+    '''
+    # FIXME refactor where this gets hit in the code-base
 
     all_pkgs_and_branches_for_all_pkg_types_already_installed = {}
     retrieve_paths = lambda dir_to_glob, how_to_glob='*': glob.glob(join(dir_to_glob, how_to_glob))
@@ -140,10 +164,12 @@ def all_pkgs_and_branches_for_all_pkg_types_already_installed(installed_pkgs_dir
     return all_pkgs_and_branches_for_all_pkg_types_already_installed
 
 
-
 def pkgs_and_branches_for_pkg_type_status(pkgs_and_branches_installed_for_pkg_type_lang):
-    ''' tells whether branches for the packages are turned on/off '''
+    ''' Tells whether branches for the packages are turned on or off
 
+    pkgs_and_branches_installed_for_pkg_type_lang:  dict of each pkg and branch installed
+        for the lang version specified to process
+    '''
     all_pkg_branches_with_hidden_raw = {}
     all_pkg_branches_with_hidden_renamed = {}
     pkg_branches_on = {} # there will be only one on at a time for each pkg_installed
@@ -178,7 +204,6 @@ def pkgs_and_branches_for_pkg_type_status(pkgs_and_branches_installed_for_pkg_ty
     return pkg_branches
 
 
-
 # pkg_and_branches_all = pkgs_and_branches_for_pkg_type_status['all_pkg_branches_with_hidden_renamed']
 # branches_installed_for_pkg =  pkg_and_branches_all[ pkg_name ]
 # eg. pkg_and_branches_all['ipython'] -- to get all the branches installed (on & off's renamed) for this pkg
@@ -195,9 +220,14 @@ def pkgs_and_branches_for_pkg_type_status(pkgs_and_branches_installed_for_pkg_ty
 
 
 def branches_installed_for_given_pkgs_lang_ver(lang_cmd, pkg_to_process_name, everything_already_installed):
-    ''' returns a list of all branches that are installed for a specific pkg,
-        for a specific version of the lang across all pkg types '''
+    ''' Returns a list of all branches that are installed for a specific pkg,
+    for a specific version of the lang across all pkg types.
 
+    lang_cmd:  str of the lang version to process.
+    pkg_to_process_name:  str of the pkg name to process.
+    everything_already_installed:  dict of all installed packages by lang_version, pkg_type, pkg_name,
+        and branches installed for that hierarchy.
+    '''
     all_branches_installed_for_pkgs_lang_ver = []
 
     if lang_cmd in everything_already_installed:
@@ -216,9 +246,14 @@ def branches_installed_for_given_pkgs_lang_ver(lang_cmd, pkg_to_process_name, ev
 
 
 def lang_and_pkg_type_and_pkg_and_branches_tuple(pkg_to_process, everything_already_installed):
-    ''' gives back a tuple with all installed versions of a package, for different pkg_types and
-        for different branches '''
+    ''' Gives back a tuple with all installed versions of a package, for different pkg_types and
+    for different branches.
 
+    pkg_to_process:  str of the pkg name to process.
+    everything_already_installed:  dict of all installed packages by lang_version, pkg_type, pkg_name,
+        and branches installed for that hierarchy.
+
+    '''
     lang_pkg_type_pkg_and_branches_for_lang = []
     for lang_installed, pkg_types_dict in everything_already_installed.items():
         for installed_pkg_type, pkg_and_branches_dict in pkg_types_dict.items():
@@ -234,8 +269,11 @@ def lang_and_pkg_type_and_pkg_and_branches_tuple(pkg_to_process, everything_alre
     return lang_pkg_type_pkg_and_branches_for_lang
 
 
-
 def branch_name_flattener(branch_name):
+    ''' Returns platform safe branch name for installation dir name (eg. without '/' in it).
+
+    branch_name:  str of branch to process.
+    '''
     if branch_name:
         branch = branch_name.split('/')
         if len(branch) == 1:
@@ -248,10 +286,18 @@ def branch_name_flattener(branch_name):
 
 def package_processor(args, additional_args, pkg_type_already_installed, how_to_func, processing_func,
                             process_str, everything_already_installed):
-    ''' this is used by command line arg passed to the script to decide
-        whether to proceed with the command '''
+    ''' This is used by the cmdline arg passed into the script to decide whether to proceed
+    with the command or to bail.
 
-
+    args:  a class inst of the argparse namespace with the arguments parsed to use during the install.
+    additional_args:  list of additional args parsed from the the argparse arguments.
+    pkg_type_already_installed:  str of the name of the pkg type that is already installed.
+    how_to_func:  func callable that displays alternative method of processing of cmd.
+    processing_func:  func callable that is the long way to process the specified cmd.
+    process_str:  str of cmd specified at cmdlin to process
+    everything_already_installed:  dict of all installed packages by lang_version, pkg_type, pkg_name,
+        and branches installed for that hierarchy.
+    '''
     arg_action = 'pkg_to_{}'.format(process_str)
 
     if arg_action in args:
