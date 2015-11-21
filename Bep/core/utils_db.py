@@ -6,6 +6,11 @@
 # Purpose: general utilites used by the packages script
 #----------------------------------------------------------------
 
+###############################################################################
+# TODO this would be a json backed representation of the installed pkgs
+# NOTE currently none of it's functionality is in use
+###############################################################################
+
 import os
 import json
 
@@ -51,14 +56,11 @@ def handle_db_after_an_install(pkg_type, pkg_to_install_name, branch_to_install,
             json.dump(db, f, sort_keys=True, indent=4)
 
 
-
 def get_lang_cmd_branch_was_installed_with(pkg_type, pkg_name, branch, db_pname):
     with open(db_pname, 'r') as f:
         db = json.load(f)
         lang_branch_installed_with = db[pkg_type][pkg_name][branch]['installation_lang_cmd']
         return lang_branch_installed_with
-
-
 
 
 # TODO  make it so that it removes things appropriately in the db...
