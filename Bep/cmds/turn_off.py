@@ -16,6 +16,24 @@ command_and_items_to_process_when_multiple_items = {}   # but not for install co
 
 def turn_off_cmd(args, additional_args, lang_dir_name, pkg_type, noise, install_dirs,
                   pkgs_and_branches_on, pkgs_and_branches_off, everything_already_installed, **kwargs):
+    ''' Turns off specified packages.
+
+    Parameters
+    ----------
+    args:  a class inst of the argparse namespace with the arguments parsed to use during the install.
+    additional_args:  list of additional args parsed from the the argparse arguments.
+    lang_dir_name:  name of lang_version dir for package to remove.
+    pkg_type:  str of pkg_type to remove.
+    noise:  noise class inst with the verbosity level for the amount of output to deliver to stdout.
+    install_dirs:  dict of install locations for installed pkgs and install logs.
+    pkgs_and_branches_on:  dict of all packages and branches currently turned on for this lang_version
+        and pkg_type. eg. {'ipython': ['master']}
+    pkgs_and_branches_off:  dict of all packages and branches currently turned off for this lang_version
+        and pkg_type.
+    everything_already_installed:  dict of all installed packages by lang_version, pkg_type, pkg_name,
+        and branches installed; eg.
+            {'python2.7': {'github': {'ipython': ['master']}}}
+    '''
 
 
     def turn_off_branches():

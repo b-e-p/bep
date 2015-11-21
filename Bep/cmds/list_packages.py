@@ -10,6 +10,16 @@ from Bep.core import utils
 
 
 def list_cmd(everything_already_installed, noise):
+    ''' Lists/writes all installed packages to stdout.
+
+    Parameters
+    ----------
+    everything_already_installed:  dict of all installed packages by lang_version, pkg_type, pkg_name,
+        and branches installed; eg.
+            {'python2.7': {'github': {'ipython': ['master']}}}
+
+    noise:  noise class inst with the verbosity level for the amount of output to deliver to stdout.
+    '''
 
     for lang_dir_name, pkg_type_dict in everything_already_installed.items():
 

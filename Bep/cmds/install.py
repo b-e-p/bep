@@ -17,7 +17,7 @@ from Bep import package
 
 
 class Args(object):
-    ''' create a namespace similar to if "args" that were passed in on cmdline '''
+    ''' Builds a namespace similar to if `args` were passed in on the cmdline (via argparse) '''
     def __init__(self, repo_type, pkg_type, pkg_to_install, language, branch):
         self.repo_type = repo_type
         self.pkg_type = pkg_type
@@ -26,8 +26,18 @@ class Args(object):
         self.language = language
 
 
-
 def install_cmd(args, packages_file, packages_file_path, noise, install_dirs, installed_pkgs_dir):
+    ''' Installs package(s) for either cmdline install interface or from .bep_packages file install
+
+    Parameters
+    ----------
+    args:  a class inst of the argparse namespace with the arguments parsed to use during the install.
+    packages_file:  the user's .bep_packages file.
+    packages_file_path:  the absolute path to the packages_file.
+    noise:  noise class inst with the verbosity level for the amount of output to deliver to stdout.
+    install_dirs:  dict of install locations for installed pkgs and install logs.
+    installed_pkgs_dir:  the absolute path to the where the downloaded and built pkgs are stored.
+    '''
 
     ##### install from packages file    # FIXME --this is hacky -- fix this
     #if ('pkg_type' in args) and (args.pkg_type == "packages"):
