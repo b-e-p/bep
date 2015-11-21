@@ -4,7 +4,7 @@
 # Author: Jason Gors <jasonDOTgorsATgmail>
 # Creation Date: 07-30-2013
 # Purpose:  this is the entry point when called.
-        # and built w/ distutils.
+#           and built w/ distutils.
 # License: BSD
 #----------------------------------------------------------------
 

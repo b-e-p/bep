@@ -4,7 +4,7 @@
 # Author: Jason Gors <jasonDOTgorsATgmail>
 # Creation Date: 08-30-2013
 # Purpose: this is the entry point when called
-        # and built w/ setuptools.
+#          and built w/ setuptools.
 # License: BSD
 #----------------------------------------------------------------
 
