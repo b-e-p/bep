@@ -1,0 +1,18 @@
+#! /usr/bin/env python
+
+packages = dict(
+    github = [
+        'b-e-p/testrepo1',
+        'b-e-p/testrepo2',
+            ],
+
+    bitbucket = [
+        'git+jgors/testrepo_git',
+        'hg+jgors/testrepo_hg',
+                ],
+
+    local = [
+        #'hg+/home/username/some_dir/a_mercurial_repo',
+        #'git+/home/username/some_other_dir/a_git_repo',
+        #'bzr+/home/username/another_dir/a_bazaar_repo',
+            ])
