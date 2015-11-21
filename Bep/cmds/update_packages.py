@@ -31,8 +31,7 @@ def update_cmd(args, additional_args, lang_dir_name, pkg_type, noise, install_di
     pkgs_and_branches_off:  dict of all packages and branches currently turned off for this lang_version
         and pkg_type.
     everything_already_installed:  dict of all installed packages by lang_version, pkg_type, pkg_name,
-        and branches installed; eg.
-            {'python2.7': {'github': {'ipython': ['master']}}}
+        and branches installed for that hierarchy.
     '''
 
 

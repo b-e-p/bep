@@ -15,9 +15,7 @@ def list_cmd(everything_already_installed, noise):
     Parameters
     ----------
     everything_already_installed:  dict of all installed packages by lang_version, pkg_type, pkg_name,
-        and branches installed; eg.
-            {'python2.7': {'github': {'ipython': ['master']}}}
-
+        and branches installed for that hierarchy.
     noise:  noise class inst with the verbosity level for the amount of output to deliver to stdout.
     '''
 
