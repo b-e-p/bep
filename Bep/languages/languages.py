@@ -4,8 +4,8 @@
 # Author: Jason Gors <jasonDOTgorsATgmail>
 # Creation Date: 09-19-2013
 # Purpose:  This is where language specific installation commands
-        # live.  This is also the top level class for the classes
-        # defined in the package.py file.
+#           live.  This is also the top level class for the classes
+#           defined in the package.py file.
 #----------------------------------------------------------------
 
 import datetime
@@ -14,11 +14,11 @@ import locale
 from os.path import join
 
 
-
-
 class Language(object):
+    ''' Language agnostic Base class. '''
 
     def execute_shell_cmd(self, lang, cmd):
+        ''' Executes the cmd per lang specified to use. '''
         encoding = locale.getdefaultlocale()[1]     # py3 stuff b/c this is encoded as b('...')
         try:
             #p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True) # for using cmd as a string
@@ -33,6 +33,7 @@ class Language(object):
 
 
     def _create_record_log_file(self, pkg_type_logs_dir, pkg_name, pkg_branch_name):
+        ''' Creates the a record of everything that was processed in a pkg log file. '''
         time_stamp = datetime.datetime.now().strftime('%Y_%m_%d_%H_%M_%S')
         record_file = join(pkg_type_logs_dir, pkg_name, pkg_branch_name,
                                             'log_{0}.txt'.format(time_stamp))
@@ -40,12 +41,14 @@ class Language(object):
 
 
 class Python(Language):
+    ''' Language subclass for installing python specific packages'''
     def __init__(self):
         self.system_default = 'python'
         self.setup_file = 'setup.py'
 
 
     def get_lang_cmd(self, lang_arg):
+        ''' Gets the lang specific cmd to use to process pkgs. '''
         #self.lang_arg = lang_arg
 
         get_version_cmd = [lang_arg, "-c", "import sys; print(sys.version[0:3])"]
@@ -70,6 +73,7 @@ class Python(Language):
         return install_cmd
 
 
-#class AnotherLanguage(Language):
-    #pass
+# class AnotherLanguage(Language):
+    # ''' could implement languages to process pkgs with other than just python. '''
+    # pass
 
