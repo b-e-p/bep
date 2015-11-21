@@ -8,7 +8,7 @@
 
 name = 'bep'
 __version__ = '0.7.1'
-description = 'A tool to make source package installations easier.'
+description = 'A tool to make package management from source easier.'
 author = 'jason gors'
 email = 'jasonDOTgorsATgmailDOTcom'
 url = 'http://www.github.com/b-e-p/bep.git'
