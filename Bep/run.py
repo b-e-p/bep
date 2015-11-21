@@ -307,7 +307,7 @@ def main(): # needs to be done as a main func for setuptools to work correctly i
 
 
     #######################################################################################################################
-    #### if nothting is installed, then don't continue on to other commands (since they only process currenly installed stuff)
+    #### if nothing is installed, then don't continue on to other commands (since they only process currently installed stuff)
     everything_already_installed = utils.all_pkgs_and_branches_for_all_pkg_types_already_installed(installed_pkgs_dir)
     if not everything_already_installed:
         raise SystemExit('\nNo packages installed.')
