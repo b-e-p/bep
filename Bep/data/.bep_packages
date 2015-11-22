@@ -17,19 +17,24 @@ packages = dict(
     github = [
         #### 'username/projectname' is all that's required:
         #'pydata/pandas',
-        #### but could give the full info if wanted:
-        #'python-->git+scikit-learn/scikit-learn',
-        #### or specify a lang other than default:
-        #'python3-->ipython/ipython',
+
+        #### but could specify a lang other than the default:
+        # 'python3-->ipython/ipython',
+
         #### or specify a branch other than master:
         #'ipython/ipython^nbconvert',
+
+        #### or both:
+        # 'python3-->ipython/ipython^nbconvert',
             ],
 
 
     bitbucket = [
-        #### repo_type is required and other options are again optional:
-        #'git+userName/repoName',
-        #'hg+userName/repoName',
+        #### repo_type is required (git or hg) and other options are again optional:
+        # 'git+userName/repoName',
+        # 'hg+userName/repoName',
+        # etc, similiar to github specifications above
+
                 ],
 
 
@@ -40,8 +45,8 @@ packages = dict(
         #### 'repoType+/some_dir/inside_a_dir/on_local_machine/pkg_name',
         ####'hg+/home/username/some_dir/a_mercurial_repo',
         ####'git+/home/username/some_other_dir/a_git_repo',
-        ####'bzr+/home/username/another_dir/a_bazaar_repo',
-        #'git+/home/jgors/repos/ipython',
-        #'git+/tmp/pandas',
-                ],
+        ####'bzr+/another_dir/a_bazaar_repo',
+        # 'git+/home/jgors/repos/ipython',
+        # 'hg+/tmp/cool_mercurial_repo',
+            ],
 )
