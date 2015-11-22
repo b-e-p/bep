@@ -3,9 +3,12 @@
 [![Build Status](https://travis-ci.org/b-e-p/bep.svg?branch=master)](https://travis-ci.org/b-e-p/bep) travis-ci.org (master branch)
 
 
+-----
+
 #### tl;dr
 Bep provides a very simple way to install, update and run the absolute newest versions (bleeding edge development versions) of any particular set of Python packages.
 
+-----
 
 ## Table of Contents
 * **[The Big Picture](#the-big-picture)**
@@ -136,8 +139,8 @@ bep turn_off --all
 bep [-l python_version] turn_on pkg_name -b branch_name
 ```
 
-### Now the shorter way.
-##### And remember, all of these commands also accept just the pkg_name as a single argument, which allows you to see and run the full command (for update, remove, turn_on | off):
+### Now the shorter way:
+##### Remember, all of the commands also accept just the pkg_name as a single argument, which allows you to see and run the full command (for update, remove, turn_on | off):
 ```
 bep {update, remove, turn_on, turn_off} pkg_name
 ```
@@ -148,7 +151,7 @@ For example:
 
 
 #### To List Installed Packages:
-##### (shows whether each is turned on or off)
+##### (shows whether each package is turned on or off)
 ```
 # List installed packages:
 bep list
@@ -211,13 +214,20 @@ Once Bep is installed, it can re-install itself to handle updates to itself:
 
 `bep install github b-e-p/bep`
 
-In the same vein, if Bep was initially installed at the user level (not systemwide), then **Bep can uninstall itself**:
+Similiarly, if Bep was installed at the user level (not systemwide), then **Bep can uninstall itself**:
 
 `bep remove github bep -b master`
 
-Likewise, again if Bep was installed at the user level, then **to remove everything Bep installed, including Bep itself**:
+Likewise, if Bep was installed at the user level, then **to remove everything that Bep installed, including Bep itself**:
 
 `bep remove --all`
+
+Or **if bep was installed with pip**, then simply:
+
+```
+bep remove --all    # to remove all pkgs installed with bep
+pip uninstall bep   # to remove bep itself
+```
 
 
 ### Example of a Sample .bep_packages file
