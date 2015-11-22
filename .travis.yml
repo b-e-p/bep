@@ -23,5 +23,6 @@ before_install:
 - pip install nose --upgrade
 - pip install six
 install:
+- git submodule update --init --recursive
 - python setup.py install
 script: nosetests -s -v
