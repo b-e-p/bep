@@ -247,7 +247,7 @@ packages = dict(
         'python3-->ipython/ipython',
 
         #### or specify a branch other than master:
-        #'ipython/ipython^nbconvert',
+        'ipython/ipython^nbconvert',
 
         #### or both:
         'python3-->ipython/ipython^nbconvert',
@@ -278,7 +278,7 @@ packages = dict(
 
 
 #### Note, Bep doesn't handle dependencies for packages installed with Bep, so an install might not work due to dependency issues.
->As a result, if a package is specified for installation and it turns out that it cannot be built & installed due to it requiring a dependency not being available on the system (or perhaps needing a newer version of the dependency than what is currently installed on the system), then Bep will displays the installation error that occurs, which will likely point out the dependency that is needed.  If this occurs, then the dependency could be installed with Bep as well (if it's something that Bep is capable of handling) or if not, it will have to be installed with an OS package manager, pip, etc.
+>As a result, if a package is specified for installation and it turns out that it cannot be built & installed due to it requiring a dependency not being available on the system (or perhaps needing a newer version of the dependency than what is currently installed on the system), then Bep displays the installation error that occurs, which will likely point out the dependency that is needed.  If this occurs, then the dependency could be installed with Bep as well (if it's something that Bep is capable of handling) or if not, it will have to be installed with an OS package manager, pip, etc.
 
 
 ### TODO
