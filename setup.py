@@ -28,6 +28,8 @@ setup_args = dict(
     long_description='For installation and usage info see {}'.format(url),
     author=author,
     author_email=email,
+    classifiers=['Programming Language :: Python :: 2.7',
+                 'Programming Language :: Python :: 3'],
     url=url,
     license=license,
     packages=['Bep', 'Bep.cmds', 'Bep.core', 'Bep.languages', 'Bep.scripts', 'Bep.tests'],
