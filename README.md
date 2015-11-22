@@ -41,7 +41,7 @@ As mentioned, several versions/branches of the same package can be installed alo
 
 ## The Basic Commands
 
-(Note, for all commands, specify the language arg only if wanting to process a package under a language version other than the system default)
+(Note, for all commands, specify the `--language` arg only if wanting to process a package under a language version other than the system default)
 
 ### To install packages:
 
